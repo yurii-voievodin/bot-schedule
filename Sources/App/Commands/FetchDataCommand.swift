@@ -30,6 +30,8 @@ final class FetchDataCommand: Command {
         self.droplet = droplet
     }
 
+    // MARK: - Public interface
+
     public func run(arguments: [String]) throws {
         let response = try drop.client.get("http://schedule.sumdu.edu.ua")
         guard let bodyBytes = response.body.bytes else { return }
