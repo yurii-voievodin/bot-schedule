@@ -39,14 +39,23 @@ final class FetchDataCommand: Command {
         guard let document = HTML(html: htmlString, encoding: .windowsCP1251) else { return }
 
         let groups = fetchDataFromSelect("select#group", document: document)
-        let auditoriums = fetchDataFromSelect("select#auditorium", document: document)
-        let teachers = fetchDataFromSelect("select#teacher", document: document)
+        _ = fetchDataFromSelect("select#auditorium", document: document)
+        _ = fetchDataFromSelect("select#teacher", document: document)
 
-        // TODO: Save to database
+        // TODO: Create import manager (create new records, update existing and delete old)
+
+        for group in groups {
+            if let serverID = Int(group.value) {
+                var newGroup = Object(serverID: serverID, name: group.key)
+                try newGroup.save()
+            }
+        }
     }
+}
 
-    // MARK: - Helpers
+// MARK: - Helpers
 
+extension FetchDataCommand {
 
     /// Fetch data about groups, auditoriums, teachers
     ///
@@ -56,6 +65,7 @@ final class FetchDataCommand: Command {
     /// - Returns: array of data - name: id
     fileprivate func fetchDataFromSelect(_ selector: String, document: HTMLDocument) -> [String: String] {
         var data: [String: String] = [:]
+
         for option in document.css(selector) {
             for value in option.css("option") {
                 if let name = value.content, let id = value["value"] {

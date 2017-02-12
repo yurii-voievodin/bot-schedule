@@ -42,6 +42,6 @@ final class FetchScheduleCommand: Command {
 
         // TODO: Save all to database
 
-        let response = try drop.client.post("http://schedule.sumdu.edu.ua/index/json")
+        _ = try drop.client.post("http://schedule.sumdu.edu.ua/index/json")
     }
 }
