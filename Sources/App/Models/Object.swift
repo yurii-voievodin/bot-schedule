@@ -29,14 +29,14 @@ final class Object: Model {
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")
-        serverID = try node.extract("serverID")
+        serverID = try node.extract("serverid")
         name = try node.extract("name")
     }
 
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
             "id": id,
-            "serverID": serverID,
+            "serverid": serverID,
             "name": name
             ])
     }
@@ -48,7 +48,7 @@ extension Object: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(entity, closure: { data in
             data.id()
-            data.int("serverID")
+            data.int("serverid")
             data.string("name")
         })
     }

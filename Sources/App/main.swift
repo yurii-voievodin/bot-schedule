@@ -1,30 +1,20 @@
 import Vapor
 import VaporPostgreSQL
 
-// Preparations
-let preparations = [Object.self]
+// Droplet
+let drop = Droplet()
 
 // Providers
-let providers = [VaporPostgreSQL.Provider.self]
+try drop.addProvider(VaporPostgreSQL.Provider.self)
 
-// Droplet
-let drop = Droplet(
-    preparations: preparations,
-    providers: providers
-)
+// Preparations
+drop.preparations += Object.self
+
+// Database
 Object.database = drop.database
 
 // Commands
-drop.commands.append(FetchDataCommand(console: drop.console, droplet: drop))
+drop.commands.append(ImportObjectsCommand(console: drop.console, droplet: drop))
 
-// Check database connection
-drop.get("version") { request in
-    if let db = drop.database?.driver as? PostgreSQLDriver {
-        let version = try db.raw("SELECT version()")
-        return JSON(version)
-    } else {
-        return "No db connection"
-    }
-}
-
+// Run droplet
 drop.run()

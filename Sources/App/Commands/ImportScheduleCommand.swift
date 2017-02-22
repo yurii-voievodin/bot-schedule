@@ -1,5 +1,5 @@
 //
-//  FetchScheduleCommand.swift
+//  ImportScheduleCommand.swift
 //  SumDUBot
 //
 //  Created by Yura Voevodin on 11.02.17.
@@ -11,11 +11,11 @@ import Console
 import HTTP
 import Kanna
 
-final class FetchScheduleCommand: Command {
+final class ImportScheduleCommand: Command {
 
     // MARK: - Constants
 
-    public let id = "fetchSchedule"
+    public let id = "ImportSchedule"
     public let help = [""]
     public let console: ConsoleProtocol
 
