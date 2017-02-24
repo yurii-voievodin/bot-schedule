@@ -14,23 +14,23 @@ final class ObjectImportManager {
 
     // MARK: - Public interface
 
-    func importFromArray(array: [String: String]) {
+    func importFrom(array: [ObjectStruct]) {
         // Save new and update existing records
         for object in array {
-            guard let serverID = Int(object.value) else { continue }
-            createOrUpdate(with: serverID, name: object.key)
+            createOrUpdate(object)
         }
     }
 
-    fileprivate func createOrUpdate(with id: Int, name: String) {
+    fileprivate func createOrUpdate(_ objectStruct: ObjectStruct) {
         do {
-            if var object = try Object.query().filter("serverid", id).first() {
+            if var object = try Object.query().filter("serverid", objectStruct.id).first() {
                 // Find existing
-                object.name = name
+                object.name = objectStruct.name
+                object.type = objectStruct.type.rawValue
                 try object.save()
             } else {
                 // Or create a new one
-                var newObject = Object(serverID: id, name: name)
+                var newObject = Object(serverID: objectStruct.id, name: objectStruct.name, type: objectStruct.type.rawValue)
                 try newObject.save()
             }
         } catch {

@@ -19,25 +19,29 @@ final class Object: Model {
 
     var serverID: Int
     var name: String
+    var type: Int
 
     // MARK: - Initialization
 
-    init(serverID: Int, name: String) {
+    init(serverID: Int, name: String, type: Int) {
         self.serverID = serverID
         self.name = name
+        self.type = type
     }
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")
         serverID = try node.extract("serverid")
         name = try node.extract("name")
+        type = try node.extract("type")
     }
 
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
             "id": id,
             "serverid": serverID,
-            "name": name
+            "name": name,
+            "type": type
             ])
     }
 }
@@ -50,6 +54,7 @@ extension Object: Preparation {
             data.id()
             data.int("serverid")
             data.string("name")
+            data.int("type")
         })
     }
 

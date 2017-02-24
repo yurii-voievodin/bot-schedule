@@ -47,13 +47,13 @@ final class ImportObjectsCommand: Command {
         let teachers = extractData(with: "select#teacher", from: document)
 
         // Append to the single dictionary
-        var allObjects: Data = [:]
-        allObjects = appendData(previous: allObjects, new: groups)
-        allObjects = appendData(previous: allObjects, new: auditoriums)
-        allObjects = appendData(previous: allObjects, new: teachers)
+        var allObjects: [ObjectStruct] = []
+        allObjects = append(groups, to: allObjects, type: .group)
+        allObjects = append(auditoriums, to: allObjects, type: .auditorium)
+        allObjects = append(teachers, to: allObjects, type: .teacher)
 
         // Import all data to database
-        ObjectImportManager().importFromArray(array: allObjects)
+        ObjectImportManager().importFrom(array: allObjects)
     }
 }
 
@@ -64,17 +64,20 @@ extension ImportObjectsCommand {
     /// Append data to the dictionary
     ///
     /// - Parameters:
-    ///   - previousData: previous
     ///   - newData: new
+    ///   - previousData: previous
+    ///   - type: ObjectType
     /// - Returns: previous with new
-    fileprivate func appendData(previous previousData: Data, new newData: Data) -> Data {
-        var updatedData: Data = previousData
+    fileprivate func append(_ newData: Data, to previousData: [ObjectStruct], type: ObjectType) -> [ObjectStruct] {
+        var data = previousData
         for object in newData {
-            if object.key.characters.count > 0 && object.value.characters.count > 0 && object.value != "0" {
-                updatedData[object.key] = object.value
+            guard object.key.characters.count > 0 && object.value.characters.count > 0 && object.value != "0" else {
+                continue
             }
+            guard let serverID = Int(object.value) else { continue }
+            data.append(ObjectStruct(id: serverID, name: object.key, type: type))
         }
-        return updatedData
+        return data
     }
 
     /// Fetch data about groups, auditoriums, teachers
