@@ -34,7 +34,15 @@ final class ImportScheduleCommand: Command {
 
     public func run(arguments: [String]) throws {
 
+        // TODO: Create "ScheduleRecord" model for database
+
+        // TODO: Create "ScheduleRecordImportManager" for import single record from JSON
+
         // TODO: Fetch data about groups, teachers and auditoriums from database
+
+        // TODO: Iterate through all objects
+
+        // TODO: Save all to database with "ScheduleRecordImportManager"
 
         guard let object = try Object.all().first else {
             print("fail")
@@ -42,10 +50,6 @@ final class ImportScheduleCommand: Command {
         }
         let json = try makeRequestOfSchedule(for: object)
         print(json ?? "Oops")
-
-        // TODO: Fetch data about about single group, teacher and auditorium in loop
-
-        // TODO: Save all to database
     }
 }
 
