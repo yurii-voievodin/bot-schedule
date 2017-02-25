@@ -154,7 +154,8 @@ extension ImportCommand {
 
         // Time interval for request
         let startDate = Date()
-        let endDate = startDate.addingTimeInterval(60*60*24*7)
+        let oneDay: TimeInterval = 60*60*24*7
+        let endDate = startDate.addingTimeInterval(oneDay)
 
         // Query parameters
         let query: [String: CustomStringConvertible] = [
