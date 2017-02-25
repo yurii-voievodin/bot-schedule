@@ -17,41 +17,24 @@ final class ScheduleRecord: Model {
     var id: Node?
     var exists: Bool = false
 
+    var objectID: Node?
+
     var auditorium: String
     var date: String
-    var day: String
-    var group: String
-    var name: String
-    var order: String
     var teacher: String
-    var time: String
-    var type: String
 
     // MARK: - Initialization
 
-    init(auditorium: String, date: String, day: String, group: String, name: String, order: String, teacher: String, time: String, type: String) {
-        self.auditorium = auditorium
-        self.date = date
-        self.day = day
-        self.group = group
-        self.name = name
-        self.order = order
-        self.teacher = teacher
-        self.time = time
-        self.type = type
-    }
-
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")
-        auditorium = try node.extract("auditorium")
-        date = try node.extract("date")
-        day = try node.extract("day")
-        group = try node.extract("group")
-        name = try node.extract("name")
-        order = try node.extract("order")
-        teacher = try node.extract("teacher")
-        time = try node.extract("time")
-        type = try node.extract("type")
+
+        // Properties
+        auditorium = try node.extract("NAME_AUD")
+        date = try node.extract("DATE_REG")
+        teacher = try node.extract("NAME_FIO")
+
+        // Relationships
+        objectID = try node.extract("object_id")
     }
 
     func makeNode(context: Context) throws -> Node {
@@ -59,14 +42,17 @@ final class ScheduleRecord: Model {
             "id": id,
             "auditorium": auditorium,
             "date": date,
-            "day": day,
-            "group": group,
-            "name": name,
-            "order": order,
             "teacher": teacher,
-            "time": time,
-            "type": type
+            "object_id": objectID
             ])
+    }
+}
+
+// MARK: - Relationships
+
+extension ScheduleRecord {
+    func object() throws -> Parent<Object> {
+        return try parent(objectID)
     }
 }
 
@@ -74,16 +60,12 @@ final class ScheduleRecord: Model {
 
 extension ScheduleRecord: Preparation {
     static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { data in
-            data.id()
-            data.string("auditorium")
-            data.string("date")
-            data.string("day")
-            data.string("groupName")
-            data.string("name")
-            data.string("teacher")
-            data.string("time")
-            data.string("type")
+        try database.create(entity, closure: { record in
+            record.id()
+            record.string("auditorium")
+            record.string("date")
+            record.string("teacher")
+            record.parent(Object.self, optional: false)
         })
     }
 

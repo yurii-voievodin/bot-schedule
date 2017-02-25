@@ -33,21 +33,21 @@ final class ImportScheduleCommand: Command {
     // MARK: - Public interface
 
     public func run(arguments: [String]) throws {
+        // Fetch objects
+        let objects = try Object.query().limit(100, withOffset: 0).run()
 
-        // TODO: Create "ScheduleRecordImportManager" for import single record from JSON
+        for object in objects {
+            // Make request and node from JSON response
+            let json = try makeRequestOfSchedule(for: object)
+            if let node = json?.makeNode(), let id = object.id {
 
-        // TODO: Fetch data about groups, teachers and auditoriums from database
+                // Try to delete old records
+                try object.records().delete()
 
-        // TODO: Iterate through all objects
-
-        // TODO: Save all to database with "ScheduleRecordImportManager"
-
-        guard let object = try Object.all().first else {
-            print("fail")
-            return
+                // Import new records
+                try ScheduleRecordImportManager().importFrom(node: node, for: id)
+            }
         }
-        let json = try makeRequestOfSchedule(for: object)
-        print(json ?? "Oops")
     }
 }
 

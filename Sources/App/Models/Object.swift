@@ -46,6 +46,14 @@ final class Object: Model {
     }
 }
 
+// MARK: - Relationships
+
+extension Object {
+    func records() throws -> Children<ScheduleRecord> {
+        return children()
+    }
+}
+
 // MARK: - Preparation
 
 extension Object: Preparation {
