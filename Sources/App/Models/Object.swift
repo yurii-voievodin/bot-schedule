@@ -70,3 +70,29 @@ extension Object: Preparation {
         try database.delete(entity)
     }
 }
+
+// MARK: - Helpers
+
+extension Object {
+
+    static func createOrUpdate(from node: Node) throws {
+        guard let serverID = node["serverid"]?.int else { return }
+
+        if var existingObject = try Object.query().filter("serverid", serverID).first() {
+            // Find existing
+            existingObject.name = try node.extract("name")
+            existingObject.type = try node.extract("type")
+            try existingObject.save()
+        } else {
+            // Or create a new one
+            var newObject = try Object(node: node)
+            try newObject.save()
+        }
+    }
+
+    static func importFrom(nodes: [Node]) throws {
+        for node in nodes {
+            try Object.createOrUpdate(from: node)
+        }
+    }
+}

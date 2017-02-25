@@ -73,3 +73,18 @@ extension ScheduleRecord: Preparation {
         try database.delete(entity)
     }
 }
+
+// MARK: - Helpers
+
+extension ScheduleRecord {
+
+    static func importFrom(_ nodes: [Node], for objectID: Node) throws {
+        for node in nodes {
+            var nodeRecord = node
+
+            nodeRecord["object_id"] = objectID
+            var record = try ScheduleRecord(node: nodeRecord)
+            try record.save()
+        }
+    }
+}

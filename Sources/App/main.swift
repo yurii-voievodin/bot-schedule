@@ -16,9 +16,7 @@ Object.database = drop.database
 ScheduleRecord.database = drop.database
 
 // Commands
-drop.commands.append(ImportObjectsCommand(console: drop.console, droplet: drop))
-drop.commands.append(ImportScheduleCommand(console: drop.console, droplet: drop))
-
+drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
 
 // Run droplet
 drop.run()
