@@ -9,6 +9,7 @@ try drop.addProvider(VaporPostgreSQL.Provider.self)
 
 // Preparations
 drop.preparations += Object.self
+drop.preparations += ScheduleRecord.self
 
 // Database
 Object.database = drop.database

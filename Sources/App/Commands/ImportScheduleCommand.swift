@@ -34,8 +34,6 @@ final class ImportScheduleCommand: Command {
 
     public func run(arguments: [String]) throws {
 
-        // TODO: Create "ScheduleRecord" model for database
-
         // TODO: Create "ScheduleRecordImportManager" for import single record from JSON
 
         // TODO: Fetch data about groups, teachers and auditoriums from database
