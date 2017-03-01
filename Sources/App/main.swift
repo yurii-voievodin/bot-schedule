@@ -7,16 +7,16 @@ enum BotError: Swift.Error {
     case missingSecretKey
 }
 
-// Droplet
+/// Droplet
 let drop = Droplet()
 
 /// Read the secret key from Config/secrets/app.json.
 guard let secret = drop.config["app", "secret"]?.string else {
-    /// Show errors in console.
+    // Show errors in console.
     drop.console.error("Missing secret key!")
     drop.console.warning("Add one in Config/secrets/app.json")
 
-    /// Throw missing secret key error.
+    // Throw missing secret key error.
     throw BotError.missingSecretKey
 }
 
@@ -35,8 +35,7 @@ ScheduleRecord.database = drop.database
 drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
 
 drop.get("") { request in
-
-    return "Hello!"
+    return "SumDUBot"
 }
 
 /// Setting up the POST request with the secret key.
@@ -53,41 +52,45 @@ drop.post(secret) { request in
     /// User first name from request JSON.
     var userFirstName = request.data["message", "from", "first_name"]?.string ?? ""
 
-    /// Check if the message is empty
-    if message.characters.isEmpty {
-        /// Set the response message text.
-        response = "I'm sorry but your message is empty 😢"
-        /// The message is not empty
-    } else {
-        /// Check if the message is a Telegram command.
-        if message.hasPrefix("/") {
-            /// Check what type of command is.
-            switch message {
-            /// Start command "/start".
-            case "/start":
-                /// Set the response message text.
-                response = "Welcome to SwiftyBot " + userFirstName + "!\n" +
-                "To list all available commands type /help"
-            /// Help command "/help".
-            case "/help":
-                /// Set the response message text.
-                response = "Welcome to SwiftyBot " +
-                    "an example on how create a Telegram bot with Swift using Vapor.\n" +
-                    "https://www.fabriziobrancati.com/posts/how-create-telegram-bot-swift-vapor-ubuntu-macos\n\n" +
-                    "/start - Welcome message\n" +
-                    "/help - Help message\n" +
-                "Any text - Returns the reversed message"
-            /// Command not valid.
-            default:
-                /// Set the response message text and suggest to type "/help".
-                response = "Unrecognized command.\n" +
-                "To list all available commands type /help"
-            }
-            /// It isn't a Telegram command, so creates a reversed message text.
-        } else {
-            /// Set the response message text.
-            response = "🙀"
+    // Check if the message is empty
+    guard message.characters.isEmpty else {
+        return try JSON(node: [])
+    }
+
+    // Check if the message is a Telegram command.
+    if message.hasPrefix("/") {
+        let newLine = "\n"
+
+        // Check what type of command is.
+        switch message {
+        // Start command "/start".
+        case "/start":
+            // Set the response message text.
+            response = "Вас вітає бот розкладу СумДУ! 😜" + newLine +
+                "Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine +
+                "Для зв'язку з розробником пишіть сюди - @voevodin_yura" + newLine +
+                "Ви можете здійснювати пошук за назвою групи, аудиторією або фамілією викладача." + newLine +
+            "Для перегляду доступних команд використовуйте /help"
+
+        // Help command "/help".
+        case "/help":
+            // Set the response message text.
+            response = "Вас вітає бот розкладу СумДУ! 😜" + newLine +
+                "Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine +
+                "/start - Початок роботи" + newLine +
+                "/help - Допомога" + newLine +
+            "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
+        // Command not valid.
+        default:
+            // Set the response message text and suggest to type "/help".
+            response = "Unrecognized command.\n" +
+            "To list all available commands type /help"
         }
+        // It isn't a Telegram command.
+    } else {
+        // Set the response message text.
+        response = "Вибачте, пошук поки що не працює" + "\n" +
+        "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
     }
 
     /// Create the JSON response.
