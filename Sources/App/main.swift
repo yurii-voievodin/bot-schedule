@@ -59,7 +59,7 @@ drop.post(secret) { request in
 
     // Check if the message is a Telegram command.
     if message.hasPrefix("/") {
-        let newLine = "\n"
+        let newLine = "\n\n"
 
         // Check what type of command is.
         switch message {
@@ -82,8 +82,7 @@ drop.post(secret) { request in
             "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
         // Command not valid.
         default:
-            // Set the response message text and suggest to type "/help".
-            response = "Unrecognized command.\n"
+            return try JSON(node: [])
         }
         // It isn't a Telegram command.
     } else {
