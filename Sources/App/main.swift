@@ -38,9 +38,9 @@ drop.get("") { request in
     return "SumDUBot"
 }
 
-/// Setting up the POST request with the secret key.
-/// With a secret path to be sure that nobody else knows that URL.
-/// https://core.telegram.org/bots/api#setwebhook
+// Setting up the POST request with the secret key.
+// With a secret path to be sure that nobody else knows that URL.
+// https://core.telegram.org/bots/api#setwebhook
 drop.post(secret) { request in
     /// Let's prepare the response message text.
     var response = ""
@@ -53,7 +53,7 @@ drop.post(secret) { request in
     var userFirstName = request.data["message", "from", "first_name"]?.string ?? ""
 
     // Check if the message is empty
-    guard message.characters.isEmpty else {
+    guard !message.characters.isEmpty else {
         return try JSON(node: [])
     }
 
@@ -83,8 +83,7 @@ drop.post(secret) { request in
         // Command not valid.
         default:
             // Set the response message text and suggest to type "/help".
-            response = "Unrecognized command.\n" +
-            "To list all available commands type /help"
+            response = "Unrecognized command.\n"
         }
         // It isn't a Telegram command.
     } else {
@@ -93,8 +92,8 @@ drop.post(secret) { request in
         "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
     }
 
-    /// Create the JSON response.
-    /// https://core.telegram.org/bots/api#sendmessage
+    // Create the JSON response.
+    // https://core.telegram.org/bots/api#sendmessage
     return try JSON(node:
         [
             "method": "sendMessage",
