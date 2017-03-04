@@ -38,42 +38,34 @@ final class CommandsController {
     // MARK: - Actions
 
     func index(request: Request) throws -> ResponseRepresentable {
-        /// Let's prepare the response message text
-        var response = ""
-        /// Chat ID from request JSON
-        let chatID = request.data["message", "chat", "id"]?.int ?? 0
-        /// Message text from request JSON
-        let message = request.data["message", "text"]?.string ?? ""
+        // Generate response node
+        // https://core.telegram.org/bots/api#sendmessage
+        var node: [String : NodeRepresentable] = [
+            "method": "sendMessage",
+            "chat_id": request.data["message", "chat", "id"]?.int ?? 0
+        ]
 
-        // Check if the message is empty
-        guard !message.characters.isEmpty else {
-            return try JSON(node: [])
-        }
+        // Message text from request JSON
+        let message = request.data["message", "text"]?.string ?? ""
+        let requestString = message.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Check if the message is a Telegram command
-        if let command = Command(rawValue: message.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) {
-            response = command.response
+        if let command = Command(rawValue: requestString) {
+            node["text"] = command.response
         } else {
             // It isn't a Telegram command
-            response = "Вибачте, пошук поки що не працює не повністю" + "\n" +
-            "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
+            var response = "Вибачте, пошук поки що працює не повністю" + "`\n\n`"
 
-            let objects = try Object.findObjects(with: message)
+            let objects = try Object.findObjects(with: requestString)
             if objects.characters.count > 0 {
-                response = "\n\n" + objects
+                response =  objects
             } else {
                 response = "За вашим запитом нічого не знайдено, спробуйте інший"
             }
+            node["text"] = response
+            node["parse_mode"] = "Markdown"
         }
 
-        // Create the JSON response
-        // https://core.telegram.org/bots/api#sendmessage
-        return try JSON(node:
-            [
-                "method": "sendMessage",
-                "chat_id": chatID,
-                "text": response
-            ]
-        )
+        return try JSON(node: node)
     }
 }
