@@ -95,4 +95,15 @@ extension Object {
             try Object.createOrUpdate(from: node)
         }
     }
+
+    static func findObjects(with name: String) throws -> String {
+        var response = ""
+
+        let objects = try Object.query().filter("name", contains: name).all()
+        for object in objects {
+            response += "*" + object.name + "*" + " - /info_\(object.id )" + "\n"
+        }
+
+        return response
+    }
 }
