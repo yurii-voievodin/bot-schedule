@@ -69,14 +69,12 @@ final class CommandsController {
 
             } else {
                 // Search
-                response = "За вашим запитом нічого не знайдено, спробуйте інший"
-
                 let objects = try Object.findObjects(with: message)
                 if objects.characters.count > 0 {
                     response =  objects
                 }
-                node["text"] = response
             }
+            node["text"] = response
         }
         
         return try JSON(node: node)
