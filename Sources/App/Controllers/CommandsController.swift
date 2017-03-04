@@ -46,23 +46,37 @@ final class CommandsController {
         ]
 
         // Message text from request JSON
-        let message = request.data["message", "text"]?.string ?? ""
-        let requestString = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Check if the message is a Telegram command
-        if let command = Command(rawValue: requestString) {
+        if let command = Command(rawValue: message) {
             node["text"] = command.response
         } else {
             // It isn't a Telegram command
             var response = "Вибачте, пошук поки що працює не повністю" + "\n\n"
 
-            let objects = try Object.findObjects(with: requestString)
-            if objects.characters.count > 0 {
-                response =  objects
-            } else {
+            if message.hasPrefix("/info_") {
+                // Info
+                let idString = message.substring(from: message.index(message.startIndex, offsetBy: 6))
                 response = "За вашим запитом нічого не знайдено, спробуйте інший"
+
+                if let id = Int(idString) {
+                    let records = try ScheduleRecord.findSchedule(by: id)
+                    if records.characters.count > 0 {
+                        response = records
+                    }
+                }
+
+            } else {
+                // Search
+                response = "За вашим запитом нічого не знайдено, спробуйте інший"
+
+                let objects = try Object.findObjects(with: message)
+                if objects.characters.count > 0 {
+                    response =  objects
+                }
+                node["text"] = response
             }
-            node["text"] = response
         }
         
         return try JSON(node: node)

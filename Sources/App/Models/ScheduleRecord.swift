@@ -87,4 +87,16 @@ extension ScheduleRecord {
             try record.save()
         }
     }
+
+    static func findSchedule(by id: Int) throws -> String {
+        var schedule = ""
+
+        let records = try ScheduleRecord.query().filter("id", .equals, id).all()
+        for record in records {
+            if record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 {
+                schedule += record.date + " - " + record.auditorium + " - " + record.teacher
+            }
+        }
+        return schedule
+    }
 }
