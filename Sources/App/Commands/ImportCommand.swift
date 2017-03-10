@@ -181,7 +181,7 @@ extension ImportCommand {
         let allObjects = try Object.all()
         let objectsCount = allObjects.count
         for _ in 0...100 {
-            let randomID = arc4random_uniform(UInt32(objectsCount))
+            let randomID = generateRandom(with: objectsCount)
             let randomServerID = allObjects[Int(randomID)].serverID
             IDs.append(randomServerID)
         }
@@ -203,5 +203,13 @@ extension ImportCommand {
             // Try to import new records
             try ScheduleRecord.importFrom(responseArray, for: objectID)
         }
+    }
+
+    fileprivate func generateRandom(with max: Int) -> Int {
+        #if os(Linux)
+            return Int(random() % (max + 1))
+        #else
+            return Int(arc4random_uniform(UInt32(max)))
+        #endif
     }
 }
