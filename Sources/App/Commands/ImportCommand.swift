@@ -176,15 +176,23 @@ extension ImportCommand {
 
     /// Imports schedule from "schedule.sumdu.edu.ua" to database
     fileprivate func importSchedule() throws {
+        // Generate random IDs
+        var IDs: [Int] = []
+        let allObjects = try Object.all()
+        let objectsCount = allObjects.count
+        for _ in 0...100 {
+            let randomID = arc4random_uniform(UInt32(objectsCount))
+            let randomServerID = allObjects[Int(randomID)].serverID
+            IDs.append(randomServerID)
+        }
+
         // Fetch objects
-        let objects = try Object.query().limit(1).run()
+        let objects = try Object.query().filter("serverid", .in, IDs).run()
 
         for object in objects {
             // Make request and node from JSON response
             let scheduleResponse = try makeRequestOfSchedule(for: object)
-            guard let responseArray = scheduleResponse.json?.array else {
-                throw ImportError.failedGetArray
-            }
+            guard let responseArray = scheduleResponse.json?.array else { throw ImportError.failedGetArray }
 
             // Id of related object
             guard let objectID = object.id else { throw ImportError.missingObjectID }

@@ -22,6 +22,8 @@ final class ScheduleRecord: Model {
     var auditorium: String
     var date: String
     var teacher: String
+    var name: String?
+    var type: String?
 
     // MARK: - Initialization
 
@@ -32,6 +34,8 @@ final class ScheduleRecord: Model {
         auditorium = try node.extract("auditorium")
         date = try node.extract("date")
         teacher = try node.extract("teacher")
+        name = try node.extract("name")
+        type = try node.extract("type")
 
         // Relationships
         objectID = try node.extract("object_id")
@@ -43,6 +47,8 @@ final class ScheduleRecord: Model {
             "auditorium": auditorium,
             "date": date,
             "teacher": teacher,
+            "name": name,
+            "type": type,
             "object_id": objectID
             ])
     }
@@ -62,6 +68,9 @@ final class ScheduleRecord: Model {
             return nil
         }
         self.teacher = teacher
+
+        self.name = object["ABBR_DIS"]?.string
+        self.type = object["NAME_STUD"]?.string
     }
 }
 
@@ -82,6 +91,8 @@ extension ScheduleRecord: Preparation {
             record.string("auditorium")
             record.string("date")
             record.string("teacher")
+            record.string("name", optional: true)
+            record.string("type", optional: true)
             record.parent(Object.self, optional: false)
         })
     }
