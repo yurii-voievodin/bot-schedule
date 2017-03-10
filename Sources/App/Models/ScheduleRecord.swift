@@ -105,6 +105,7 @@ extension ScheduleRecord {
     }
 
     static func findSchedule(by id: Int) throws -> String {
+        let newLine = "\n"
         var schedule = ""
         var dateString = ""
 
@@ -116,12 +117,12 @@ extension ScheduleRecord {
             if record.date != dateString {
                 dateString = record.date
                 if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
-                    schedule += recordDate + "\n"
+                    schedule += newLine + recordDate + newLine
                 }
             }
 
             // Compound record
-            schedule += record.auditorium + " - " + record.teacher + "\n"
+            schedule += record.auditorium + " - " + record.teacher + newLine
         }
         return schedule
     }

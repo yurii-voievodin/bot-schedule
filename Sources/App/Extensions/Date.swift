@@ -27,6 +27,7 @@ extension Date {
     var humanReadable: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd MMMM yyyy"
+        formatter.locale = Locale(identifier: "uk_UA")
         return formatter.string(from: self)
     }
 
