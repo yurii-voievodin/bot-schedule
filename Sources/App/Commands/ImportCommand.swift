@@ -130,15 +130,21 @@ extension ImportCommand {
 
 extension ImportCommand {
 
+    /// Import errors
+    enum ImportError: Swift.Error {
+        case failedGetArray
+        case missingObjectID
+    }
+
     /// Make request of schedule for object
     ///
     /// - Parameter object: for which get schedule
     /// - Returns: schedule as json
-    fileprivate func makeRequestOfSchedule(for object: Object) throws -> JSON? {
+    fileprivate func makeRequestOfSchedule(for object: Object) throws -> Response {
         // Detect type of object
         guard let type = ObjectType(rawValue: object.type) else {
             print("❌ Failed to detect type of object")
-            return nil
+            return Response()
         }
         var groupId = "0"
         var teacherId = "0"
@@ -165,27 +171,29 @@ extension ImportCommand {
             "data[ID_FIO]": teacherId,
             "data[ID_AUD]": auditoriumId
         ]
-
-        let response = try drop.client.post("http://schedule.sumdu.edu.ua/index/json", query: query)
-        return response.json
+        return try drop.client.post("http://schedule.sumdu.edu.ua/index/json", query: query)
     }
 
+    /// Imports schedule from "schedule.sumdu.edu.ua" to database
     fileprivate func importSchedule() throws {
         // Fetch objects
-        let objects = try Object.query().limit(10).run()
+        let objects = try Object.query().limit(1).run()
 
         for object in objects {
             // Make request and node from JSON response
-            let json = try makeRequestOfSchedule(for: object)
-            if let node = json?.makeNode(), let id = object.id {
-
-                // Try to delete old records
-                try object.records().delete()
-
-                // Try to import new records
-                guard let nodes = node.nodeArray else { return }
-                try ScheduleRecord.importFrom(nodes, for: id)
+            let scheduleResponse = try makeRequestOfSchedule(for: object)
+            guard let responseArray = scheduleResponse.json?.array else {
+                throw ImportError.failedGetArray
             }
+
+            // Id of related object
+            guard let objectID = object.id else { throw ImportError.missingObjectID }
+
+            // Try to delete old records
+            try object.records().delete()
+            
+            // Try to import new records
+            try ScheduleRecord.importFrom(responseArray, for: objectID)
         }
     }
 }

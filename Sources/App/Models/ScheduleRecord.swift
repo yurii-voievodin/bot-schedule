@@ -29,9 +29,9 @@ final class ScheduleRecord: Model {
         id = try node.extract("id")
 
         // Properties
-        auditorium = try node.extract("NAME_AUD")
-        date = try node.extract("DATE_REG")
-        teacher = try node.extract("NAME_FIO")
+        auditorium = try node.extract("auditorium")
+        date = try node.extract("date")
+        teacher = try node.extract("teacher")
 
         // Relationships
         objectID = try node.extract("object_id")
@@ -45,6 +45,23 @@ final class ScheduleRecord: Model {
             "teacher": teacher,
             "object_id": objectID
             ])
+    }
+
+    init?(_ object: [String: Polymorphic]) {
+        guard let auditorium = object["NAME_AUD"]?.string else {
+            return nil
+        }
+        self.auditorium = auditorium
+
+        guard let date = object["DATE_REG"]?.string else {
+            return nil
+        }
+        self.date = date
+
+        guard let teacher = object["NAME_FIO"]?.string else {
+            return nil
+        }
+        self.teacher = teacher
     }
 }
 
@@ -78,23 +95,22 @@ extension ScheduleRecord: Preparation {
 
 extension ScheduleRecord {
 
-    static func importFrom(_ nodes: [Node], for objectID: Node) throws {
-        for node in nodes {
-            var nodeRecord = node
-
-            nodeRecord["object_id"] = objectID
-            var record = try ScheduleRecord(node: nodeRecord)
-            try record.save()
+    static func importFrom(_ array: [Polymorphic], for objectID: Node) throws {
+        for item in array {
+            if let object = item.object, var record = ScheduleRecord(object) {
+                record.objectID = objectID
+                try record.save()
+            }
         }
     }
 
     static func findSchedule(by id: Int) throws -> String {
         var schedule = ""
 
-        let records = try ScheduleRecord.query().filter("id", .equals, id).all()
+        let records = try ScheduleRecord.query().filter("object_id", .equals, id).all()
         for record in records {
             if record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 {
-                schedule += record.date + " - " + record.auditorium + " - " + record.teacher
+                schedule += record.date + " - " + record.auditorium + " - " + record.teacher + "\n"
             }
         }
         return schedule
