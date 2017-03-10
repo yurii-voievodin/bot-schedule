@@ -10,10 +10,31 @@ import Foundation
 
 extension Date {
 
+    // MARK: Properties
+
+    static var serverFormat: String {
+        return "dd.MM.yyyy"
+    }
+
     /// String representation of the date in server format
-    public var serverDateFormat: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy"
-        return dateFormatter.string(from: self)
+    var serverDateFormat: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = Date.serverFormat
+        return formatter.string(from: self)
+    }
+
+    /// Generate string representation of date with format "dd MMMM yyyy"
+    var humanReadable: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMMM yyyy"
+        return formatter.string(from: self)
+    }
+
+    // MARK: Helpers
+
+    static func serverDate(from dateString: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = Date.serverFormat
+        return formatter.date(from: dateString)
     }
 }

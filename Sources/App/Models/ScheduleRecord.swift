@@ -106,12 +106,22 @@ extension ScheduleRecord {
 
     static func findSchedule(by id: Int) throws -> String {
         var schedule = ""
+        var dateString = ""
 
         let records = try ScheduleRecord.query().filter("object_id", .equals, id).all()
         for record in records {
-            if record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 {
-                schedule += record.date + " - " + record.auditorium + " - " + record.teacher + "\n"
+            guard record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 else { continue }
+
+            // Day of week
+            if record.date != dateString {
+                dateString = record.date
+                if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
+                    schedule += recordDate + "\n"
+                }
             }
+
+            // Compound record
+            schedule += record.auditorium + " - " + record.teacher + "\n"
         }
         return schedule
     }
