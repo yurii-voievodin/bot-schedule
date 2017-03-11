@@ -15,22 +15,36 @@ final class CommandsController {
         case start = "/start"
         case firstStart = "/start start"
         case help = "/help"
+        case info = "/info"
+        case search = "/search"
 
         var response: String {
             let newLine = "\n\n"
 
             switch self {
             case .start, .firstStart:
-                return "Вас вітає бот розкладу СумДУ! 😜" + newLine +
-                    "Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine +
-                    "Для зв'язку з розробником пишіть сюди - @voevodin_yura" + newLine +
-                    "Ви можете здійснювати пошук за назвою групи, аудиторією або фамілією викладача." + newLine +
-                "Для перегляду доступних команд використовуйте /help"
+                return "Вас вітає бот розкладу СумДУ! 😜" + newLine
+                    + "Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine
+                    + "Для зв'язку з розробником пишіть сюди - @voevodin_yura" + newLine
+                    + "Ви можете здійснювати пошук за назвою групи, аудиторією або фамілією викладача." + newLine
+                    + "Для перегляду доступних команд використовуйте /help"
+
             case .help:
-                return "Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine +
-                    "/start - Початок роботи" + "\n" +
-                    "/help - Допомога" + newLine +
-                "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
+                return "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine
+                    + "/start - Початок роботи" + "\n"
+                    + "/help - Допомога" + newLine
+                    + "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
+
+            case .info:
+                return "💡 Ідея розробки - https://github.com/appdev-academy/sumdu-ios" + newLine
+                    + "📚 Бібліотеки: " + newLine
+                    + "Vapor - A web framework and server for Swift that works on macOS and Ubuntu. (https://vapor.codes)" + newLine
+                    + "Kanna - XML/HTML parser for Swift. (https://github.com/tid-kijyun/Kanna.git)" + newLine
+                    + "PostgreSQL Provider for the Vapor web framework. (https://github.com/vapor/postgresql-provider)" + newLine
+                    + "Delightful console output for Swift developers. (https://github.com/onevcat/Rainbow)" + newLine
+
+            case .search:
+                return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
             }
         }
     }
@@ -84,7 +98,6 @@ extension CommandsController {
         if records.characters.count > 0 {
             response = records
         }
-        
         return response
     }
 }
