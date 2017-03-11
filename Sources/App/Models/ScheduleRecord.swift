@@ -143,7 +143,7 @@ extension ScheduleRecord {
 
         let newLine = "\n"
         let twoLines = "\n\n"
-        var schedule = ""
+        var schedule = "Розклад для: " + object.name + newLine
         var dateString = ""
 
         let records = try ScheduleRecord.query().filter("object_id", .equals, id).all()
