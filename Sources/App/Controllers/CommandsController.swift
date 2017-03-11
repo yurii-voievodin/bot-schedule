@@ -11,6 +11,10 @@ import HTTP
 
 final class CommandsController {
 
+    // MARK: - Constants
+
+    fileprivate let emptyResponseText = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
+
     enum Command: String {
         case start = "/start"
         case firstStart = "/start start"
@@ -19,29 +23,32 @@ final class CommandsController {
         case search = "/search"
 
         var response: String {
-            let newLine = "\n\n"
+            let twoLines = "\n\n"
+            let oneLine = "\n"
 
             switch self {
             case .start, .firstStart:
-                return "Вас вітає бот розкладу СумДУ! 😜" + newLine
-                    + "Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine
-                    + "Для зв'язку з розробником пишіть сюди - @voevodin_yura" + newLine
-                    + "Ви можете здійснювати пошук за назвою групи, аудиторією або фамілією викладача." + newLine
+                return "Вас вітає бот розкладу СумДУ! 😜" + twoLines
+                    + "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + twoLines
+                    + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura" + twoLines
+                    + "🔍 Ви можете здійснювати пошук за назвою групи, аудиторією або фамілією викладача." + twoLines
                     + "Для перегляду доступних команд використовуйте /help"
 
             case .help:
-                return "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + newLine
-                    + "/start - Початок роботи" + "\n"
-                    + "/help - Допомога" + newLine
-                    + "Для зв'язку з розробником пишіть сюди - @voevodin_yura"
+                return "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + twoLines
+                    + "/start - ⭐️ Початок роботи" + oneLine
+                    + "/help - Допомога" + oneLine
+                    + "/info - ℹ️ Інформація" + oneLine
+                    + "/search - 🔍 Пошук" + oneLine
+                    + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura"
 
             case .info:
-                return "💡 Ідея розробки - https://github.com/appdev-academy/sumdu-ios" + newLine
-                    + "📚 Бібліотеки: " + newLine
-                    + "Vapor - A web framework and server for Swift that works on macOS and Ubuntu. (https://vapor.codes)" + newLine
-                    + "Kanna - XML/HTML parser for Swift. (https://github.com/tid-kijyun/Kanna.git)" + newLine
-                    + "PostgreSQL Provider for the Vapor web framework. (https://github.com/vapor/postgresql-provider)" + newLine
-                    + "Delightful console output for Swift developers. (https://github.com/onevcat/Rainbow)" + newLine
+                return "💡 Ідея розробки - https://github.com/appdev-academy/sumdu-ios" + twoLines
+                    + "📚 Бібліотеки: " + twoLines
+                    + "Vapor - A web framework and server for Swift that works on macOS and Ubuntu. (https://vapor.codes)" + twoLines
+                    + "Kanna - XML/HTML parser for Swift. (https://github.com/tid-kijyun/Kanna.git)" + twoLines
+                    + "PostgreSQL Provider for the Vapor web framework. (https://github.com/vapor/postgresql-provider)" + twoLines
+                    + "Delightful console output for Swift developers. (https://github.com/onevcat/Rainbow)" + twoLines
 
             case .search:
                 return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
@@ -54,7 +61,7 @@ final class CommandsController {
     func index(request: Request) throws -> ResponseRepresentable {
         // Message text from request JSON
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        var responseText = ""
+        var responseText = emptyResponseText
 
         if let command = Command(rawValue: message) {
             // If it is a command
@@ -87,7 +94,7 @@ final class CommandsController {
 extension CommandsController {
 
     fileprivate func findSchedule(for message: String) throws -> String {
-        var response = "За вашим запитом нічого не знайдено, спробуйте інший"
+        var response = emptyResponseText
 
         // Get ID of Object from message (/info_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 6))
