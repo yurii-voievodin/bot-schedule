@@ -103,7 +103,7 @@ extension Object {
         let objects = try Object.query().filter("name", contains: name).all()
         for object in objects {
             if let id = object.id?.int {
-                response += object.name + " - /info_\(id)" + "\n"
+                response += object.name + " - /info_\(id)" + newLine
             }
         }
         return response

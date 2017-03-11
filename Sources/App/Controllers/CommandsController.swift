@@ -23,9 +23,6 @@ final class CommandsController {
         case search = "/search"
 
         var response: String {
-            let twoLines = "\n\n"
-            let oneLine = "\n"
-
             switch self {
             case .start, .firstStart:
                 return "Вас вітає бот розкладу СумДУ! 😜" + twoLines
@@ -36,9 +33,9 @@ final class CommandsController {
 
             case .help:
                 return "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + twoLines
-                    + "/start - Початок роботи ⭐️" + oneLine
-                    + "/help - Допомога" + oneLine
-                    + "/info - Інформація ℹ️" + oneLine
+                    + "/start - Початок роботи ⭐️" + newLine
+                    + "/help - Допомога" + newLine
+                    + "/info - Інформація ℹ️" + newLine
                     + "/search - Пошук 🔍" + twoLines
                     + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura"
 
