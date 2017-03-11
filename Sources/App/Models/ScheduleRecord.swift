@@ -23,8 +23,11 @@ final class ScheduleRecord: Model {
     var auditorium: String
     var date: String
     var teacher: String
+    var groupName: String
+
     var name: String?
     var type: String?
+    var time: String
 
     // MARK: - Initialization
 
@@ -37,6 +40,8 @@ final class ScheduleRecord: Model {
         teacher = try node.extract("teacher")
         name = try node.extract("name")
         type = try node.extract("type")
+        time = try node.extract("time")
+        groupName = try node.extract("group_name")
 
         // Relationships
         objectID = try node.extract("object_id")
@@ -50,7 +55,9 @@ final class ScheduleRecord: Model {
             "teacher": teacher,
             "name": name,
             "type": type,
-            "object_id": objectID
+            "object_id": objectID,
+            "time": time,
+            "group_name": groupName
             ])
     }
 
@@ -70,7 +77,17 @@ final class ScheduleRecord: Model {
         }
         self.teacher = teacher
 
-        self.name = object["ABBR_DIS"]?.string
+        guard let time = object["TIME_PAIR"]?.string else {
+            return nil
+        }
+        self.time = time
+
+        guard let group = object["NAME_GROUP"]?.string else {
+            return nil
+        }
+        self.groupName = group
+
+        self.name = object["ABBR_DISC"]?.string
         self.type = object["NAME_STUD"]?.string
     }
 }
@@ -95,6 +112,8 @@ extension ScheduleRecord: Preparation {
             record.string("name", optional: true)
             record.string("type", optional: true)
             record.parent(Object.self, optional: false)
+            record.string("time")
+            record.string("group_name")
         })
     }
 
@@ -128,12 +147,6 @@ extension ScheduleRecord {
         var dateString = ""
 
         let records = try ScheduleRecord.query().filter("object_id", .equals, id).all()
-
-        // Name of object
-        if let name = records.first?.name {
-            schedule = newLine + name + twoLines
-        }
-
         for record in records {
             guard record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 else { continue }
 
@@ -145,14 +158,27 @@ extension ScheduleRecord {
                 }
             }
 
-            // Compound record
-            if let name = record.name {
-                schedule += name + newLine
-            }
+            // Time
+            schedule += record.time + newLine
+
+            // Type
             if let type = record.type {
                 schedule += type + newLine
             }
-            schedule += record.auditorium + " - " + record.teacher + newLine
+
+            // Name
+            if let name = record.name {
+                schedule += name + newLine
+            }
+
+            // Auditorium
+            schedule += record.auditorium + newLine
+            
+            // Group
+            schedule += record.groupName + newLine
+            
+            // Teacher
+            schedule += record.teacher + newLine
         }
         return schedule
     }

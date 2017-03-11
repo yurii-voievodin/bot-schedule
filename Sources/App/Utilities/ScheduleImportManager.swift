@@ -57,7 +57,7 @@ struct ScheduleImportManager {
 
         // Time interval for request
         let startDate = Date()
-        let oneDay: TimeInterval = 60*60*24*7
+        let oneDay: TimeInterval = 60*60*24*14
         let endDate = startDate.addingTimeInterval(oneDay)
 
         // Query parameters
