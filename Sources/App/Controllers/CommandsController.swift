@@ -36,19 +36,19 @@ final class CommandsController {
 
             case .help:
                 return "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + twoLines
-                    + "/start - ⭐️ Початок роботи" + oneLine
+                    + "/start - Початок роботи ⭐️" + oneLine
                     + "/help - Допомога" + oneLine
-                    + "/info - ℹ️ Інформація" + oneLine
-                    + "/search - 🔍 Пошук" + oneLine
+                    + "/info - Інформація ℹ️" + oneLine
+                    + "/search - Пошук 🔍" + twoLines
                     + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura"
 
             case .info:
-                return "💡 Ідея розробки - https://github.com/appdev-academy/sumdu-ios" + twoLines
-                    + "📚 Бібліотеки: " + twoLines
+                return "📚 Бібліотеки: " + twoLines
                     + "Vapor - A web framework and server for Swift that works on macOS and Ubuntu. (https://vapor.codes)" + twoLines
                     + "Kanna - XML/HTML parser for Swift. (https://github.com/tid-kijyun/Kanna.git)" + twoLines
                     + "PostgreSQL Provider for the Vapor web framework. (https://github.com/vapor/postgresql-provider)" + twoLines
                     + "Delightful console output for Swift developers. (https://github.com/onevcat/Rainbow)" + twoLines
+                    + "💡 Ідея розробки - https://github.com/appdev-academy/sumdu-ios"
 
             case .search:
                 return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
@@ -75,7 +75,7 @@ final class CommandsController {
             // Search objects
             let objects = try Object.findObjects(with: message)
             if objects.characters.count > 0 {
-                responseText += objects
+                responseText = objects
             }
         }
 
