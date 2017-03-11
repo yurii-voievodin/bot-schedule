@@ -154,7 +154,7 @@ extension ScheduleRecord {
             if record.date != dateString {
                 dateString = record.date
                 if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
-                    schedule += newLine + "🗓 " + recordDate + twoLines
+                    schedule += "🗓 " + recordDate + twoLines
                 }
             }
 
@@ -163,7 +163,7 @@ extension ScheduleRecord {
 
             // Type
             if let type = record.type {
-                schedule += "   " + type
+                schedule += " - " + type
             }
 
             // Name
@@ -173,7 +173,7 @@ extension ScheduleRecord {
 
             // Auditorium
             schedule += newLine + record.auditorium + " - аудиторія" + newLine
-            
+
             // Group
             schedule += record.groupName + " - група" + newLine
             
