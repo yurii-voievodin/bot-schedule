@@ -23,6 +23,13 @@ extension Date {
         return formatter.string(from: self)
     }
 
+    /// String representation of the date in server format
+    var dateWithTimeFormat: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMMM yyyy HH"
+        return formatter.string(from: self)
+    }
+
     /// Generate string representation of date with format "dd MMMM yyyy"
     var humanReadable: String {
         let formatter = DateFormatter()

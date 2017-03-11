@@ -11,20 +11,27 @@ import Console
 import HTTP
 import Kanna
 import Foundation
+import Rainbow
 
 fileprivate typealias Data = [String: String]
 
 final class ImportCommand: Command {
 
+    /// Import errors
+    enum ImportError: Swift.Error {
+        case missingArguments
+        case unknownArgument
+    }
+
+    /// Arguments for this command
     enum Argument: String {
         case objects = "objects"
-        case schedule = "schedule"
     }
 
     // MARK: - Constants
 
     public let id = "import"
-    public let help = ["This command imports data about schedule, groups, auditoriums, teachers from http://schedule.sumdu.edu.ua"]
+    public let help = ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua \n Arguments: \n objects - import all objects (roups, auditoriums, teachers)"]
     public let console: ConsoleProtocol
 
     // MARK: - Variables
@@ -38,17 +45,15 @@ final class ImportCommand: Command {
         self.droplet = droplet
     }
 
-    // MARK: - Public interface
+    // MARK: - Lifecycle
 
     public func run(arguments: [String]) throws {
-        guard let firstArgument = arguments.first else { return }
-        guard let argument = Argument(rawValue: firstArgument) else { return }
+        guard let firstArgument = arguments.first else { throw ImportError.missingArguments }
+        guard let argument = Argument(rawValue: firstArgument) else { throw ImportError.unknownArgument }
 
         switch argument {
         case .objects:
             try importObjects()
-        case .schedule:
-            try importSchedule()
         }
     }
 }
@@ -94,7 +99,7 @@ extension ImportCommand {
             }
 
             let node = try Node( node: [
-                "serverid": id,
+                "server_id": id,
                 "name": name,
                 "type": "\(type.rawValue)"
                 ])
@@ -120,96 +125,12 @@ extension ImportCommand {
         allNodes.append(contentsOf: try makeNodes(from: groups, type: .group))
         allNodes.append(contentsOf: try makeNodes(from: auditoriums, type: .auditorium))
         allNodes.append(contentsOf: try makeNodes(from: teachers, type: .teacher))
-
+        
         // Import all data to database
         try Object.importFrom(nodes: allNodes)
-    }
-}
 
-// MARK: - Import schedule
-
-extension ImportCommand {
-
-    /// Import errors
-    enum ImportError: Swift.Error {
-        case failedGetArray
-        case missingObjectID
-    }
-
-    /// Make request of schedule for object
-    ///
-    /// - Parameter object: for which get schedule
-    /// - Returns: schedule as json
-    fileprivate func makeRequestOfSchedule(for object: Object) throws -> Response {
-        // Detect type of object
-        guard let type = ObjectType(rawValue: object.type) else {
-            print("❌ Failed to detect type of object")
-            return Response()
-        }
-        var groupId = "0"
-        var teacherId = "0"
-        var auditoriumId = "0"
-        switch type {
-        case .auditorium:
-            auditoriumId = String(object.serverID)
-        case .group:
-            groupId = String(object.serverID)
-        case .teacher:
-            teacherId = String(object.serverID)
-        }
-
-        // Time interval for request
-        let startDate = Date()
-        let oneDay: TimeInterval = 60*60*24*7
-        let endDate = startDate.addingTimeInterval(oneDay)
-
-        // Query parameters
-        let query: [String: CustomStringConvertible] = [
-            "data[DATE_BEG]": startDate.serverDateFormat,
-            "data[DATE_END]": endDate.serverDateFormat,
-            "data[KOD_GROUP]": groupId,
-            "data[ID_FIO]": teacherId,
-            "data[ID_AUD]": auditoriumId
-        ]
-        return try drop.client.post("http://schedule.sumdu.edu.ua/index/json", query: query)
-    }
-
-    /// Imports schedule from "schedule.sumdu.edu.ua" to database
-    fileprivate func importSchedule() throws {
-        // Generate random IDs
-        var IDs: [Int] = []
-        let allObjects = try Object.all()
-        let objectsCount = allObjects.count
-        for _ in 0...100 {
-            let randomID = generateRandom(with: objectsCount)
-            let randomServerID = allObjects[Int(randomID)].serverID
-            IDs.append(randomServerID)
-        }
-
-        // Fetch objects
-        let objects = try Object.query().filter("serverid", .in, IDs).run()
-
-        for object in objects {
-            // Make request and node from JSON response
-            let scheduleResponse = try makeRequestOfSchedule(for: object)
-            guard let responseArray = scheduleResponse.json?.array else { throw ImportError.failedGetArray }
-
-            // Id of related object
-            guard let objectID = object.id else { throw ImportError.missingObjectID }
-
-            // Try to delete old records
-            try object.records().delete()
-            
-            // Try to import new records
-            try ScheduleRecord.importFrom(responseArray, for: objectID)
-        }
-    }
-
-    fileprivate func generateRandom(with max: Int) -> Int {
-        #if os(Linux)
-            return Int(random() % (max + 1))
-        #else
-            return Int(arc4random_uniform(UInt32(max)))
-        #endif
+        // Success
+        let count = try Object.all().count
+        print("\(count) objects imported".green)
     }
 }

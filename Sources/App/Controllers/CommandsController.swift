@@ -38,45 +38,53 @@ final class CommandsController {
     // MARK: - Actions
 
     func index(request: Request) throws -> ResponseRepresentable {
-        // Generate response node
-        // https://core.telegram.org/bots/api#sendmessage
-        var node: [String : NodeRepresentable] = [
-            "method": "sendMessage",
-            "chat_id": request.data["message", "chat", "id"]?.int ?? 0
-        ]
-
         // Message text from request JSON
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        var responseText = ""
 
-        // Check if the message is a Telegram command
         if let command = Command(rawValue: message) {
-            node["text"] = command.response
+            // If it is a command
+            responseText = command.response
+
+        } else if message.hasPrefix("/info_") {
+            // It isn't a command
+            responseText = try findSchedule(for: message)
+
         } else {
-            // It isn't a Telegram command
-            var response = "Вибачте, пошук поки що працює не повністю" + "\n\n"
-
-            if message.hasPrefix("/info_") {
-                // Info
-                let idString = message.substring(from: message.index(message.startIndex, offsetBy: 6))
-                response = "За вашим запитом нічого не знайдено, спробуйте інший"
-
-                if let id = Int(idString) {
-                    let records = try ScheduleRecord.findSchedule(by: id)
-                    if records.characters.count > 0 {
-                        response = records
-                    }
-                }
-
-            } else {
-                // Search
-                let objects = try Object.findObjects(with: message)
-                if objects.characters.count > 0 {
-                    response =  objects
-                }
+            // Search objects
+            let objects = try Object.findObjects(with: message)
+            if objects.characters.count > 0 {
+                responseText += objects
             }
-            node["text"] = response
+        }
+
+        // Generate response node
+        // https://core.telegram.org/bots/api#sendmessage
+        return try JSON(node: [
+            "method": "sendMessage",
+            "chat_id": request.data["message", "chat", "id"]?.int ?? 0,
+            "text": responseText
+            ])
+    }
+}
+
+// MARK: - Helpers
+
+extension CommandsController {
+
+    fileprivate func findSchedule(for message: String) throws -> String {
+        var response = "За вашим запитом нічого не знайдено, спробуйте інший"
+
+        // Get ID of Object from message (/info_{id})
+        let idString = message.substring(from: message.index(message.startIndex, offsetBy: 6))
+        guard let id = Int(idString) else { return response }
+
+        // Try to find records
+        let records = try ScheduleRecord.findSchedule(by: id)
+        if records.characters.count > 0 {
+            response = records
         }
         
-        return try JSON(node: node)
+        return response
     }
 }

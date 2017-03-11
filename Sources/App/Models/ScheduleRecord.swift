@@ -7,6 +7,7 @@
 //
 
 import Vapor
+import HTTP
 import Fluent
 import Foundation
 
@@ -106,16 +107,21 @@ extension ScheduleRecord: Preparation {
 
 extension ScheduleRecord {
 
-    static func importFrom(_ array: [Polymorphic], for objectID: Node) throws {
-        for item in array {
-            if let object = item.object, var record = ScheduleRecord(object) {
-                record.objectID = objectID
-                try record.save()
-            }
-        }
-    }
-
     static func findSchedule(by id: Int) throws -> String {
+        let currentDate = Date().dateWithTimeFormat
+
+        // Try to find object in database
+        guard var object = try Object.find(id) else { throw  ScheduleImportManager.ImportError.missingObject }
+
+        if object.updatedAt != currentDate {
+            // Try to import schedule
+            try ScheduleImportManager.importSchedule(for: object)
+
+            // Update date in object
+            object.updatedAt = currentDate
+            try object.save()
+        }
+
         let newLine = "\n"
         let twoLines = "\n\n"
         var schedule = ""
