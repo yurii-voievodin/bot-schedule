@@ -159,26 +159,26 @@ extension ScheduleRecord {
             }
 
             // Time
-            schedule += record.time + newLine
+            schedule += record.time
 
             // Type
             if let type = record.type {
-                schedule += type + newLine
+                schedule += "   " + type
             }
 
             // Name
             if let name = record.name {
-                schedule += name + newLine
+                schedule += newLine + name
             }
 
             // Auditorium
-            schedule += record.auditorium + newLine
+            schedule += newLine + record.auditorium + " - аудиторія" + newLine
             
             // Group
-            schedule += record.groupName + newLine
+            schedule += record.groupName + " - група" + newLine
             
             // Teacher
-            schedule += record.teacher + newLine
+            schedule += record.teacher + twoLines
         }
         return schedule
     }
