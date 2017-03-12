@@ -22,7 +22,7 @@ final class Object: Model {
     var type: Int
     var updatedAt: String
 
-    // MARK: - Initialization
+    // MARK: Initialization
 
     init(node: Node, in context: Context) throws {
         id = try node.extract("id")

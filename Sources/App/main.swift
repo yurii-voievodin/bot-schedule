@@ -26,13 +26,18 @@ try drop.addProvider(VaporPostgreSQL.Provider.self)
 // Preparations
 drop.preparations += Object.self
 drop.preparations += ScheduleRecord.self
+drop.preparations += Session.self
 
 // Database
 Object.database = drop.database
 ScheduleRecord.database = drop.database
+Session.database = drop.database
 
 // Commands
 drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
+
+// Middleware
+drop.middleware.append(SessionMiddleware())
 
 drop.get("") { request in
     return "SumDUBot"

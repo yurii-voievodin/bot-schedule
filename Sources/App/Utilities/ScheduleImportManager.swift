@@ -62,8 +62,8 @@ struct ScheduleImportManager {
 
         // Query parameters
         let query: [String: CustomStringConvertible] = [
-            "data[DATE_BEG]": startDate.serverDateFormat,
-            "data[DATE_END]": endDate.serverDateFormat,
+            "data[DATE_BEG]": startDate.serverDate,
+            "data[DATE_END]": endDate.serverDate,
             "data[KOD_GROUP]": groupId,
             "data[ID_FIO]": teacherId,
             "data[ID_AUD]": auditoriumId

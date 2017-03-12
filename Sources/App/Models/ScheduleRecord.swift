@@ -127,17 +127,17 @@ extension ScheduleRecord: Preparation {
 extension ScheduleRecord {
 
     static func findSchedule(by id: Int) throws -> String {
-        let currentDate = Date().dateWithTimeFormat
+        let currentHour = Date().dateWithHour
 
         // Try to find object in database
         guard var object = try Object.find(id) else { throw  ScheduleImportManager.ImportError.missingObject }
 
-        if object.updatedAt != currentDate {
+        if object.updatedAt != currentHour {
             // Try to import schedule
             try ScheduleImportManager.importSchedule(for: object)
 
             // Update date in object
-            object.updatedAt = currentDate
+            object.updatedAt = currentHour
             try object.save()
         }
 

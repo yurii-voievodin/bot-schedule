@@ -17,14 +17,14 @@ extension Date {
     }
 
     /// String representation of the date in server format
-    var serverDateFormat: String {
+    var serverDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = Date.serverFormat
         return formatter.string(from: self)
     }
 
     /// String representation of the date in server format
-    var dateWithTimeFormat: String {
+    var dateWithHour: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd MMMM yyyy HH"
         return formatter.string(from: self)
