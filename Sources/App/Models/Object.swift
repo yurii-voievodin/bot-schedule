@@ -104,7 +104,7 @@ extension Object {
         var response = ""
         guard name.characters.count > 1 else { return response }
 
-        let objects = try Object.query().filter("name", contains: name).all()
+        let objects = try Object.query().filter("lowercase_name", contains: name.lowercased()).all()
         for object in objects {
             if let id = object.id?.int {
                 response += object.name + " - /info_\(id)" + newLine
