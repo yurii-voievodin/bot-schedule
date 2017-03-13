@@ -13,8 +13,6 @@ import Kanna
 import Foundation
 import Rainbow
 
-fileprivate typealias Data = [String: String]
-
 final class ImportCommand: Command {
 
     /// Import errors
@@ -68,44 +66,16 @@ extension ImportCommand {
     ///   - selector: selector for "select" HTML attribute
     ///   - document: document to fetch data
     /// - Returns: array of data - name: id
-    fileprivate func extractData(with selector: String, from document: HTMLDocument) -> Data {
-        var data: Data = [:]
+    fileprivate func extractData(with selector: String, from document: HTMLDocument) -> Dictionary<String, Any> {
+        var data: Dictionary = [String: Any]()
 
         for option in document.css(selector) {
             for value in option.css("option") {
-                if let name = value.content, let id = value["value"] {
-                    data[name] = id
-                }
+                guard let name = value.content, let id = value["value"] else { continue }
+                data[name] = id
             }
         }
         return data
-    }
-
-    /// Make array of Node from array of Data
-    ///
-    /// - Parameter data: input array of Data
-    /// - Returns: Output array of Node
-    fileprivate func makeNodes(from data: Data, type: ObjectType) throws -> [Node] {
-        var nodes: [Node] = []
-
-        for object in data {
-            // Get ID and name
-            let id = object.value
-            let name = object.key
-
-            // Validation
-            guard name.characters.count > 0 && id.characters.count > 0 && id != "0" else {
-                continue
-            }
-
-            let node = try Node( node: [
-                "server_id": id,
-                "name": name,
-                "type": "\(type.rawValue)"
-                ])
-            nodes.append(node)
-        }
-        return nodes
     }
 
     fileprivate func importObjects() throws {
@@ -120,14 +90,10 @@ extension ImportCommand {
         let auditoriums = extractData(with: "select#auditorium", from: document)
         let teachers = extractData(with: "select#teacher", from: document)
 
-        // Append to the single dictionary
-        var allNodes: [Node] = []
-        allNodes.append(contentsOf: try makeNodes(from: groups, type: .group))
-        allNodes.append(contentsOf: try makeNodes(from: auditoriums, type: .auditorium))
-        allNodes.append(contentsOf: try makeNodes(from: teachers, type: .teacher))
-        
         // Import all data to database
-        try Object.importFrom(nodes: allNodes)
+        try ObjectsImportManager.importFrom(groups, for: .group)
+        try ObjectsImportManager.importFrom(auditoriums, for: .auditorium)
+        try ObjectsImportManager.importFrom(teachers, for: .teacher)
 
         // Success
         let count = try Object.all().count

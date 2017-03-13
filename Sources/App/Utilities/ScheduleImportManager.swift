@@ -39,7 +39,7 @@ struct ScheduleImportManager {
     /// - Returns: schedule as json
     static func makeRequestOfSchedule(_ object: Object) throws -> Response {
         // Detect type of object
-        guard let type = ObjectType(rawValue: object.type) else {
+        guard let type = Object.ObjectType(rawValue: object.type) else {
             print("❌ Failed to detect type of object")
             return Response()
         }

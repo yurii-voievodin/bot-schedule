@@ -70,7 +70,7 @@ final class CommandsController {
 
         } else {
             // Search objects
-            let objects = try Object.findObjects(with: message)
+            let objects = try Object.find(with: message)
             if objects.characters.count > 0 {
                 responseText = objects
             }

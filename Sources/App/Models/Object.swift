@@ -21,6 +21,7 @@ final class Object: Model {
     var name: String
     var type: Int
     var updatedAt: String
+    var lowercaseName: String
 
     // MARK: Initialization
 
@@ -30,6 +31,7 @@ final class Object: Model {
         name = try node.extract("name")
         type = try node.extract("type")
         updatedAt = try node.extract("updated_at")
+        lowercaseName = try node.extract("lowercase_name")
     }
 
     func makeNode(context: Context) throws -> Node {
@@ -38,8 +40,26 @@ final class Object: Model {
             "server_id": serverID,
             "name": name,
             "type": type,
-            "updated_at": updatedAt
+            "updated_at": updatedAt,
+            "lowercase_name": lowercaseName
             ])
+    }
+
+    init?(array object: Dictionary<String, Any>) {
+        guard let serverID = object["server_id"] as? Int else { return nil }
+        self.serverID = serverID
+
+        guard let name = object["name"] as? String else { return nil }
+        self.name = name
+
+        guard let type = object["type"] as? Int else { return nil }
+        self.type = type
+
+        guard let updatedAt = object["updated_at"] as? String else { return nil }
+        self.updatedAt = updatedAt
+
+        guard let lowercaseName = object["lowercase_name"] as? String else { return nil }
+        self.lowercaseName = lowercaseName
     }
 }
 
@@ -61,6 +81,7 @@ extension Object: Preparation {
             data.string("name")
             data.int("type")
             data.string("updated_at")
+            data.string("lowercase_name")
         })
     }
 
@@ -73,32 +94,15 @@ extension Object: Preparation {
 
 extension Object {
 
-    static func createOrUpdate(from node: Node) throws {
-        guard let serverID = node["server_id"]?.int else { return }
-
-        if var existingObject = try Object.query().filter("server_id", serverID).first() {
-            // Find existing
-            existingObject.name = try node.extract("name")
-            existingObject.type = try node.extract("type")
-            existingObject.updatedAt = ""
-            try existingObject.save()
-        } else {
-            // Or create a new one
-            var newNode = node
-            newNode["updated_at"] = ""
-            var newObject = try Object(node: newNode)
-            try newObject.save()
-        }
+    enum ObjectType: Int {
+        case auditorium = 0
+        case group = 1
+        case teacher = 2
     }
 
-    static func importFrom(nodes: [Node]) throws {
-        for node in nodes {
-            try Object.createOrUpdate(from: node)
-        }
-    }
-
-    static func findObjects(with name: String) throws -> String {
+    static func find(with name: String) throws -> String {
         var response = ""
+        guard name.characters.count > 1 else { return response }
 
         let objects = try Object.query().filter("name", contains: name).all()
         for object in objects {

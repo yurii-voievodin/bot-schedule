@@ -62,29 +62,19 @@ final class ScheduleRecord: Model {
     }
 
     init?(_ object: [String: Polymorphic]) {
-        guard let auditorium = object["NAME_AUD"]?.string else {
-            return nil
-        }
+        guard let auditorium = object["NAME_AUD"]?.string else { return nil }
         self.auditorium = auditorium
 
-        guard let date = object["DATE_REG"]?.string else {
-            return nil
-        }
+        guard let date = object["DATE_REG"]?.string else { return nil }
         self.date = date
 
-        guard let teacher = object["NAME_FIO"]?.string else {
-            return nil
-        }
+        guard let teacher = object["NAME_FIO"]?.string else { return nil }
         self.teacher = teacher
 
-        guard let time = object["TIME_PAIR"]?.string else {
-            return nil
-        }
+        guard let time = object["TIME_PAIR"]?.string else { return nil }
         self.time = time
 
-        guard let group = object["NAME_GROUP"]?.string else {
-            return nil
-        }
+        guard let group = object["NAME_GROUP"]?.string else { return nil }
         self.groupName = group
 
         self.name = object["ABBR_DISC"]?.string
