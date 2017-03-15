@@ -131,43 +131,69 @@ extension ScheduleRecord {
             try object.save()
         }
 
-        var schedule = "Розклад для: " + object.name + twoLines
-        var dateString = ""
+        var schedule = ""
+        var previousDateString = ""
 
-        let records = try ScheduleRecord.query().filter("object_id", .equals, id).all()
+        let records = try ScheduleRecord.query()
+            .filter("object_id", .equals, id)
+            .sort("date", .descending)
+            .sort("time", .descending)
+            .all()
         for record in records {
             guard record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 else { continue }
 
-            // Day of week
-            if record.date != dateString {
-                dateString = record.date
-                if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
-                    schedule += "🗓 " + recordDate + twoLines
-                }
+            // Previous date
+            if previousDateString.characters.count == 0 {
+                previousDateString = record.date
             }
 
             // Time
-            schedule += "🕐 " + record.time
+            if record.time.characters.count > 0 {
+                schedule += "🕐 " + record.time
+            }
 
             // Type
-            if let type = record.type {
+            if let type = record.type, type.characters.count > 0 {
                 schedule += " - " + type
             }
 
             // Name
-            if let name = record.name {
+            if let name = record.name, name.characters.count > 0 {
                 schedule += newLine + name
             }
 
             // Auditorium
-            schedule += newLine + record.auditorium + " - аудиторія" + newLine
+            if record.auditorium.characters.count > 0 {
+                schedule += newLine + record.auditorium + " - аудиторія" + newLine
+            }
 
             // Group
-            schedule += record.groupName + " - група" + newLine
-            
+            if record.groupName.characters.count > 0 {
+                schedule += record.groupName + " - група" + newLine
+            }
+
             // Teacher
-            schedule += "👔 " + record.teacher + twoLines
+            if record.teacher.characters.count > 0 {
+                schedule += "👔 " + record.teacher + twoLines
+            }
+
+            // Date
+            if record.date != previousDateString {
+                if let recordDate = Date.serverDate(from: previousDateString)?.humanReadable {
+                    schedule += "🗓 " + recordDate + twoLines
+                }
+                previousDateString = record.date
+            }
         }
+
+        // First date
+        if let lastRecord = records.last {
+            schedule += "🗓 " + lastRecord.date
+        }
+        
+        // Description
+        schedule += twoLines + "Розклад для: " + object.name
+        
         return schedule
     }
 }
