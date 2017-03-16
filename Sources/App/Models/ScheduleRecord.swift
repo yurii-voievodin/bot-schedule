@@ -149,7 +149,7 @@ extension ScheduleRecord {
         for record in records {
             // Time
             if record.time.characters.count > 0 {
-                schedule += newLine + "🕐 " + record.time
+                schedule += twoLines + "🕐 " + record.time
             }
 
             // Type
