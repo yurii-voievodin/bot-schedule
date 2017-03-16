@@ -20,10 +20,11 @@ final class ScheduleRecord: Model {
 
     var objectID: Node?
 
-    var auditorium: String
+    var auditorium: String?
     var date: String
-    var teacher: String
-    var groupName: String
+    var teacher: String?
+    var groupName: String?
+    var pairName: String
 
     var name: String?
     var type: String?
@@ -42,6 +43,7 @@ final class ScheduleRecord: Model {
         type = try node.extract("type")
         time = try node.extract("time")
         groupName = try node.extract("group_name")
+        pairName = try node.extract("pair_name")
 
         // Relationships
         objectID = try node.extract("object_id")
@@ -57,25 +59,26 @@ final class ScheduleRecord: Model {
             "type": type,
             "object_id": objectID,
             "time": time,
-            "group_name": groupName
+            "group_name": groupName,
+            "pair_name": pairName
             ])
     }
 
     init?(_ object: [String: Polymorphic]) {
-        guard let auditorium = object["NAME_AUD"]?.string else { return nil }
-        self.auditorium = auditorium
+        auditorium = object["NAME_AUD"]?.string
 
         guard let date = object["DATE_REG"]?.string else { return nil }
         self.date = date
 
-        guard let teacher = object["NAME_FIO"]?.string else { return nil }
-        self.teacher = teacher
+        teacher = object["NAME_FIO"]?.string
 
         guard let time = object["TIME_PAIR"]?.string else { return nil }
         self.time = time
 
-        guard let group = object["NAME_GROUP"]?.string else { return nil }
-        self.groupName = group
+        groupName = object["NAME_GROUP"]?.string
+
+        guard let pairName = object["NAME_PAIR"]?.string else { return nil }
+        self.pairName = pairName
 
         self.name = object["ABBR_DISC"]?.string
         self.type = object["NAME_STUD"]?.string
@@ -96,14 +99,15 @@ extension ScheduleRecord: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(entity, closure: { record in
             record.id()
-            record.string("auditorium")
+            record.string("auditorium", optional: true)
             record.string("date")
-            record.string("teacher")
+            record.string("teacher", optional: true)
             record.string("name", optional: true)
             record.string("type", optional: true)
             record.parent(Object.self, optional: false)
             record.string("time")
-            record.string("group_name")
+            record.string("group_name", optional: true)
+            record.string("pair_name")
         })
     }
 
@@ -132,24 +136,20 @@ extension ScheduleRecord {
         }
 
         var schedule = ""
-        var previousDateString = ""
+        var dateString = ""
 
         let records = try ScheduleRecord.query()
             .filter("object_id", .equals, id)
-            .sort("date", .descending)
-            .sort("time", .descending)
+            .sort("date", .ascending)
+            .sort("pair_name", .ascending)
             .all()
+
+        var scheduleArray: [String] = []
+
         for record in records {
-            guard record.auditorium.characters.count > 0 && record.teacher.characters.count > 0 else { continue }
-
-            // Previous date
-            if previousDateString.characters.count == 0 {
-                previousDateString = record.date
-            }
-
             // Time
             if record.time.characters.count > 0 {
-                schedule += "🕐 " + record.time
+                schedule += newLine + "🕐 " + record.time
             }
 
             // Type
@@ -163,37 +163,54 @@ extension ScheduleRecord {
             }
 
             // Auditorium
-            if record.auditorium.characters.count > 0 {
-                schedule += newLine + record.auditorium + " - аудиторія" + newLine
+            if let auditorium = record.auditorium, auditorium.characters.count > 0 {
+                schedule += newLine + auditorium + " - аудиторія"
             }
 
             // Group
-            if record.groupName.characters.count > 0 {
-                schedule += record.groupName + " - група" + newLine
+            if let groupName =  record.groupName, groupName.characters.count > 0 {
+                schedule += newLine + groupName + " - група"
             }
 
             // Teacher
-            if record.teacher.characters.count > 0 {
-                schedule += "👔 " + record.teacher + twoLines
+            if let teacher = record.teacher, teacher.characters.count > 0 {
+                schedule += newLine + "👔 " + teacher
             }
 
             // Date
-            if record.date != previousDateString {
-                if let recordDate = Date.serverDate(from: previousDateString)?.humanReadable {
-                    schedule += "🗓 " + recordDate + twoLines
+            if record.date != dateString {
+                dateString = record.date
+                if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
+                    schedule += twoLines + recordDate + " ⬆️"
                 }
-                previousDateString = record.date
+            }
+
+            if schedule.characters.count > 0 {
+                scheduleArray.append(schedule)
+                schedule = ""
             }
         }
 
-        // First date
-        if let lastRecord = records.last {
-            schedule += "🗓 " + lastRecord.date
+        // Generate reversed response
+        var response = ""
+        for item in scheduleArray.reversed() {
+            response += item
         }
-        
+
         // Description
-        schedule += twoLines + "Розклад для: " + object.name
-        
-        return schedule
+        var typeString = ""
+        if let type = Object.ObjectType(rawValue: object.type) {
+            switch type {
+            case .auditorium:
+                typeString = "Аудиторія"
+            case .group:
+                typeString = "Група"
+            case .teacher:
+                typeString = "Викладач"
+            }
+            response += twoLines + typeString + " - " + object.name
+        }
+
+        return response
     }
 }
