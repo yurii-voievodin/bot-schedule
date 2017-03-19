@@ -21,6 +21,7 @@ final class CommandsController {
         case help = "/help"
         case info = "/info"
         case search = "/search"
+        case statistics = "/statistics"
 
         var response: String {
             switch self {
@@ -36,7 +37,8 @@ final class CommandsController {
                     + "/start - Початок роботи ⭐️" + newLine
                     + "/help - Допомога" + newLine
                     + "/info - Інформація ℹ️" + newLine
-                    + "/search - Пошук 🔍" + twoLines
+                    + "/search - Пошук 🔍" + newLine
+                    + "/statistics - Статистика використання бота" + twoLines
                     + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura"
 
             case .info:
@@ -49,6 +51,9 @@ final class CommandsController {
 
             case .search:
                 return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
+            case .statistics:
+                return "Кількість запитів за сьогодні: " + Session.statisticsForToday() + newLine
+                + "Кількість запитів за останній місяць: " + Session.statisticsForMonth()
             }
         }
     }

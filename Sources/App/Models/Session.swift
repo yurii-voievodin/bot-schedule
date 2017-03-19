@@ -57,3 +57,34 @@ extension Session: Preparation {
         try database.delete(entity)
     }
 }
+
+// MARK: - Helpers
+
+extension Session {
+
+    static func statisticsForToday() -> String {
+        var results = 0
+        do {
+            let sessions = try Session.query().filter("date", .hasPrefix, Date().dayMonthYear).all()
+            for session in sessions {
+                results += session.requests
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+        return String(results)
+    }
+
+    static func statisticsForMonth() -> String {
+        var results = 0
+        do {
+            let sessions = try Session.query().filter("date", .contains, Date().monthYear).all()
+            for session in sessions {
+                results += session.requests
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+        return String(results)
+    }
+}

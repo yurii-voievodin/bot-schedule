@@ -23,10 +23,24 @@ extension Date {
         return formatter.string(from: self)
     }
 
-    /// String representation of the date in server format
+    /// String representation of the date for statistics, format "dd MMMM yyyy HH"
     var dateWithHour: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd MMMM yyyy HH"
+        return formatter.string(from: self)
+    }
+
+    /// "dd MMMM yyyy"
+    var dayMonthYear: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMMM yyyy"
+        return formatter.string(from: self)
+    }
+
+    /// "MMMM yyyy"
+    var monthYear: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: self)
     }
 
