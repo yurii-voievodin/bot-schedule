@@ -23,6 +23,9 @@ guard let secret = drop.config["app", "secret"]?.string else {
 // Providers
 try drop.addProvider(VaporPostgreSQL.Provider.self)
 
+// Migrations before tables
+drop.preparations += DeleteSession.self
+
 // Preparations
 drop.preparations += Object.self
 drop.preparations += ScheduleRecord.self
