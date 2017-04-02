@@ -53,7 +53,7 @@ final class CommandsController {
                 return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
             case .statistics:
                 return "Кількість запитів за сьогодні: " + Session.statisticsForToday() + newLine
-                + "Кількість запитів у цьому місяці: " + Session.statisticsForMonth()
+                    + "Кількість запитів у цьому місяці: " + Session.statisticsForMonth()
             }
         }
     }
@@ -80,7 +80,6 @@ final class CommandsController {
                 responseText = objects
             }
         }
-
         // Generate response node
         // https://core.telegram.org/bots/api#sendmessage
         return try JSON(node: [

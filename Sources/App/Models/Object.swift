@@ -74,6 +74,7 @@ extension Object {
 // MARK: - Preparation
 
 extension Object: Preparation {
+
     static func prepare(_ database: Database) throws {
         try database.create(entity, closure: { data in
             data.id()

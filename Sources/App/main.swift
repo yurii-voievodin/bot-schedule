@@ -30,6 +30,7 @@ drop.preparations += DeleteSession.self
 drop.preparations += Object.self
 drop.preparations += ScheduleRecord.self
 drop.preparations += Session.self
+drop.preparations += User.self
 
 // Database
 Object.database = drop.database
@@ -41,16 +42,12 @@ drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
 
 // Middleware
 drop.middleware.append(SessionMiddleware())
-
-drop.get("") { request in
-    return "SumDUBot"
-}
-
-let commandsController = CommandsController()
+drop.middleware.append(UserMiddleware())
 
 // Setting up the POST request with the secret key.
 // With a secret path to be sure that nobody else knows that URL.
 // https://core.telegram.org/bots/api#setwebhook
+let commandsController = CommandsController()
 drop.post(secret, handler: commandsController.index)
 
 // Run droplet
