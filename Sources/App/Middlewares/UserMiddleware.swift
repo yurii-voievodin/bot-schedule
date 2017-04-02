@@ -15,12 +15,15 @@ final class UserMiddleware: Middleware {
         let response = try next.respond(to: request)
 
         // Get chat and user
-        guard let chat = request.data["message", "chat"]?.object, let user = User(chat) else { return response }
+        guard let chat = request.data["message", "chat"]?.object, var user = User(chat) else { return response }
 
         // Try to find user and add new if not found
-        var newUser = try User.query().filter("chat_id", .equals, user.chatID).first()
-        if newUser == nil {
-            try newUser?.save()
+        if var existingUser = try User.query().filter("chat_id", .equals, user.chatID).first() {
+            existingUser.requests += 1
+            try existingUser.save()
+        } else {
+            user.requests = 1
+            try user.save()
         }
         return response
     }

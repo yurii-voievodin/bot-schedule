@@ -20,6 +20,7 @@ final class User: Model {
     var chatID: Int
     var firstName: String?
     var lastName: String?
+    var requests: Int
 
     // MARK: - Initialization
 
@@ -28,6 +29,7 @@ final class User: Model {
         chatID = try node.extract("chat_id")
         firstName = try node.extract("first_name")
         lastName = try node.extract("last_name")
+        requests = try node.extract("requests")
     }
 
     func makeNode(context: Context) throws -> Node {
@@ -36,6 +38,7 @@ final class User: Model {
             "chat_id": chatID,
             "first_name": firstName,
             "last_name": lastName,
+            "requests": requests
             ])
     }
 
@@ -44,6 +47,7 @@ final class User: Model {
         self.chatID = chatID
         self.firstName = object["first_name"]?.string
         self.lastName = object["last_name"]?.string
+        self.requests = 0
     }
 }
 
@@ -52,11 +56,12 @@ final class User: Model {
 extension User: Preparation {
 
     static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { data in
-            data.id()
-            data.int("chat_id")
-            data.string("first_name")
-            data.string("last_name")
+        try database.create(entity, closure: { user in
+            user.id()
+            user.int("chat_id")
+            user.string("first_name")
+            user.string("last_name")
+            user.int("requests")
         })
     }
 
