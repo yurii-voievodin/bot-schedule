@@ -59,8 +59,8 @@ extension User: Preparation {
         try database.create(entity, closure: { user in
             user.id()
             user.int("chat_id")
-            user.string("first_name")
-            user.string("last_name")
+            user.string("first_name", optional: true)
+            user.string("last_name", optional: true)
             user.int("requests")
         })
     }
@@ -69,4 +69,3 @@ extension User: Preparation {
         try database.delete(entity)
     }
 }
-
