@@ -47,7 +47,7 @@ drop.middleware.append(UserMiddleware())
 // Setting up the POST request with the secret key.
 // With a secret path to be sure that nobody else knows that URL.
 // https://core.telegram.org/bots/api#setwebhook
-let commandsController = CommandsController()
+let commandsController = CommandsController(secret: secret)
 drop.post(secret, handler: commandsController.index)
 
 // Run droplet

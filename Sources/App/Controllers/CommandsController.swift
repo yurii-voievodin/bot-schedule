@@ -6,8 +6,9 @@
 //
 //
 
-import Vapor
+import Jobs
 import HTTP
+import Vapor
 
 final class CommandsController {
 
@@ -58,9 +59,20 @@ final class CommandsController {
         }
     }
 
+    // MARK: - Initialization
+
+    // MARK: - Initialization
+
+    let secret: String
+    init(secret: String) {
+        self.secret = secret
+    }
+
     // MARK: - Actions
 
     func index(request: Request) throws -> ResponseRepresentable {
+        let chatID = request.data["message", "chat", "id"]?.int ?? 0
+
         // Message text from request JSON
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = emptyResponseText
@@ -68,6 +80,21 @@ final class CommandsController {
         if let command = Command(rawValue: message) {
             // If it is a command
             responseText = command.response
+
+            if command == .statistics {
+
+                // Run async job with response
+                Jobs.oneoff {
+                    try self.sendResponse(chatID: chatID, text: responseText)
+                }
+
+                // Response with "typing"
+                return try JSON(node: [
+                    "method": "sendChatAction",
+                    "chat_id": request.data["message", "chat", "id"]?.int ?? 0,
+                    "action": "typing"
+                    ])
+            }
 
         } else if message.hasPrefix("/info_") {
             // It isn't a command
@@ -107,5 +134,15 @@ extension CommandsController {
             response = records
         }
         return response
+    }
+
+    fileprivate func sendResponse(chatID: Int, text: String) throws {
+        let json = try JSON(node: [
+            "method": "sendMessage",
+            "chat_id": chatID,
+            "text": text
+            ])
+        let jsonBytes = try json.makeBytes()
+        _ = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [:], body: Body.data(jsonBytes))
     }
 }
