@@ -81,28 +81,12 @@ final class CommandsController {
             // If it is a command
             responseText = command.response
 
-            if command == .statistics {
-
-                // Run async job with response
-                Jobs.oneoff {
-                    try self.sendResponse(chatID: chatID, text: responseText)
-                }
-
-                // Response with "typing"
-                return try JSON(node: [
-                    "method": "sendChatAction",
-                    "chat_id": request.data["message", "chat", "id"]?.int ?? 0,
-                    "action": "typing"
-                    ])
-            }
-
         } else if message.hasPrefix("/info_") {
             // It isn't a command
-
             responseText = "🤷‍♂️ Вибачте, але пошук тимчасово не працює в зв'язку з проблемами на сайті СумДУ"
 
             // TODO: Enable search later
-//            responseText = try findSchedule(for: message)
+            //            responseText = try findSchedule(for: message)
 
         } else {
             // Search objects
@@ -111,12 +95,17 @@ final class CommandsController {
                 responseText = objects
             }
         }
-        // Generate response node
-        // https://core.telegram.org/bots/api#sendmessage
+
+        // Run async job with response
+        Jobs.oneoff {
+            try self.sendResponse(chatID: chatID, text: responseText)
+        }
+
+        // Response with "typing"
         return try JSON(node: [
-            "method": "sendMessage",
+            "method": "sendChatAction",
             "chat_id": request.data["message", "chat", "id"]?.int ?? 0,
-            "text": responseText
+            "action": "typing"
             ])
     }
 }
@@ -141,14 +130,14 @@ extension CommandsController {
     }
 
     fileprivate func sendResponse(chatID: Int, text: String) throws {
-        let json = try JSON(node: [
+        let node = try Node(node: [
             "method": "sendMessage",
             "chat_id": chatID,
             "text": text
             ])
-        let jsonBytes = try json.makeBytes()
-        let response = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [:], body: Body.data(jsonBytes))
 
-        print(response.json ?? "Response JSON not found")
+        _ = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [
+            "Content-Type": "application/x-www-form-urlencoded"
+            ], body: Body.data(node.formURLEncoded()))
     }
 }
