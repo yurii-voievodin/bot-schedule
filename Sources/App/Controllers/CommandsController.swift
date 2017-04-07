@@ -98,7 +98,11 @@ final class CommandsController {
 
         } else if message.hasPrefix("/info_") {
             // It isn't a command
-            responseText = try findSchedule(for: message)
+
+            responseText = "🤷‍♂️ Вибачте, але пошук тимчасово не працює в зв'язку з проблемами на сайті СумДУ"
+
+            // TODO: Enable search later
+//            responseText = try findSchedule(for: message)
 
         } else {
             // Search objects
@@ -143,6 +147,8 @@ extension CommandsController {
             "text": text
             ])
         let jsonBytes = try json.makeBytes()
-        _ = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [:], body: Body.data(jsonBytes))
+        let response = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [:], body: Body.data(jsonBytes))
+
+        print(response.json ?? "Response JSON not found")
     }
 }
