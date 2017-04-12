@@ -61,8 +61,6 @@ final class CommandsController {
 
     // MARK: - Initialization
 
-    // MARK: - Initialization
-
     let secret: String
     init(secret: String) {
         self.secret = secret
@@ -81,12 +79,19 @@ final class CommandsController {
             // If it is a command
             responseText = command.response
 
+            // Run async job with response
+            Jobs.oneoff {
+                try self.sendResponse(chatID: chatID, text: responseText)
+            }
+
         } else if message.hasPrefix("/info_") {
             // It isn't a command
-            responseText = "🤷‍♂️ Вибачте, але пошук тимчасово не працює в зв'язку з проблемами на сайті СумДУ"
 
-            // TODO: Enable search later
-            //            responseText = try findSchedule(for: message)
+            // Run async job with request to server
+            Jobs.oneoff {
+                responseText = try self.findSchedule(for: message)
+                try self.sendResponse(chatID: chatID, text: responseText)
+            }
 
         } else {
             // Search objects
@@ -94,11 +99,11 @@ final class CommandsController {
             if objects.characters.count > 0 {
                 responseText = objects
             }
-        }
 
-        // Run async job with response
-        Jobs.oneoff {
-            try self.sendResponse(chatID: chatID, text: responseText)
+            // Run async job with response
+            Jobs.oneoff {
+                try self.sendResponse(chatID: chatID, text: responseText)
+            }
         }
 
         // Response with "typing"
