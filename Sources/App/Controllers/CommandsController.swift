@@ -6,8 +6,9 @@
 //
 //
 
-import Vapor
+import Jobs
 import HTTP
+import Vapor
 
 final class CommandsController {
 
@@ -58,9 +59,18 @@ final class CommandsController {
         }
     }
 
+    // MARK: - Initialization
+
+    let secret: String
+    init(secret: String) {
+        self.secret = secret
+    }
+
     // MARK: - Actions
 
     func index(request: Request) throws -> ResponseRepresentable {
+        let chatID = request.data["message", "chat", "id"]?.int ?? 0
+
         // Message text from request JSON
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = emptyResponseText
@@ -69,9 +79,19 @@ final class CommandsController {
             // If it is a command
             responseText = command.response
 
+            // Run async job with response
+            Jobs.oneoff {
+                try self.sendResponse(chatID: chatID, text: responseText)
+            }
+
         } else if message.hasPrefix("/info_") {
             // It isn't a command
-            responseText = try findSchedule(for: message)
+
+            // Run async job with request to server
+            Jobs.oneoff {
+                responseText = try self.findSchedule(for: message)
+                try self.sendResponse(chatID: chatID, text: responseText)
+            }
 
         } else {
             // Search objects
@@ -79,13 +99,18 @@ final class CommandsController {
             if objects.characters.count > 0 {
                 responseText = objects
             }
+
+            // Run async job with response
+            Jobs.oneoff {
+                try self.sendResponse(chatID: chatID, text: responseText)
+            }
         }
-        // Generate response node
-        // https://core.telegram.org/bots/api#sendmessage
+
+        // Response with "typing"
         return try JSON(node: [
-            "method": "sendMessage",
+            "method": "sendChatAction",
             "chat_id": request.data["message", "chat", "id"]?.int ?? 0,
-            "text": responseText
+            "action": "typing"
             ])
     }
 }
@@ -107,5 +132,17 @@ extension CommandsController {
             response = records
         }
         return response
+    }
+
+    fileprivate func sendResponse(chatID: Int, text: String) throws {
+        let node = try Node(node: [
+            "method": "sendMessage",
+            "chat_id": chatID,
+            "text": text
+            ])
+
+        _ = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [
+            "Content-Type": "application/x-www-form-urlencoded"
+            ], body: Body.data(node.formURLEncoded()))
     }
 }

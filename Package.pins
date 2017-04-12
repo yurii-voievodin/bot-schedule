@@ -62,6 +62,12 @@
       "version": "1.0.1"
     },
     {
+      "package": "Jobs",
+      "reason": null,
+      "repositoryURL": "https://github.com/kgn/Jobs.git",
+      "version": "0.1.2"
+    },
+    {
       "package": "Kanna",
       "reason": null,
       "repositoryURL": "https://github.com/tid-kijyun/Kanna.git",
