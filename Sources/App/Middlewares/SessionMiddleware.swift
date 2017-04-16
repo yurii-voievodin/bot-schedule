@@ -17,7 +17,6 @@ final class SessionMiddleware: Middleware {
         guard let (year, month, day, hour) = Date().intDate else {
             return response
         }
-
         if var session = try Session.query()
             .filter("year", .equals, year)
             .filter("month", .equals, month)

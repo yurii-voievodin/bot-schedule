@@ -28,18 +28,14 @@ try drop.addProvider(VaporPostgreSQL.Provider.self)
 drop.preparations += DeleteSession.self
 
 // Preparations
-let models = [
+drop.preparations += [
     Auditorium.self,
     Group.self,
     Teacher.self,
     Record.self,
     Session.self,
     User.self
-    ] as [Preparation.Type]
-
-for model in models {
-    drop.preparations += model
-}
+] as [Preparation.Type]
 
 // Database
 Auditorium.database = drop.database

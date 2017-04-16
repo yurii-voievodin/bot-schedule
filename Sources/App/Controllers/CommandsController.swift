@@ -28,22 +28,20 @@ final class CommandsController {
             switch self {
             case .start, .firstStart:
                 return "Вас вітає бот розкладу СумДУ! 🙋‍♂️" + twoLines
-                    + "🛠 Зв'язатися з розробником - @voevodin_yura" + twoLines
-                    + "🔍 Ви можете здійснювати пошук за назвою групи, аудиторією або прізвищем викладача." + twoLines
-                    + "Для перегляду доступних команд використовуйте /help"
-
+                    + "🔍 Шукайте за назвою групи, аудиторією або прізвищем викладача." + twoLines
+                    + "Допомога - /help"
             case .help:
                 return "/start - Початок роботи ⭐️" + newLine
-                    + "/help - Допомога" + newLine
+                    + "/help - Допомога ⁉️" + newLine
                     + "/search - Пошук 🔍" + newLine
-                    + "/statistics - Статистика використання бота" + twoLines
+                    + "/statistics - Статистика використання бота 📊" + twoLines
                     + "🛠 Зв'язатися з розробником - @voevodin_yura"
-
             case .search:
                 return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
             case .statistics:
-                return "Кількість запитів за сьогодні: " + Session.statisticsForToday() + newLine
-                    + "Кількість запитів у цьому місяці: " + Session.statisticsForMonth()
+                return "Кількість запитів:" + newLine
+                    + " - за сьогодні: " + Session.statisticsForToday() + newLine
+                    + " - у цьому місяці: " + Session.statisticsForMonth()
             }
         }
     }
@@ -64,6 +62,7 @@ final class CommandsController {
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = emptyResponseText
 
+        // Command
         if let command = Command(rawValue: message) {
             // If it is a command
             responseText = command.response
@@ -72,6 +71,8 @@ final class CommandsController {
             Jobs.oneoff {
                 try self.sendResponse(chatID, text: responseText)
             }
+
+            // Auditorium
         } else if message.hasPrefix("/auditorium_") {
             // Show records for auditorium
             Jobs.oneoff {
@@ -81,6 +82,8 @@ final class CommandsController {
                 }
                 try self.sendResponse(chatID, text: responseText)
             }
+
+            // Group
         } else if message.hasPrefix("/group_") {
             // Show records for group
             Jobs.oneoff {
@@ -90,6 +93,8 @@ final class CommandsController {
                 }
                 try self.sendResponse(chatID, text: responseText)
             }
+
+            // Teacher
         } else if message.hasPrefix("/teacher_") {
             // Show records for teacher
             Jobs.oneoff {

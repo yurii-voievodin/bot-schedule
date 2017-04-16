@@ -157,11 +157,32 @@ extension Record {
             }
             // Type
             if let type = record.type, type.characters.count > 0 {
-                schedule += " - " + type
+                schedule += newLine + type
             }
             // Name
             if let name = record.name, name.characters.count > 0 {
                 schedule += newLine + name
+            }
+            // Auditorium
+            do {
+                if let auditorium = try record.auditorium().get() {
+                    schedule += newLine + "🚪 " + auditorium.name
+                }
+            } catch {
+            }
+            // Teacher
+            do {
+                if let teacher = try record.teacher().get() {
+                    schedule += newLine + "👔 " + teacher.name
+                }
+            } catch {
+            }
+            // Group
+            do {
+                if let group = try record.group().get() {
+                    schedule += newLine + "👥 " + group.name
+                }
+            } catch {
             }
             // Date
             if record.date != dateString {
