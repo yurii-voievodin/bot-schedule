@@ -72,7 +72,7 @@ extension Teacher {
             response += teacher.name + " - /teacher_\(teacher.serverID)" + newLine
         }
         guard response.characters.count > 0 else { return "" }
-        return "👔 Викладачі:" + newLine + response
+        return twoLines + "👔 Викладачі:" + twoLines + response
     }
 
     static func show(for message: String) throws -> String {

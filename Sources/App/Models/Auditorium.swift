@@ -72,7 +72,7 @@ extension Auditorium {
             response += auditorium.name + " - /auditorium_\(auditorium.serverID)" + newLine
         }
         guard response.characters.count > 0 else { return "" }
-        return "🚪 Аудиторії:" + newLine + response
+        return twoLines + "🚪 Аудиторії:" + twoLines + response
     }
 
     static func show(for message: String) throws -> String {

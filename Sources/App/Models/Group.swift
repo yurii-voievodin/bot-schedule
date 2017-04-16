@@ -72,7 +72,7 @@ extension Group {
             response += group.name + " - /group_\(group.serverID)" + newLine
         }
         guard response.characters.count > 0 else { return "" }
-        return "👥 Групи:" + newLine + response
+        return twoLines + "👥 Групи:" + twoLines + response
     }
 
     static func show(for message: String) throws -> String {

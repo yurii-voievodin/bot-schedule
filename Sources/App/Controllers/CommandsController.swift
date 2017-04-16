@@ -9,6 +9,7 @@
 import Jobs
 import HTTP
 import Vapor
+import Foundation
 
 final class CommandsController {
 
@@ -102,9 +103,9 @@ final class CommandsController {
             // Search
             Jobs.oneoff {
                 var searchResults = ""
-                searchResults += try Auditorium.find(by: message) + newLine
-                searchResults += try Group.find(by: message) + newLine
-                searchResults += try Teacher.find(by: message) + newLine
+                searchResults += try Auditorium.find(by: message)
+                searchResults += try Group.find(by: message)
+                searchResults += try Teacher.find(by: message)
                 if searchResults.characters.count > 0 {
                     responseText = searchResults
                 }
