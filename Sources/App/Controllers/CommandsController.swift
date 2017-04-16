@@ -26,18 +26,17 @@ final class CommandsController {
         var response: String {
             switch self {
             case .start, .firstStart:
-                return "Вас вітає бот розкладу СумДУ! 😜" + twoLines
-                    + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura" + twoLines
+                return "Вас вітає бот розкладу СумДУ! 🙋‍♂️" + twoLines
+                    + "🛠 Зв'язатися з розробником - @voevodin_yura" + twoLines
                     + "🔍 Ви можете здійснювати пошук за назвою групи, аудиторією або прізвищем викладача." + twoLines
                     + "Для перегляду доступних команд використовуйте /help"
 
             case .help:
-                return "⚠️ Увага, бот знаходиться на стадії розробки, тому деякі команди можуть бути недоступні!" + twoLines
-                    + "/start - Початок роботи ⭐️" + newLine
+                return "/start - Початок роботи ⭐️" + newLine
                     + "/help - Допомога" + newLine
                     + "/search - Пошук 🔍" + newLine
                     + "/statistics - Статистика використання бота" + twoLines
-                    + "🛠 Для зв'язку з розробником пишіть сюди - @voevodin_yura"
+                    + "🛠 Зв'язатися з розробником - @voevodin_yura"
 
             case .search:
                 return "🔍 Введіть назву аудиторії, групи або ініціали викладача"
@@ -103,9 +102,18 @@ final class CommandsController {
             // Search
             Jobs.oneoff {
                 var searchResults = ""
-                searchResults += try Auditorium.find(by: message) + newLine
-                searchResults += try Group.find(by: message) + newLine
-                searchResults += try Teacher.find(by: message) + newLine
+                let auditoriums = try Auditorium.find(by: message)
+                if auditoriums.characters.count > 0 {
+                    searchResults += auditoriums + newLine
+                }
+                let groups = try Group.find(by: message)
+                if groups.characters.count > 0 {
+                    searchResults += groups + newLine
+                }
+                let teachers = try Teacher.find(by: message)
+                if teachers.characters.count > 0 {
+                    searchResults += teachers + newLine
+                }
                 if searchResults.characters.count > 0 {
                     responseText = searchResults
                 }
