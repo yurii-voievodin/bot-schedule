@@ -71,14 +71,33 @@ final class Record: Model {
         guard let pairName = record["NAME_PAIR"]?.string else { return nil }
         self.pairName = pairName
 
-        self.name = record["ABBR_DISC"]?.string
-        self.type = record["NAME_STUD"]?.string
+        name = record["ABBR_DISC"]?.string
+        type = record["NAME_STUD"]?.string
 
+        // Auditorium
         if let kodAud = record["KOD_AUD"]?.string {
-            self.auditoriumID = Node(stringLiteral: kodAud)
+            do {
+                let auditorium = try Auditorium.query().filter(TypableFields.serverID.name, kodAud).first()
+                auditoriumID = auditorium?.id
+            } catch  {
+            }
         }
+        // Teacher
         if let kodFio = record["KOD_FIO"]?.string {
-            self.teacherID = Node(stringLiteral: kodFio)
+            teacherID = Node(stringLiteral: kodFio)
+            do {
+                let teacher = try Teacher.query().filter(TypableFields.serverID.name, kodFio).first()
+                teacherID = teacher?.id
+            } catch  {
+            }
+        }
+        // Group
+        if let nameGroup = record["NAME_GROUP"]?.string {
+            do {
+                let group = try Group.query().filter("name", nameGroup).first()
+                groupID = group?.id
+            } catch  {
+            }
         }
     }
 }

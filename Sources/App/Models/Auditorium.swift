@@ -75,14 +75,13 @@ extension Auditorium {
     }
 
     static func show(for message: String) throws -> String {
-        let currentHour = Date().dateWithHour
-
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
         guard let id = Int(idString) else { return "" }
 
         // Find records for auditorium
-        guard var auditorium = try Auditorium.query().filter("server_id", id).first() else { return "" }
+        guard var auditorium = try Auditorium.query().filter(TypableFields.serverID.name, id).first() else { return "" }
+        let currentHour = Date().dateWithHour
         if auditorium.updatedAt != currentHour {
             // Try to delete old records
             try auditorium.records().delete()

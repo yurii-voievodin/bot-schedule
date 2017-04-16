@@ -80,7 +80,19 @@ extension Group {
         guard let id = Int(idString) else { return "" }
 
         // Find records for groups
-        guard let group = try Group.find(id) else { return "" }
+        guard var group = try Group.query().filter(TypableFields.serverID.name, id).first() else { return "" }
+        let currentHour = Date().dateWithHour
+        if group.updatedAt != currentHour {
+            // Try to delete old records
+            try group.records().delete()
+
+            // Try to import schedule
+            try ScheduleImportManager.importSchedule(for: .group, id: group.serverID)
+
+            // Update date in object
+            group.updatedAt = currentHour
+            try group.save()
+        }
         let records = try group.records()
             .sort("date", .ascending)
             .sort("pair_name", .ascending)
@@ -114,7 +126,7 @@ extension Group: Preparation {
             object.string(TypableFields.lowercaseName.name)
         })
     }
-
+    
     static func revert(_ database: Database) throws {
         try database.delete(entity)
     }
