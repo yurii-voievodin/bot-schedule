@@ -41,7 +41,7 @@
       "package": "Fluent",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/fluent.git",
-      "version": "1.4.2"
+      "version": "1.4.3"
     },
     {
       "package": "FluentPostgreSQL",
@@ -68,22 +68,16 @@
       "version": "0.1.2"
     },
     {
-      "package": "Kanna",
-      "reason": null,
-      "repositoryURL": "https://github.com/tid-kijyun/Kanna.git",
-      "version": "2.2.1"
-    },
-    {
       "package": "Leaf",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/leaf.git",
-      "version": "1.0.6"
+      "version": "1.0.7"
     },
     {
       "package": "Multipart",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/multipart.git",
-      "version": "1.0.2"
+      "version": "1.0.3"
     },
     {
       "package": "Node",
@@ -128,12 +122,6 @@
       "version": "1.2.7"
     },
     {
-      "package": "SwiftClibxml2",
-      "reason": null,
-      "repositoryURL": "https://github.com/tid-kijyun/SwiftClibxml2.git",
-      "version": "1.0.2"
-    },
-    {
       "package": "TLS",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/tls.git",
@@ -149,7 +137,7 @@
       "package": "Vapor",
       "reason": null,
       "repositoryURL": "https://github.com/vapor/vapor.git",
-      "version": "1.5.13"
+      "version": "1.5.15"
     },
     {
       "package": "VaporPostgreSQL",

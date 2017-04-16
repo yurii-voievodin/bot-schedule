@@ -1,5 +1,6 @@
 import Vapor
 import VaporPostgreSQL
+import Fluent
 
 /// Bot errors
 enum BotError: Swift.Error {
@@ -27,14 +28,20 @@ try drop.addProvider(VaporPostgreSQL.Provider.self)
 drop.preparations += DeleteSession.self
 
 // Preparations
-drop.preparations += Object.self
-drop.preparations += ScheduleRecord.self
-drop.preparations += Session.self
-drop.preparations += User.self
+drop.preparations += [
+    Auditorium.self,
+    Group.self,
+    Teacher.self,
+    Record.self,
+    Session.self,
+    User.self
+] as [Preparation.Type]
 
 // Database
-Object.database = drop.database
-ScheduleRecord.database = drop.database
+Auditorium.database = drop.database
+Group.database = drop.database
+Teacher.database = drop.database
+Record.database = drop.database
 Session.database = drop.database
 
 // Commands

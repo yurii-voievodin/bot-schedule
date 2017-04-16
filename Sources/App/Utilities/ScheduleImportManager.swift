@@ -12,6 +12,15 @@ import HTTP
 
 struct ScheduleImportManager {
 
+    // MARK: - Constants
+
+    /// Type of object
+    enum ObjectType {
+        case auditorium
+        case group
+        case teacher
+    }
+
     /// Import errors
     enum ImportError: Swift.Error {
         case failedGetArray
@@ -19,40 +28,20 @@ struct ScheduleImportManager {
         case missingObject
     }
 
-    /// Import records from array
-    ///
-    /// - Parameters:
-    ///   - array: [Polymorphic] array of records from Response
-    ///   - objectID: Id of Object in database
-    static func importFrom(_ array: [Polymorphic], for objectID: Node) throws {
-        for item in array {
-            if let object = item.object, var record = ScheduleRecord(object) {
-                record.objectID = objectID
-                try record.save()
-            }
-        }
-    }
+    // MARK: - Methods
 
     /// Make request of schedule for object
-    ///
-    /// - Parameter object: for which get schedule
-    /// - Returns: schedule as json
-    static func makeRequestOfSchedule(_ object: Object) throws -> Response {
-        // Detect type of object
-        guard let type = Object.ObjectType(rawValue: object.type) else {
-            print("❌ Failed to detect type of object")
-            return Response()
-        }
+    static func makeRequestOfSchedule(for type: ObjectType, id: Int) throws -> Response {
         var groupId = "0"
         var teacherId = "0"
         var auditoriumId = "0"
         switch type {
         case .auditorium:
-            auditoriumId = String(object.serverID)
+            auditoriumId = String(id)
         case .group:
-            groupId = String(object.serverID)
+            groupId = String(id)
         case .teacher:
-            teacherId = String(object.serverID)
+            teacherId = String(id)
         }
 
         // Time interval for request
@@ -60,29 +49,20 @@ struct ScheduleImportManager {
         let oneDay: TimeInterval = 60*60*24*8
         let endDate = startDate.addingTimeInterval(oneDay)
 
-        // Query parameters
-        let query: [String: CustomStringConvertible] = [
-            "data[DATE_BEG]": startDate.serverDate,
-            "data[DATE_END]": endDate.serverDate,
-            "data[KOD_GROUP]": groupId,
-            "data[ID_FIO]": teacherId,
-            "data[ID_AUD]": auditoriumId
-        ]
-        return try drop.client.post("http://schedule.sumdu.edu.ua/index/json", query: query)
+        let baseURL = "http://schedule.sumdu.edu.ua/index/json?method=getSchedules"
+        let query = "&id_grp=\(groupId)&id_fio=\(teacherId)&id_aud=\(auditoriumId)&date_beg=\(startDate.serverDate)&date_end=\(endDate.serverDate)"
+
+        return try drop.client.get(baseURL + query)
     }
 
-    static func importSchedule(for object: Object) throws {
+    static func importSchedule(for type: ObjectType, id: Int) throws {
         // Make request and node from JSON response
-        let scheduleResponse = try makeRequestOfSchedule(object)
+        let scheduleResponse = try makeRequestOfSchedule(for: type, id: id)
         guard let responseArray = scheduleResponse.json?.array else { throw ImportError.failedGetArray }
-
-        // Id of related object
-        guard let objectID = object.id else { throw ImportError.missingObjectID }
-
-        // Try to delete old records
-        try object.records().delete()
-
-        // Try to import new records
-        try ScheduleImportManager.importFrom(responseArray, for: objectID)
+        for item in responseArray {
+            if let object = item.object, var record = Record(object) {
+                try record.save()
+            }
+        }
     }
 }

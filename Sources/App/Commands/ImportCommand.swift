@@ -9,28 +9,38 @@
 import Vapor
 import Console
 import HTTP
-import Kanna
 import Foundation
 import Rainbow
 
+/// Console command for import auditoriums, groups and teachers from SumDU API
 final class ImportCommand: Command {
+
+    // MARK: - Enums
+
+    /// Arguments for this command
+    enum Argument: String {
+        case auditoriums = "auditoriums"
+        case groups = "groups"
+        case teachers = "teachers"
+    }
 
     /// Import errors
     enum ImportError: Swift.Error {
         case missingArguments
+        case missingData
         case unknownArgument
-    }
-
-    /// Arguments for this command
-    enum Argument: String {
-        case objects = "objects"
     }
 
     // MARK: - Constants
 
     public let id = "import"
-    public let help = ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua \n Arguments: \n objects - import all objects (roups, auditoriums, teachers)"]
+    public let help = ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua"]
     public let console: ConsoleProtocol
+
+    fileprivate let baseURL = "http://schedule.sumdu.edu.ua/index/json"
+    fileprivate let methodAuditoriums = "?method=getAuditoriums"
+    fileprivate let methodGroups = "?method=getGroups"
+    fileprivate let methodTeachers = "?method=getTeachers"
 
     // MARK: - Variables
 
@@ -43,60 +53,67 @@ final class ImportCommand: Command {
         self.droplet = droplet
     }
 
-    // MARK: - Lifecycle
+    // MARK: - Run
 
     public func run(arguments: [String]) throws {
         guard let firstArgument = arguments.first else { throw ImportError.missingArguments }
         guard let argument = Argument(rawValue: firstArgument) else { throw ImportError.unknownArgument }
 
         switch argument {
-        case .objects:
-            try importObjects()
+        case .auditoriums:
+            try importAuditoriums()
+        case .groups:
+            try importGroups()
+        case .teachers:
+            try importTeachers()
         }
     }
 }
 
-// MARK: - Import objetcs
+// MARK: - Functions of import
 
 extension ImportCommand {
 
-    /// Extract data from HTML <select> attribute
+    /// Import auditoriums from SumDU API
     ///
-    /// - Parameters:
-    ///   - selector: selector for "select" HTML attribute
-    ///   - document: document to fetch data
-    /// - Returns: array of data - name: id
-    fileprivate func extractData(with selector: String, from document: HTMLDocument) -> Dictionary<String, Any> {
-        var data: Dictionary = [String: Any]()
-
-        for option in document.css(selector) {
-            for value in option.css("option") {
-                guard let name = value.content, let id = value["value"] else { continue }
-                data[name] = id
-            }
-        }
-        return data
+    /// - Throws: ImportError
+    fileprivate func importAuditoriums() throws {
+        let data = try fetchData(for: methodAuditoriums)
+        let importManager = ImportManager<Auditorium>()
+        try importManager.importFrom(data)
+        // Success
+        let count = try Auditorium.all().count
+        print("\(count) auditoriums imported".green)
     }
 
-    fileprivate func importObjects() throws {
-        // Request to server with schedule
-        let response = try drop.client.get("http://schedule.sumdu.edu.ua")
-        guard let bodyBytes = response.body.bytes else { return }
-        guard let htmlString = String(bytes: bodyBytes, encoding: .windowsCP1251) else { return }
-        guard let document = HTML(html: htmlString, encoding: .windowsCP1251) else { return }
-
-        // Extract data from HTML
-        let groups = extractData(with: "select#group", from: document)
-        let auditoriums = extractData(with: "select#auditorium", from: document)
-        let teachers = extractData(with: "select#teacher", from: document)
-
-        // Import all data to database
-        try ObjectsImportManager.importFrom(groups, for: .group)
-        try ObjectsImportManager.importFrom(auditoriums, for: .auditorium)
-        try ObjectsImportManager.importFrom(teachers, for: .teacher)
-
+    /// Import groups from SumDU API
+    ///
+    /// - Throws: ImportError
+    fileprivate func importGroups() throws {
+        let data = try fetchData(for: methodGroups)
+        let importManager = ImportManager<Group>()
+        try importManager.importFrom(data)
         // Success
-        let count = try Object.all().count
-        print("\(count) objects imported".green)
+        let count = try Group.all().count
+        print("\(count) groups imported".green)
+    }
+
+    /// Import teachers from SumDU API
+    ///
+    /// - Throws: ImportError
+    fileprivate func importTeachers() throws {
+        let data = try fetchData(for: methodTeachers)
+        let importManager = ImportManager<Teacher>()
+        try importManager.importFrom(data)
+        // Success
+        let count = try Teacher.all().count
+        print("\(count) teachers imported".green)
+    }
+
+    fileprivate func fetchData(for method: String) throws -> [(String, Polymorphic)] {
+        let response = try drop.client.get(baseURL + method)
+        guard let json = response.json else { throw ImportError.missingData }
+        guard let array = json.object?.allItems else { throw ImportError.missingData }
+        return array
     }
 }
