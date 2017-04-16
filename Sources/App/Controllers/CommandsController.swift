@@ -102,18 +102,9 @@ final class CommandsController {
             // Search
             Jobs.oneoff {
                 var searchResults = ""
-                let auditoriums = try Auditorium.find(by: message)
-                if auditoriums.characters.count > 0 {
-                    searchResults += auditoriums + newLine
-                }
-                let groups = try Group.find(by: message)
-                if groups.characters.count > 0 {
-                    searchResults += groups + newLine
-                }
-                let teachers = try Teacher.find(by: message)
-                if teachers.characters.count > 0 {
-                    searchResults += teachers + newLine
-                }
+                searchResults += try Auditorium.find(by: message) + newLine
+                searchResults += try Group.find(by: message) + newLine
+                searchResults += try Teacher.find(by: message) + newLine
                 if searchResults.characters.count > 0 {
                     responseText = searchResults
                 }

@@ -66,12 +66,13 @@ extension Group {
 
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
-        var response = "Групи:" + newLine
+        var response = ""
         let groups = try Group.query().filter(TypableFields.lowercaseName.name, contains: name.lowercased()).all()
         for group in groups {
             response += group.name + " - /group_\(group.serverID)" + newLine
         }
-        return response
+        guard response.characters.count > 0 else { return "" }
+        return "👥 Групи:" + newLine + response
     }
 
     static func show(for message: String) throws -> String {
@@ -100,7 +101,7 @@ extension Group {
 
         // Formatting a response
         var response = Record.prepareResponse(for: records)
-        response += twoLines +  " Група - " + group.name
+        response += twoLines +  "👥 Група - " + group.name
         return response
     }
 }

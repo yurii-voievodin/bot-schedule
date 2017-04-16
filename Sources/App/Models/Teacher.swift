@@ -66,12 +66,13 @@ extension Teacher {
 
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
-        var response = "Викладачі:" + newLine
+        var response = ""
         let teachers = try Teacher.query().filter(TypableFields.lowercaseName.name, contains: name.lowercased()).all()
         for teacher in teachers {
             response += teacher.name + " - /teacher_\(teacher.serverID)" + newLine
         }
-        return response
+        guard response.characters.count > 0 else { return "" }
+        return "👔 Викладачі:" + newLine + response
     }
 
     static func show(for message: String) throws -> String {
@@ -100,7 +101,7 @@ extension Teacher {
 
         // Formatting a response
         var response = Record.prepareResponse(for: records)
-        response += twoLines +  " Викладач - " + teacher.name
+        response += twoLines +  "👔 Викладач - " + teacher.name
         return response
     }
 }

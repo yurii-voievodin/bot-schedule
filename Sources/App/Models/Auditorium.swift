@@ -66,12 +66,13 @@ extension Auditorium {
 
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
-        var response = "Аудиторії:" + newLine
+        var response = ""
         let auditoriums = try Auditorium.query().filter(TypableFields.lowercaseName.name, contains: name.lowercased()).all()
         for auditorium in auditoriums {
             response += auditorium.name + " - /auditorium_\(auditorium.serverID)" + newLine
         }
-        return response
+        guard response.characters.count > 0 else { return "" }
+        return "🚪 Аудиторії:" + newLine + response
     }
 
     static func show(for message: String) throws -> String {
@@ -100,7 +101,7 @@ extension Auditorium {
 
         // Formatting a response
         var response = Record.prepareResponse(for: records)
-        response += twoLines +  " Аудиторія - " + auditorium.name
+        response += twoLines +  "🚪 Аудиторія - " + auditorium.name
         return response
     }
 }
