@@ -109,6 +109,9 @@ extension Auditorium {
 // MARK: - Relationships
 
 extension Auditorium {
+
+    // TODO: Return array of records
+
     func records() throws -> Children<Record> {
         return children()
     }

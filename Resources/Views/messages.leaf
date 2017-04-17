@@ -1,0 +1,12 @@
+#extend("base")
+
+#export("body") {
+
+<div class="row">
+	<div class="u-full-width">
+		<h5>Welcome, #(admin.email)</h5>
+		<a class="button" href="/auth/logout">Logout</a>
+	</div>
+</div>
+
+}

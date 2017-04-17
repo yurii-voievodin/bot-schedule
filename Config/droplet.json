@@ -12,7 +12,8 @@
             "validation",
             "type-safe",
             "date",
-            "sessions"
+            "sessions",
+             "auth"
         ],
         "client": [
         

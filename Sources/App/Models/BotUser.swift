@@ -1,5 +1,5 @@
 //
-//  User.swift
+//  BotUser.swift
 //  SumDUBot
 //
 //  Created by Yura Voevodin on 02.04.17.
@@ -10,7 +10,7 @@ import Vapor
 import Fluent
 import Foundation
 
-final class User: Model {
+final class BotUser: Model {
 
     // MARK: Properties
 
@@ -53,7 +53,7 @@ final class User: Model {
 
 // MARK: - Preparation
 
-extension User: Preparation {
+extension BotUser: Preparation {
 
     static func prepare(_ database: Database) throws {
         try database.create(entity, closure: { user in

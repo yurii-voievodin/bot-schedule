@@ -1,0 +1,21 @@
+#extend("base")
+
+#export("body") {
+<div class="row">
+    <div class="u-full-width">
+        <h2>Registration</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="u-full-width">
+        <form action="/auth/register" method="post">
+            <label>Email</label>
+            <input name="email" class="u-full-width" type="email"/>
+            <label>Password</label>
+            <input name="password" class="u-full-width" type="password"/>
+            <input class="button-primary" type="submit" value="Register"/>
+        </form>
+        <p>Already a user? <a href="/auth/login">Login</a></p>
+    </div>
+</div>
+}
