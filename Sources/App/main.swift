@@ -22,8 +22,8 @@ guard let secret = drop.config["app", "secret"]?.string else {
     throw BotError.missingSecretKey
 }
 
-// Networking
-Networking.shared.secret = secret
+// Response manager
+ResponseManager.shared.secret = secret
 
 // Configurable
 drop.addConfigurable(middleware: AuthMiddleware(user: Admin.self), name: "auth")
@@ -42,7 +42,8 @@ drop.preparations += [
     Teacher.self,
     Record.self,
     Session.self,
-    BotUser.self
+    BotUser.self,
+    HistoryRecord.self
 ] as [Preparation.Type]
 
 // Database

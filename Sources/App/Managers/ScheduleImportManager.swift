@@ -13,14 +13,7 @@ import HTTP
 struct ScheduleImportManager {
 
     // MARK: - Constants
-
-    /// Type of object
-    enum ObjectType {
-        case auditorium
-        case group
-        case teacher
-    }
-
+    
     /// Import errors
     enum ImportError: Swift.Error {
         case failedGetArray

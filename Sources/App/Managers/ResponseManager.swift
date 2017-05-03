@@ -1,5 +1,5 @@
 //
-//  Networking.swift
+//  ResponseManager.swift
 //  SumDUBot
 //
 //  Created by Yura Voevodin on 01.05.17.
@@ -9,12 +9,14 @@
 import HTTP
 import Vapor
 
-class Networking {
+class ResponseManager {
     
-    // MARK: Properties
+    // MARK: - Properties
     
-    static let shared = Networking()
+    static let shared = ResponseManager()
     var secret = ""
+    
+    // MARK: - Methods
     
     func sendResponse(_ chatID: Int, text: String) throws {
         let node = try Node(node: ["method": "sendMessage", "chat_id": chatID, "text": text])

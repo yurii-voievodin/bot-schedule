@@ -35,9 +35,8 @@ final class MessagesController {
         // TODO: Test code will be deleted
         
         if let myUser = try BotUser.find(23) {
-            try Networking.shared.sendResponse(myUser.chatID, text: message)
+            try ResponseManager.shared.sendResponse(myUser.chatID, text: message)
         }
-        
         return message
     }
 }
