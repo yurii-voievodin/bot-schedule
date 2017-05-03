@@ -22,6 +22,9 @@ guard let secret = drop.config["app", "secret"]?.string else {
     throw BotError.missingSecretKey
 }
 
+// Networking
+Networking.shared.secret = secret
+
 // Configurable
 drop.addConfigurable(middleware: AuthMiddleware(user: Admin.self), name: "auth")
 

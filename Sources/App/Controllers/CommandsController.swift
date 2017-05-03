@@ -12,18 +12,18 @@ import Vapor
 import Foundation
 
 final class CommandsController {
-
+    
     // MARK: - Constants
-
+    
     fileprivate let emptyResponseText = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
-
+    
     enum Command: String {
         case start = "/start"
         case firstStart = "/start start"
         case help = "/help"
         case search = "/search"
         case statistics = "/statistics"
-
+        
         var response: String {
             switch self {
             case .start, .firstStart:
@@ -45,33 +45,33 @@ final class CommandsController {
             }
         }
     }
-
+    
     // MARK: - Initialization
-
+    
     let secret: String
     init(secret: String) {
         self.secret = secret
     }
-
+    
     // MARK: - Actions
-
+    
     func index(request: Request) throws -> ResponseRepresentable {
         let chatID = request.data["message", "chat", "id"]?.int ?? 0
-
+        
         // Message text from request JSON
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = emptyResponseText
-
+        
         // Command
         if let command = Command(rawValue: message) {
             // If it is a command
             responseText = command.response
-
+            
             // Run async job with response
             Jobs.oneoff {
-                try self.sendResponse(chatID, text: responseText)
+                try Networking.shared.sendResponse(chatID, text: responseText)
             }
-
+            
             // Auditorium
         } else if message.hasPrefix("/auditorium_") {
             // Show records for auditorium
@@ -80,9 +80,9 @@ final class CommandsController {
                 if result.characters.count > 0 {
                     responseText = result
                 }
-                try self.sendResponse(chatID, text: responseText)
+                try Networking.shared.sendResponse(chatID, text: responseText)
             }
-
+            
             // Group
         } else if message.hasPrefix("/group_") {
             // Show records for group
@@ -91,9 +91,9 @@ final class CommandsController {
                 if result.characters.count > 0 {
                     responseText = result
                 }
-                try self.sendResponse(chatID, text: responseText)
+                try Networking.shared.sendResponse(chatID, text: responseText)
             }
-
+            
             // Teacher
         } else if message.hasPrefix("/teacher_") {
             // Show records for teacher
@@ -102,7 +102,7 @@ final class CommandsController {
                 if result.characters.count > 0 {
                     responseText = result
                 }
-                try self.sendResponse(chatID, text: responseText)
+                try Networking.shared.sendResponse(chatID, text: responseText)
             }
         } else {
             // Search
@@ -114,7 +114,7 @@ final class CommandsController {
                 if searchResults.characters.count > 0 {
                     responseText = searchResults
                 }
-                try self.sendResponse(chatID, text: responseText)
+                try Networking.shared.sendResponse(chatID, text: responseText)
             }
         }
         // Response with "typing"
@@ -124,22 +124,5 @@ final class CommandsController {
             "action": "typing"
             ]
         )
-    }
-}
-
-// MARK: - Helpers
-
-extension CommandsController {
-
-    fileprivate func sendResponse(_ chatID: Int, text: String) throws {
-        let node = try Node(node: [
-            "method": "sendMessage",
-            "chat_id": chatID,
-            "text": text
-            ])
-
-        _ = try drop.client.post("https://api.telegram.org/bot\(secret)/sendMessage", headers: [
-            "Content-Type": "application/x-www-form-urlencoded"
-            ], body: Body.data(node.formURLEncoded()))
     }
 }

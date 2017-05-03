@@ -3,7 +3,7 @@
 #export("body") {
 <div class="row">
     <div class="u-full-width">
-        <h2>Registration</h2>
+        <h2>Реєстрація</h2>
     </div>
 </div>
 <div class="row">
@@ -11,11 +11,11 @@
         <form action="/auth/register" method="post">
             <label>Email</label>
             <input name="email" class="u-full-width" type="email"/>
-            <label>Password</label>
+            <label>Пароль</label>
             <input name="password" class="u-full-width" type="password"/>
             <input class="button-primary" type="submit" value="Register"/>
         </form>
-        <p>Already a user? <a href="/auth/login">Login</a></p>
+        <p>Вже користувач?<a href="/auth/login">Логін</a></p>
     </div>
 </div>
 }
