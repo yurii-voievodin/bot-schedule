@@ -26,6 +26,8 @@ final class CommandsController {
     // MARK: - Methods
     
     func index(request: Request) throws -> ResponseRepresentable {
+        RequestsManager.shared.addRequest()
+        
         let chatID = request.data["message", "chat", "id"]?.int ?? 0
         
         // Message text from request JSON

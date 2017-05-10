@@ -57,7 +57,6 @@ Session.database = drop.database
 drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
 
 // Middleware
-drop.middleware.append(SessionMiddleware())
 drop.middleware.append(UserMiddleware())
 
 // Setting up the POST request with the secret key.
