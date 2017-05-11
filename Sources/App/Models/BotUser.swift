@@ -110,7 +110,7 @@ extension BotUser {
         
         // Check count of history records
         if let historyRecords = try? self.historyRecords().all() {
-            if historyRecords.count == 5, let lastRecord = historyRecords.last {
+            if historyRecords.count == 5, let lastRecord = historyRecords.first {
                 try? lastRecord.delete()
             }
         }
