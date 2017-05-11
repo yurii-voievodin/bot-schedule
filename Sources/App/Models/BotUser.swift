@@ -125,17 +125,15 @@ extension BotUser {
     
     func updateHistory(objectID: Node, type: ObjectType) {
         guard let userID = id else { return }
-        
-        // Check count of history records
-        if let historyRecords = try? self.historyRecords().all() {
-            if historyRecords.count == 5, let lastRecord = historyRecords.first {
-                try? lastRecord.delete()
-            }
-        }
         switch type {
         case .auditorium:
             do {
                 if try HistoryRecord.query().filter("auditorium_id", .equals, objectID).first() == nil {
+                    
+                    // Delete one record if count == 5
+                    checkCountOfHistoryRecords()
+                    
+                    // Save new record
                     var newHistoryRecord = HistoryRecord(auditoriumID: objectID, userID: userID)
                     try newHistoryRecord.save()
                 }
@@ -145,6 +143,11 @@ extension BotUser {
         case .group:
             do {
                 if try HistoryRecord.query().filter("group_id", .equals, objectID).first() == nil {
+                    
+                    // Delete one record if count == 5
+                    checkCountOfHistoryRecords()
+                    
+                    // Save new record
                     var newHistoryRecord = HistoryRecord(groupID: objectID, userID: userID)
                     try newHistoryRecord.save()
                 }
@@ -154,11 +157,25 @@ extension BotUser {
         case .teacher:
             do {
                 if try HistoryRecord.query().filter("teacher_id", .equals, objectID).first() == nil {
+                    
+                    // Delete one record if count == 5
+                    checkCountOfHistoryRecords()
+                    
+                    // Save new record
                     var newHistoryRecord = HistoryRecord(teacherID: objectID, userID: userID)
                     try newHistoryRecord.save()
                 }
             } catch  {
                 print(error)
+            }
+        }
+    }
+    
+    fileprivate func checkCountOfHistoryRecords() {
+        // Check count of history records
+        if let historyRecords = try? self.historyRecords().all() {
+            if historyRecords.count == 5, let lastRecord = historyRecords.first {
+                try? lastRecord.delete()
             }
         }
     }
