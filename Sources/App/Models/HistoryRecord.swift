@@ -103,9 +103,9 @@ extension HistoryRecord: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(entity, closure: { creator in
             creator.id()
-            creator.parent(Auditorium.self)
-            creator.parent(Group.self)
-            creator.parent(Teacher.self)
+            creator.parent(Auditorium.self, optional: true)
+            creator.parent(Group.self, optional: true)
+            creator.parent(Teacher.self, optional: true)
             creator.parent(BotUser.self)
         })
     }

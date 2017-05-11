@@ -123,6 +123,10 @@ extension BotUser {
         case .teacher:
             newHistoryRecord = HistoryRecord(teacherID: objectID, userID: userID)
         }
-        try? newHistoryRecord.save()
+        do {
+            try newHistoryRecord.save()
+        } catch  {
+            print(error)
+        }
     }
 }
