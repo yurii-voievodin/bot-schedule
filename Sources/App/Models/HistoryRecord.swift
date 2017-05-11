@@ -46,7 +46,7 @@ final class HistoryRecord: Entity {
         auditoriumID = try node.extract("auditorium_id")
         groupID = try node.extract("group_id")
         teacherID = try node.extract("teacher_id")
-        userID = try node.extract("user_id")
+        userID = try node.extract("botuser_id")
     }
     
     // MARK: - Node
@@ -57,7 +57,7 @@ final class HistoryRecord: Entity {
             "auditorium_id": auditoriumID,
             "group_id": groupID,
             "teacher_id": teacherID,
-            "user_id": userID
+            "botuser_id": userID
             ]
         )
     }
