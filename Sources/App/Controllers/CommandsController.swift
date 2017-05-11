@@ -38,6 +38,9 @@ final class CommandsController {
         if let command = Command(rawValue: message) {
             // Command
             Jobs.oneoff {
+                // Register user request
+                BotUser.registerRequest(for: chat)
+                // Response
                 try ResponseManager.shared.sendResponse(chatID, text: command.response)
             }
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
@@ -77,6 +80,9 @@ final class CommandsController {
                 if !searchResults.isEmpty {
                     responseText = searchResults
                 }
+                // Register user request
+                BotUser.registerRequest(for: chat)
+                // Response
                 try ResponseManager.shared.sendResponse(chatID, text: responseText)
             }
         }

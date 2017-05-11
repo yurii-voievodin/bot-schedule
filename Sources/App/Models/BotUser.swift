@@ -79,7 +79,7 @@ extension BotUser {
     }
 }
 
-// MARK: - Helpers
+// MARK: - Requests
 
 extension BotUser {
     
@@ -97,6 +97,24 @@ extension BotUser {
                 user.updateHistory(objectID: objectID, type: type)
             }
         } catch {
+            print(error)
+        }
+    }
+    
+    static func registerRequest(for chat: [String : Polymorphic]?) {
+        guard let chat = chat else { return }
+        guard var user = BotUser(chat) else { return }
+        do {
+            // Try to find user and add new if not found
+            if var existingUser = try BotUser.query().filter("chat_id", .equals, user.chatID).first() {
+                existingUser.requests += 1
+                try existingUser.save()
+            } else {
+                user.requests = 1
+                try user.save()
+            }
+        } catch {
+            print(error)
         }
     }
 }
@@ -114,19 +132,34 @@ extension BotUser {
                 try? lastRecord.delete()
             }
         }
-        var newHistoryRecord: HistoryRecord
         switch type {
         case .auditorium:
-            newHistoryRecord = HistoryRecord(auditoriumID: objectID, userID: userID)
+            do {
+                if try HistoryRecord.query().filter("auditorium_id", .equals, objectID).first() == nil {
+                    var newHistoryRecord = HistoryRecord(auditoriumID: objectID, userID: userID)
+                    try newHistoryRecord.save()
+                }
+            } catch  {
+                print(error)
+            }
         case .group:
-            newHistoryRecord = HistoryRecord(groupID: objectID, userID: userID)
+            do {
+                if try HistoryRecord.query().filter("group_id", .equals, objectID).first() == nil {
+                    var newHistoryRecord = HistoryRecord(groupID: objectID, userID: userID)
+                    try newHistoryRecord.save()
+                }
+            } catch  {
+                print(error)
+            }
         case .teacher:
-            newHistoryRecord = HistoryRecord(teacherID: objectID, userID: userID)
-        }
-        do {
-            try newHistoryRecord.save()
-        } catch  {
-            print(error)
+            do {
+                if try HistoryRecord.query().filter("teacher_id", .equals, objectID).first() == nil {
+                    var newHistoryRecord = HistoryRecord(teacherID: objectID, userID: userID)
+                    try newHistoryRecord.save()
+                }
+            } catch  {
+                print(error)
+            }
         }
     }
 }
