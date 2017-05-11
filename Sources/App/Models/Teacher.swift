@@ -75,7 +75,7 @@ extension Teacher {
         return twoLines + "👔 Викладачі:" + twoLines + response
     }
 
-    static func show(for message: String) throws -> String {
+    static func show(for message: String, chat: [String : Polymorphic]?) throws -> String {
         // Get ID of teacher from message (/teacher_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 9))
         guard let id = Int(idString) else { return "" }
@@ -94,6 +94,12 @@ extension Teacher {
             teacher.updatedAt = currentHour
             try teacher.save()
         }
+        
+        // Register request for user
+        if let chat = chat, let id = teacher.id {
+            BotUser.registerRequest(for: chat, objectID: id, type: .teacher)
+        }
+        
         let records = try teacher.records()
             .sort("date", .ascending)
             .sort("pair_name", .ascending)

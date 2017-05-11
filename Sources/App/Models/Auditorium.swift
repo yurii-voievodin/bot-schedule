@@ -75,7 +75,7 @@ extension Auditorium {
         return twoLines + "🚪 Аудиторії:" + twoLines + response
     }
     
-    static func show(for message: String) throws -> String {
+    static func show(for message: String, chat: [String : Polymorphic]?) throws -> String {
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
         guard let id = Int(idString) else { return "" }
@@ -94,6 +94,12 @@ extension Auditorium {
             auditorium.updatedAt = currentHour
             try auditorium.save()
         }
+        
+        // Register request for user
+        if let chat = chat, let id = auditorium.id {
+            BotUser.registerRequest(for: chat, objectID: id, type: .auditorium)
+        }
+        
         let records = try auditorium.records()
             .sort("date", .ascending)
             .sort("pair_name", .ascending)
@@ -109,8 +115,6 @@ extension Auditorium {
 // MARK: - Relationships
 
 extension Auditorium {
-    
-    // TODO: Return array of records
     
     func records() throws -> Children<Record> {
         return children()

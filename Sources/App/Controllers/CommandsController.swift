@@ -29,6 +29,7 @@ final class CommandsController {
         RequestsManager.shared.addRequest()
         
         let chatID = request.data["message", "chat", "id"]?.int ?? 0
+        let chat = request.data["message", "chat"]?.object
         
         // Message text from request JSON
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -42,7 +43,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
             // Auditorium
             Jobs.oneoff {
-                let result = try Auditorium.show(for: message)
+                let result = try Auditorium.show(for: message, chat: chat)
                 if !result.isEmpty {
                     responseText = result
                 }
@@ -51,7 +52,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.group.prefix) {
             // Group
             Jobs.oneoff {
-                let result = try Group.show(for: message)
+                let result = try Group.show(for: message, chat: chat)
                 if !result.isEmpty {
                     responseText = result
                 }
@@ -60,7 +61,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.teacher.prefix) {
             // Teacher
             Jobs.oneoff {
-                let result = try Teacher.show(for: message)
+                let result = try Teacher.show(for: message, chat: chat)
                 if !result.isEmpty {
                     responseText = result
                 }

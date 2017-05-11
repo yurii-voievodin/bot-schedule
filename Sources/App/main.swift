@@ -56,9 +56,6 @@ Session.database = drop.database
 // Commands
 drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
 
-// Middleware
-drop.middleware.append(UserMiddleware())
-
 // Setting up the POST request with the secret key.
 // With a secret path to be sure that nobody else knows that URL.
 // https://core.telegram.org/bots/api#setwebhook

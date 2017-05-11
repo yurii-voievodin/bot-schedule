@@ -34,6 +34,8 @@ final class MessagesController {
         
         // TODO: Test code will be deleted
         
+        // TODO: Send messages to all users with Job
+        
         if let myUser = try BotUser.find(23) {
             try ResponseManager.shared.sendResponse(myUser.chatID, text: message)
         }

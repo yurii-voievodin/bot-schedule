@@ -75,7 +75,7 @@ extension Group {
         return twoLines + "👥 Групи:" + twoLines + response
     }
 
-    static func show(for message: String) throws -> String {
+    static func show(for message: String, chat: [String : Polymorphic]?) throws -> String {
         // Get ID of group from message (/group_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 7))
         guard let id = Int(idString) else { return "" }
@@ -94,6 +94,12 @@ extension Group {
             group.updatedAt = currentHour
             try group.save()
         }
+        
+        // Register request for user
+        if let chat = chat, let id = group.id {
+            BotUser.registerRequest(for: chat, objectID: id, type: .group)
+        }
+        
         let records = try group.records()
             .sort("date", .ascending)
             .sort("pair_name", .ascending)
