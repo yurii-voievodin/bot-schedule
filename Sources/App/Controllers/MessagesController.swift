@@ -8,6 +8,7 @@
 
 import HTTP
 import Vapor
+import Jobs
 
 final class MessagesController {
     
@@ -31,13 +32,15 @@ final class MessagesController {
         guard let message = request.formURLEncoded?["message"]?.string else {
             return "Missing message"
         }
-        
-        // TODO: Test code will be deleted
-        
-        // TODO: Send messages to all users with Job
-        
-        if let myUser = try BotUser.find(23) {
-            try ResponseManager.shared.sendResponse(myUser.chatID, text: message)
+        Jobs.oneoff {
+            do {
+                let users = try BotUser.all()
+                for user in users {
+                    try ResponseManager.shared.sendResponse(user.chatID, text: message)
+                }
+            } catch {
+                print(error)
+            }
         }
         return message
     }
