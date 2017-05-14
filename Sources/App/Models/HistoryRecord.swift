@@ -128,15 +128,15 @@ extension HistoryRecord {
             for record in records {
                 // Auditorium
                 if let auditorium = try record.auditorium()?.get() {
-                    history += newLine + "🚪 " + auditorium.name
+                    history += newLine + "🚪 " + auditorium.name + " - " + ObjectType.auditorium.prefix + "\(auditorium.serverID)"
                 }
                 // Group
                 if let group = try record.group()?.get() {
-                    history += newLine + "👥 " + group.name
+                    history += newLine + "👥 " + group.name + " - " + ObjectType.group.prefix + "\(group.serverID)"
                 }
                 // Teacher
                 if let teacher = try record.teacher()?.get() {
-                    history += newLine + "👔 " + teacher.name
+                    history += newLine + "👔 " + teacher.name + " - " + ObjectType.teacher.prefix + "\(teacher.serverID)"
                 }
             }
         } catch {
@@ -145,7 +145,7 @@ extension HistoryRecord {
         if history.isEmpty {
             return emptyHistory
         } else {
-            return "Історія запитів" + history
+            return newLine + "Історія запитів" + history
         }
     }
 }
