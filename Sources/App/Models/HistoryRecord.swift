@@ -114,3 +114,38 @@ extension HistoryRecord: Preparation {
         try database.delete(entity)
     }
 }
+
+// MARK: - User history
+
+extension HistoryRecord {
+    
+    static func history(for chatID: Int) -> String {
+        let emptyHistory = "Історія порожня"
+        var history = ""
+        do {
+            let user = try BotUser.query().filter("chat_id", chatID).first()
+            guard let records = try user?.historyRecords().all() else { return emptyHistory }
+            for record in records {
+                // Auditorium
+                if let auditorium = try record.auditorium()?.get() {
+                    history += newLine + "🚪 " + auditorium.name
+                }
+                // Group
+                if let group = try record.group()?.get() {
+                    history += newLine + "👥 " + group.name
+                }
+                // Teacher
+                if let teacher = try record.teacher()?.get() {
+                    history += newLine + "👔 " + teacher.name
+                }
+            }
+        } catch {
+            print(error)
+        }
+        if history.isEmpty {
+            return emptyHistory
+        } else {
+            return "Історія запитів" + history
+        }
+    }
+}

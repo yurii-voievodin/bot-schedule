@@ -41,7 +41,11 @@ final class CommandsController {
                 // Register user request
                 BotUser.registerRequest(for: chat)
                 // Response
-                try ResponseManager.shared.sendResponse(chatID, text: command.response)
+                if command == .history {
+                    try ResponseManager.shared.sendResponse(chatID, text: HistoryRecord.history(for: chatID))
+                } else {
+                    try ResponseManager.shared.sendResponse(chatID, text: command.response)
+                }
             }
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
             // Auditorium
