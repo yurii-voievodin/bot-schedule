@@ -145,7 +145,7 @@ extension HistoryRecord {
         if history.isEmpty {
             return emptyHistory
         } else {
-            return newLine + "Історія запитів" + history
+            return "Історія запитів" + newLine + history
         }
     }
 }
