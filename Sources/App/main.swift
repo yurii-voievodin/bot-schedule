@@ -1,6 +1,7 @@
 import Vapor
 import VaporPostgreSQL
 import Fluent
+import Auth
 
 /// Bot errors
 enum BotError: Swift.Error {
@@ -21,6 +22,12 @@ guard let secret = drop.config["app", "secret"]?.string else {
     throw BotError.missingSecretKey
 }
 
+// Response manager
+ResponseManager.shared.secret = secret
+
+// Configurable
+drop.addConfigurable(middleware: AuthMiddleware(user: Admin.self), name: "auth")
+
 // Providers
 try drop.addProvider(VaporPostgreSQL.Provider.self)
 
@@ -29,12 +36,14 @@ drop.preparations += DeleteSession.self
 
 // Preparations
 drop.preparations += [
+    Admin.self,
     Auditorium.self,
     Group.self,
     Teacher.self,
     Record.self,
     Session.self,
-    User.self
+    BotUser.self,
+    HistoryRecord.self
 ] as [Preparation.Type]
 
 // Database
@@ -47,15 +56,19 @@ Session.database = drop.database
 // Commands
 drop.commands.append(ImportCommand(console: drop.console, droplet: drop))
 
-// Middleware
-drop.middleware.append(SessionMiddleware())
-drop.middleware.append(UserMiddleware())
-
 // Setting up the POST request with the secret key.
 // With a secret path to be sure that nobody else knows that URL.
 // https://core.telegram.org/bots/api#setwebhook
 let commandsController = CommandsController(secret: secret)
 drop.post(secret, handler: commandsController.index)
+
+// Auth
+let authController = AuthController()
+authController.addRoutes(drop: drop)
+
+// Messages
+let messagesController = MessagesController()
+messagesController.addRoutes(drop: drop)
 
 // Run droplet
 drop.run()

@@ -1,0 +1,20 @@
+#extend("base")
+
+#export("body") {
+<div class="row">
+    <div class="u-full-width">
+        <h2>Логін</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="u-full-width">
+        <form action="/auth/login" method="post">
+            <label>Email</label>
+            <input name="email" class="u-full-width" type="email"/>
+            <label>Пароль</label>
+            <input name="password" class="u-full-width" type="password"/>
+            <input class="button-primary" type="submit" value="Login"/>
+        </form>
+    </div>
+</div>
+}

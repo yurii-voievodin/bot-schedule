@@ -1,0 +1,15 @@
+#extend("base")
+
+#export("body") {
+<div class="row">
+    <div class="u-full-width">
+        <h5>Привіт, #(admin.email)</h5>
+        <a class="button" href="/auth/logout">Вихід</a>
+    </div>
+</div>
+<form action="/messages" method="post">
+    <label for="exampleMessage">Повідомлення</label>
+    <textarea class="u-full-width" placeholder="Привіт …" id="message" name="message"></textarea>
+    <input class="button-primary" type="submit" value="Відправити">
+</form>
+}
