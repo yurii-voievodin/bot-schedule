@@ -7,15 +7,12 @@
 //
 
 import Vapor
-import Fluent
-import Foundation
+import FluentProvider
 
 final class Session: Model {
+    let storage = Storage()
     
     // MARK: Properties
-    
-    var id: Node?
-    var exists: Bool = false
     
     var day: Int
     var month: Int
@@ -31,25 +28,25 @@ final class Session: Model {
         self.requests = requests
     }
     
-    init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
-        day = try node.extract("day")
-        month = try node.extract("month")
-        year = try node.extract("year")
-        requests = try node.extract("requests")
+    // MARK: Fluent Serialization
+    
+    /// Initializes the Session from the
+    /// database row
+    init(row: Row) throws {
+        day = try row.get("day")
+        month = try row.get("month")
+        year = try row.get("year")
+        requests = try row.get("requests")
     }
     
-    // MARK: Node
-    
-    func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
-            "id": id,
-            "day": day,
-            "month": month,
-            "year": year,
-            "requests": requests
-            ]
-        )
+    /// Serializes the Session to the database
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set("day", day)
+        try row.set("month", month)
+        try row.set("year", year)
+        try row.set("requests", requests)
+        return row
     }
 }
 
@@ -58,7 +55,7 @@ final class Session: Model {
 extension Session: Preparation {
     
     static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { session in
+        try database.create(self, closure: { session in
             session.id()
             session.int("day")
             session.int("month")
@@ -68,7 +65,7 @@ extension Session: Preparation {
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }
 

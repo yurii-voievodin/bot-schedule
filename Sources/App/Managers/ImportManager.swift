@@ -7,8 +7,7 @@
 //
 
 import Vapor
-import Fluent
-import Foundation
+import FluentProvider
 
 class ImportManager<Type: Typable> {
     
@@ -78,5 +77,22 @@ enum TypableFields {
         case .updatedAt:
             return "updated_at"
         }
+    }
+}
+
+extension Typable {
+    
+    init?(array: [String : Any]) {
+        guard let serverID = array[TypableFields.serverID.name] as? Int else { return nil }
+        self.serverID = serverID
+        
+        guard let name = array[TypableFields.name.name] as? String else { return nil }
+        self.name = name
+        
+        guard let updatedAt = array[TypableFields.updatedAt.name] as? String else { return nil }
+        self.updatedAt = updatedAt
+        
+        guard let lowercaseName = array[TypableFields.lowercaseName.name] as? String else { return nil }
+        self.lowercaseName = lowercaseName
     }
 }

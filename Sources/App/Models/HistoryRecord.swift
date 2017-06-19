@@ -7,59 +7,56 @@
 //
 
 import Vapor
-import Fluent
-import Foundation
+import FluentProvider
 
 final class HistoryRecord: Entity {
+    let storage = Storage()
     
-    // MARK: - Properties
+    // MARK: Properties
     
-    var id: Node?
-    var exists: Bool = false
-    
-    var auditoriumID: Node?
-    var groupID: Node?
-    var teacherID: Node?
-    var userID: Node
+    var auditoriumID: Identifier?
+    var groupID: Identifier?
+    var teacherID: Identifier?
+    var userID: Identifier
     
     // MARK: - Initialization
     
-    init(auditoriumID: Node, userID: Node) {
+    init(auditoriumID: Identifier, userID: Identifier) {
         self.auditoriumID = auditoriumID
         self.userID = userID
     }
     
-    init(groupID: Node, userID: Node) {
+    init(groupID: Identifier, userID: Identifier) {
         self.groupID = groupID
         self.userID = userID
     }
     
-    init(teacherID: Node, userID: Node) {
+    init(teacherID: Identifier, userID: Identifier) {
         self.teacherID = teacherID
         self.userID = userID
     }
     
-    init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
-        
-        // Relationships
-        auditoriumID = try node.extract("auditorium_id")
-        groupID = try node.extract("group_id")
-        teacherID = try node.extract("teacher_id")
-        userID = try node.extract("botuser_id")
+    // MARK: Fluent Serialization
+    
+    /// Initializes the HistoryRecord from the
+    /// database row
+    init(row: Row) throws {
+        auditoriumID = try row.get("auditorium_id")
+        groupID = try row.get("group_id")
+        teacherID = try row.get("teacher_id")
+        userID = try row.get("user_id")
     }
     
-    // MARK: - Node
-    
-    func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
-            "id": id,
-            "auditorium_id": auditoriumID,
-            "group_id": groupID,
-            "teacher_id": teacherID,
-            "botuser_id": userID
-            ]
-        )
+    /// Serializes the HistoryRecord to the database
+    func makeRow() throws -> Row {
+        var row = Row()
+        
+        try row.set("auditorium_id", auditoriumID)
+        try row.set("group_id", groupID)
+        try row.set("teacher_id", teacherID)
+        try row.set("user_id", userID)
+        
+        return row
     }
 }
 
@@ -67,11 +64,11 @@ final class HistoryRecord: Entity {
 
 extension HistoryRecord {
     
-    func user() throws -> Parent<BotUser> {
+    var user: Parent<HistoryRecord, BotUser> {
         return try parent(userID)
     }
     
-    func auditorium() throws -> Parent<Auditorium>? {
+    var auditorium: Parent<HistoryRecord, Auditorium>? {
         if let id = auditoriumID {
             return try parent(id)
         } else {
@@ -79,7 +76,7 @@ extension HistoryRecord {
         }
     }
     
-    func group() throws -> Parent<Group>? {
+    var group: Parent<HistoryRecord, Group>? {
         if let id = groupID {
             return try parent(id)
         } else {
@@ -87,7 +84,7 @@ extension HistoryRecord {
         }
     }
     
-    func teacher() throws -> Parent<Teacher>? {
+    var teacher: Parent<HistoryRecord, Teacher>? {
         if let id = teacherID {
             return try parent(id)
         } else {
@@ -101,7 +98,7 @@ extension HistoryRecord {
 extension HistoryRecord: Preparation {
     
     static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { creator in
+        try database.create(self, closure: { creator in
             creator.id()
             creator.parent(Auditorium.self, optional: true)
             creator.parent(Group.self, optional: true)
@@ -111,7 +108,7 @@ extension HistoryRecord: Preparation {
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }
 

@@ -10,7 +10,6 @@ import Vapor
 import Console
 import HTTP
 import Foundation
-import Rainbow
 
 /// Console command for import auditoriums, groups and teachers from SumDU API
 final class ImportCommand: Command {

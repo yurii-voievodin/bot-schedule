@@ -7,47 +7,39 @@
 //
 
 import Vapor
-import Fluent
-import Foundation
+import FluentProvider
 
 final class BotUser: Model {
+    let storage = Storage()
     
     // MARK: Properties
     
-    var id: Node?
-    var exists: Bool = false
-    
     var chatID: Int
-    var firstName: String?
-    var lastName: String?
     var requests: Int
     
     // MARK: - Initialization
     
-    init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
-        chatID = try node.extract("chat_id")
-        firstName = try node.extract("first_name")
-        lastName = try node.extract("last_name")
-        requests = try node.extract("requests")
-    }
-    
-    func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
-            "id": id,
-            "chat_id": chatID,
-            "first_name": firstName,
-            "last_name": lastName,
-            "requests": requests
-            ])
-    }
-    
-    init?(_ object: [String: Polymorphic]) {
-        guard let chatID = object["id"]?.int else { return nil }
+    init?(_ object: [String: Any]) {
+        guard let chatID = object["id"] as? Int else { return nil }
         self.chatID = chatID
-        self.firstName = object["first_name"]?.string
-        self.lastName = object["last_name"]?.string
         self.requests = 0
+    }
+    
+    // MARK: Fluent Serialization
+    
+    /// Initializes the BotUser from the
+    /// database row
+    init(row: Row) throws {
+        chatID = try row.get("chat_id")
+        requests = try row.get("requests")
+    }
+    
+    /// Serializes the BotUser to the database
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set("chat_id", chatID)
+        try row.set("requests", requests)
+        return row
     }
 }
 
@@ -56,25 +48,22 @@ final class BotUser: Model {
 extension BotUser: Preparation {
     
     static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { user in
+        try database.create(self, closure: { user in
             user.id()
             user.int("chat_id")
-            user.string("first_name", optional: true)
-            user.string("last_name", optional: true)
             user.int("requests")
         })
     }
     
     static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }
 
 // MARK: - Relationships
 
 extension BotUser {
-    
-    func historyRecords() throws -> Children<HistoryRecord> {
+    var historyRecords: Children<BotUser, HistoryRecord> {
         return children()
     }
 }
@@ -83,11 +72,11 @@ extension BotUser {
 
 extension BotUser {
     
-    static func registerRequest(for chat: [String : Polymorphic], objectID: Node, type: ObjectType) {
+    static func registerRequest(for chat: [String : Any], objectID: Node, type: ObjectType) {
         guard var user = BotUser(chat) else { return }
         do {
             // Try to find user and add new if not found
-            if var existingUser = try BotUser.query().filter("chat_id", .equals, user.chatID).first() {
+            if var existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
                 existingUser.requests += 1
                 try existingUser.save()
                 existingUser.updateHistory(objectID: objectID, type: type)
@@ -101,12 +90,12 @@ extension BotUser {
         }
     }
     
-    static func registerRequest(for chat: [String : Polymorphic]?) {
+    static func registerRequest(for chat: [String : Any]?) {
         guard let chat = chat else { return }
         guard var user = BotUser(chat) else { return }
         do {
             // Try to find user and add new if not found
-            if var existingUser = try BotUser.query().filter("chat_id", .equals, user.chatID).first() {
+            if var existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
                 existingUser.requests += 1
                 try existingUser.save()
             } else {
@@ -128,7 +117,7 @@ extension BotUser {
         switch type {
         case .auditorium:
             do {
-                if try HistoryRecord.query().filter("auditorium_id", .equals, objectID).first() == nil {
+                if try HistoryRecord.makeQuery().filter("auditorium_id", .equals, objectID).first() == nil {
                     
                     // Delete one record if count == 5
                     checkCountOfHistoryRecords()
@@ -142,7 +131,7 @@ extension BotUser {
             }
         case .group:
             do {
-                if try HistoryRecord.query().filter("group_id", .equals, objectID).first() == nil {
+                if try HistoryRecord.makeQuery().filter("group_id", .equals, objectID).first() == nil {
                     
                     // Delete one record if count == 5
                     checkCountOfHistoryRecords()
@@ -156,7 +145,7 @@ extension BotUser {
             }
         case .teacher:
             do {
-                if try HistoryRecord.query().filter("teacher_id", .equals, objectID).first() == nil {
+                if try HistoryRecord.makeQuery().filter("teacher_id", .equals, objectID).first() == nil {
                     
                     // Delete one record if count == 5
                     checkCountOfHistoryRecords()
@@ -173,7 +162,7 @@ extension BotUser {
     
     fileprivate func checkCountOfHistoryRecords() {
         // Check count of history records
-        if let historyRecords = try? self.historyRecords().all() {
+        if let historyRecords = try? self.historyRecords.all() {
             if historyRecords.count == 5, let lastRecord = historyRecords.first {
                 try? lastRecord.delete()
             }
