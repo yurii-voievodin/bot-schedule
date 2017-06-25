@@ -11,8 +11,8 @@ final class Routes: RouteCollection {
         // Setting up the POST request with the secret key.
         // With a secret path to be sure that nobody else knows that URL.
         // https://core.telegram.org/bots/api#setwebhook
-        let commandsController = CommandsController(secret: secret)
-        builder.post(secret, handler: commandsController.index)
+//        let commandsController = CommandsController(secret: secret)
+//        builder.post(secret, handler: commandsController.index)
         
 //        // Auth
 //        let authController = AuthController()

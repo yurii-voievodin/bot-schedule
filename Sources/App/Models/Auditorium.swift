@@ -9,36 +9,8 @@
 import Vapor
 import FluentProvider
 
-final class Auditorium: Typable {
-    let storage = Storage()
+final class Auditorium: ListObject {
     
-    // MARK: Properties
-    
-    var serverID: Int
-    var name: String
-    var updatedAt: String
-    var lowercaseName: String
-    
-    // MARK: Fluent Serialization
-    
-    /// Initializes the Auditorium from the
-    /// database row
-    init(row: Row) throws {
-        serverID = try row.get(TypableFields.serverID.name)
-        name = try row.get(TypableFields.name.name)
-        updatedAt = try row.get(TypableFields.updatedAt.name)
-        lowercaseName = try row.get(TypableFields.lowercaseName.name)
-    }
-    
-    /// Serializes the Auditorium to the database
-    func makeRow() throws -> Row {
-        var row = Row()
-        try row.set(TypableFields.serverID.name, serverID)
-        try row.set(TypableFields.name.name, name)
-        try row.set(TypableFields.updatedAt.name, updatedAt)
-        try row.set(TypableFields.lowercaseName.name, lowercaseName)
-        return row
-    }
 }
 
 // MARK: - Relationships
@@ -75,7 +47,7 @@ extension Auditorium {
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
         var response = ""
-        let auditoriums = try Auditorium.makeQuery().filter(TypableFields.lowercaseName.name, contains: name.lowercased()).all()
+        let auditoriums = try Auditorium.makeQuery().filter(TypableFields.lowercaseName.name, .contains, name.lowercased()).all()
         for auditorium in auditoriums {
             response += auditorium.name + " - " + ObjectType.auditorium.prefix + "\(auditorium.serverID)" + newLine
         }
@@ -89,11 +61,11 @@ extension Auditorium {
         guard let id = Int(idString) else { return "" }
         
         // Find records for auditorium
-        guard var auditorium = try Auditorium.makeQuery().filter(TypableFields.serverID.name, id).first() else { return "" }
+        guard let auditorium = try Auditorium.makeQuery().filter(TypableFields.serverID.name, id).first() else { return "" }
         let currentHour = Date().dateWithHour
         if auditorium.updatedAt != currentHour {
             // Try to delete old records
-            try auditorium.records().delete()
+            try auditorium.records.delete()
             
             // Try to import schedule
             try ScheduleImportManager.importSchedule(for: .auditorium, id: auditorium.serverID)
@@ -108,7 +80,7 @@ extension Auditorium {
             BotUser.registerRequest(for: chat, objectID: id, type: .auditorium)
         }
         
-        let records = try auditorium.records()
+        let records = try auditorium.records
             .sort("date", .ascending)
             .sort("pair_name", .ascending)
             .all()

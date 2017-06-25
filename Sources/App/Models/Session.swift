@@ -77,7 +77,7 @@ extension Session {
         var results = 0
         guard let (day, month, year) = Date().calendarComponents else { return "0" }
         do {
-            let sessions = try Session.query()
+            let sessions = try Session.makeQuery()
                 .filter("year", .equals, year)
                 .filter("month", .equals, month)
                 .filter("day", .equals, day)
@@ -95,7 +95,7 @@ extension Session {
         var results = 0
         guard let (_, month, year) = Date().calendarComponents else { return "0" }
         do {
-            let sessions = try Session.query()
+            let sessions = try Session.makeQuery()
                 .filter("year", .equals, year)
                 .filter("month", .equals, month)
                 .all()

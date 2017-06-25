@@ -28,45 +28,45 @@ final class Record: Model {
     
     // MARK: - Initialization
     
-    init?(_ record: [String: Any]) {
-        guard let date = record["DATE_REG"] as? String else { return nil }
-        self.date = date
-        
-        guard let time = record["TIME_PAIR"] as? String else { return nil }
-        self.time = time
-        
-        guard let pairName = record["NAME_PAIR"] as? String else { return nil }
-        self.pairName = pairName
-        
-        name = record["ABBR_DISC"] as? String
-        type = record["NAME_STUD"] as? String
-        
-        // Auditorium
-        if let kodAud = record["KOD_AUD"] as? String {
-            do {
-                let auditorium = try Auditorium.makeQuery().filter(TypableFields.serverID.name, kodAud).first()
-                auditoriumID = auditorium?.id
-            } catch  {
-            }
-        }
-        // Teacher
-        if let kodFio = record["KOD_FIO"] as? String {
-            teacherID = Node(stringLiteral: kodFio)
-            do {
-                let teacher = try Teacher.makeQuery().filter(TypableFields.serverID.name, kodFio).first()
-                teacherID = teacher?.id
-            } catch  {
-            }
-        }
-        // Group
-        if let nameGroup = record["NAME_GROUP"] as? String {
-            do {
-                let group = try Group.makeQuery().filter("name", nameGroup).first()
-                groupID = group?.id
-            } catch  {
-            }
-        }
-    }
+//    init?(_ record: [String: Any]) {
+//        guard let date = record["DATE_REG"] as? String else { return nil }
+//        self.date = date
+//        
+//        guard let time = record["TIME_PAIR"] as? String else { return nil }
+//        self.time = time
+//        
+//        guard let pairName = record["NAME_PAIR"] as? String else { return nil }
+//        self.pairName = pairName
+//        
+//        name = record["ABBR_DISC"] as? String
+//        type = record["NAME_STUD"] as? String
+//        
+//        // Auditorium
+//        if let kodAud = record["KOD_AUD"] as? String {
+//            do {
+//                let auditorium = try Auditorium.makeQuery().filter(TypableFields.serverID.name, kodAud).first()
+//                auditoriumID = auditorium?.id
+//            } catch  {
+//            }
+//        }
+//        // Teacher
+//        if let kodFio = record["KOD_FIO"] as? String {
+////            teacherID = Node(stringLiteral: kodFio)
+//            do {
+//                let teacher = try Teacher.makeQuery().filter(TypableFields.serverID.name, kodFio).first()
+//                teacherID = teacher?.id
+//            } catch  {
+//            }
+//        }
+//        // Group
+//        if let nameGroup = record["NAME_GROUP"] as? String {
+//            do {
+//                let group = try Group.makeQuery().filter("name", nameGroup).first()
+//                groupID = group?.id
+//            } catch  {
+//            }
+//        }
+//    }
     
     // MARK: Fluent Serialization
     
@@ -187,7 +187,7 @@ extension Record {
             }
             // Auditorium
             do {
-                if let auditorium = try record.auditorium().get() {
+                if let auditorium = try record.auditorium.get() {
                     schedule += newLine + "🚪 " + auditorium.name
                 }
             } catch {
@@ -201,7 +201,7 @@ extension Record {
             }
             // Group
             do {
-                if let group = try record.group().get() {
+                if let group = try record.group.get() {
                     schedule += newLine + "👥 " + group.name
                 }
             } catch {

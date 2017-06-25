@@ -9,12 +9,12 @@ extension Config {
         Node.fuzzy = [Row.self, JSON.self, Node.self]
         
         /// Read the secret key from Config/secrets/app.json.
-        guard let secret = config["app", "secret"]?.string else {
-            // Throw missing secret key error.
-            throw BotError.missingSecretKey
-        }
-        // Response manager
-        ResponseManager.shared.secret = secret
+//        guard let secret = config["app", "secret"]?.string else {
+//            // Throw missing secret key error.
+//            throw BotError.missingSecretKey
+//        }
+//        // Response manager
+//        ResponseManager.shared.secret = secret
         
         try setupProviders()
         try setupPreparations()
@@ -33,7 +33,6 @@ extension Config {
     /// schemas prepared before the app boots
     private func setupPreparations() throws {
         preparations += [
-            Admin.self,
             Auditorium.self,
             BotUser.self,
             Group.self,
@@ -45,11 +44,11 @@ extension Config {
     }
     
     private func setupMiddlewares() throws {
-        addConfigurable(middleware: AuthMiddleware(user: Admin.self), name: "auth")
+
     }
     
     private func setupCommands() throws {
-        addConfigurable(command: ImportCommand(console: drop.console, droplet: drop), name: "import-command")
+//        addConfigurable(command: ImportCommand(console: drop.console, droplet: drop), name: "import-command")
     }
     
     /// Bot errors

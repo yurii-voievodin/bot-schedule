@@ -65,12 +65,12 @@ final class HistoryRecord: Entity {
 extension HistoryRecord {
     
     var user: Parent<HistoryRecord, BotUser> {
-        return try parent(userID)
+        return parent(id: userID)
     }
     
     var auditorium: Parent<HistoryRecord, Auditorium>? {
         if let id = auditoriumID {
-            return try parent(id)
+            return parent(id: id)
         } else {
             return nil
         }
@@ -78,7 +78,7 @@ extension HistoryRecord {
     
     var group: Parent<HistoryRecord, Group>? {
         if let id = groupID {
-            return try parent(id)
+            return parent(id: id)
         } else {
             return nil
         }
@@ -86,7 +86,7 @@ extension HistoryRecord {
     
     var teacher: Parent<HistoryRecord, Teacher>? {
         if let id = teacherID {
-            return try parent(id)
+            return parent(id: id)
         } else {
             return nil
         }
@@ -120,19 +120,19 @@ extension HistoryRecord {
         let emptyHistory = "Історія порожня"
         var history = ""
         do {
-            let user = try BotUser.query().filter("chat_id", chatID).first()
-            guard let records = try user?.historyRecords().all() else { return emptyHistory }
+            let user = try BotUser.makeQuery().filter("chat_id", chatID).first()
+            guard let records = try user?.historyRecords.all() else { return emptyHistory }
             for record in records {
                 // Auditorium
-                if let auditorium = try record.auditorium()?.get() {
+                if let auditorium = try record.auditorium?.get() {
                     history += newLine + "🚪 " + auditorium.name + " - " + ObjectType.auditorium.prefix + "\(auditorium.serverID)"
                 }
                 // Group
-                if let group = try record.group()?.get() {
+                if let group = try record.group?.get() {
                     history += newLine + "👥 " + group.name + " - " + ObjectType.group.prefix + "\(group.serverID)"
                 }
                 // Teacher
-                if let teacher = try record.teacher()?.get() {
+                if let teacher = try record.teacher?.get() {
                     history += newLine + "👔 " + teacher.name + " - " + ObjectType.teacher.prefix + "\(teacher.serverID)"
                 }
             }

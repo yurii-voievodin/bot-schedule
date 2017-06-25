@@ -16,7 +16,7 @@ class RequestsManager {
         guard let (day, month, year) = Date().calendarComponents else { return }
         
         do {
-            if var session = try Session.query()
+            if let session = try Session.makeQuery()
                 .filter("year", .equals, year)
                 .filter("month", .equals, month)
                 .filter("day", .equals, day)
@@ -24,7 +24,7 @@ class RequestsManager {
                 session.requests += 1
                 try session.save()
             } else {
-                var newSession = Session(day: day, month: month, year: year, requests: 1)
+                let newSession = Session(day: day, month: month, year: year, requests: 1)
                 try newSession.save()
             }
         } catch  {

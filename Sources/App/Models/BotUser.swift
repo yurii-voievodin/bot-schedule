@@ -72,11 +72,11 @@ extension BotUser {
 
 extension BotUser {
     
-    static func registerRequest(for chat: [String : Any], objectID: Node, type: ObjectType) {
-        guard var user = BotUser(chat) else { return }
+    static func registerRequest(for chat: [String : Any], objectID: Identifier, type: ObjectType) {
+        guard let user = BotUser(chat) else { return }
         do {
             // Try to find user and add new if not found
-            if var existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
+            if let existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
                 existingUser.requests += 1
                 try existingUser.save()
                 existingUser.updateHistory(objectID: objectID, type: type)
@@ -92,10 +92,10 @@ extension BotUser {
     
     static func registerRequest(for chat: [String : Any]?) {
         guard let chat = chat else { return }
-        guard var user = BotUser(chat) else { return }
+        guard let user = BotUser(chat) else { return }
         do {
             // Try to find user and add new if not found
-            if var existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
+            if let existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
                 existingUser.requests += 1
                 try existingUser.save()
             } else {
@@ -112,7 +112,7 @@ extension BotUser {
 
 extension BotUser {
     
-    func updateHistory(objectID: Node, type: ObjectType) {
+    func updateHistory(objectID: Identifier, type: ObjectType) {
         guard let userID = id else { return }
         switch type {
         case .auditorium:
@@ -123,7 +123,7 @@ extension BotUser {
                     checkCountOfHistoryRecords()
                     
                     // Save new record
-                    var newHistoryRecord = HistoryRecord(auditoriumID: objectID, userID: userID)
+                    let newHistoryRecord = HistoryRecord(auditoriumID: objectID, userID: userID)
                     try newHistoryRecord.save()
                 }
             } catch  {
@@ -137,7 +137,7 @@ extension BotUser {
                     checkCountOfHistoryRecords()
                     
                     // Save new record
-                    var newHistoryRecord = HistoryRecord(groupID: objectID, userID: userID)
+                    let newHistoryRecord = HistoryRecord(groupID: objectID, userID: userID)
                     try newHistoryRecord.save()
                 }
             } catch  {
@@ -151,7 +151,7 @@ extension BotUser {
                     checkCountOfHistoryRecords()
                     
                     // Save new record
-                    var newHistoryRecord = HistoryRecord(teacherID: objectID, userID: userID)
+                    let newHistoryRecord = HistoryRecord(teacherID: objectID, userID: userID)
                     try newHistoryRecord.save()
                 }
             } catch  {

@@ -9,36 +9,8 @@
 import Vapor
 import FluentProvider
 
-final class Teacher: Typable {
-    let storage = Storage()
+final class Teacher: ListObject {
     
-    // MARK: Properties
-    
-    var serverID: Int
-    var name: String
-    var updatedAt: String
-    var lowercaseName: String
-    
-    // MARK: Fluent Serialization
-    
-    /// Initializes the Teacher from the
-    /// database row
-    init(row: Row) throws {
-        serverID = try row.get(TypableFields.serverID.name)
-        name = try row.get(TypableFields.name.name)
-        updatedAt = try row.get(TypableFields.updatedAt.name)
-        lowercaseName = try row.get(TypableFields.lowercaseName.name)
-    }
-    
-    /// Serializes the Teacher to the database
-    func makeRow() throws -> Row {
-        var row = Row()
-        try row.set(TypableFields.serverID.name, serverID)
-        try row.set(TypableFields.name.name, name)
-        try row.set(TypableFields.updatedAt.name, updatedAt)
-        try row.set(TypableFields.lowercaseName.name, lowercaseName)
-        return row
-    }
 }
 
 // MARK: - Relationships
@@ -90,7 +62,7 @@ extension Teacher {
         guard let id = Int(idString) else { return "" }
         
         // Find records for teachers
-        guard var teacher = try Teacher.makeQuery().filter(TypableFields.serverID.name, id).first() else { return "" }
+        guard let teacher = try Teacher.makeQuery().filter(TypableFields.serverID.name, id).first() else { return "" }
         let currentHour = Date().dateWithHour
         if teacher.updatedAt != currentHour {
             // Try to delete old records
