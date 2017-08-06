@@ -12,7 +12,7 @@ import HTTP
 import Foundation
 
 /// Console command for import auditoriums, groups and teachers from SumDU API
-final class ImportCommand: Command {
+final class ImportCommand: Command, ConfigInitializable {
     
     // MARK: - Enums
     
@@ -30,29 +30,24 @@ final class ImportCommand: Command {
         case unknownArgument
     }
     
-    // MARK: - Constants
+    // MARK: - Properties
     
-    public let id = "import"
-    public let help = ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua"]
-    public let console: ConsoleProtocol
+    let id = "import"
+    let help = ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua"]
+    var console: ConsoleProtocol
+    var client: ClientFactoryProtocol
     
     fileprivate let baseURL = "http://schedule.sumdu.edu.ua/index/json"
     fileprivate let methodAuditoriums = "?method=getAuditoriums"
     fileprivate let methodGroups = "?method=getGroups"
     fileprivate let methodTeachers = "?method=getTeachers"
     
-    // MARK: - Variables
+    // MARK: - Methods
     
-    fileprivate var droplet: Droplet?
-    
-    // MARK: - Initialization
-    
-    public init(console: ConsoleProtocol, droplet: Droplet) {
-        self.console = console
-        self.droplet = droplet
+    required init(config: Config) throws {
+        console = try config.resolveConsole()
+        client = try config.resolveClient()
     }
-    
-    // MARK: - Run
     
     public func run(arguments: [String]) throws {
         guard let firstArgument = arguments.first else { throw ImportError.missingArguments }
@@ -77,8 +72,8 @@ extension ImportCommand {
     ///
     /// - Throws: ImportError
     fileprivate func importAuditoriums() throws {
-//        let data = try fetchData(for: methodAuditoriums)
-//        let importManager = ImportManager<Auditorium>()
+        //        let data = try fetchData(for: methodAuditoriums)
+        //        let importManager = ImportManager<Auditorium>()
         //        try importManager.importFrom(data)
         // Success
         let count = try Auditorium.all().count
@@ -89,8 +84,8 @@ extension ImportCommand {
     ///
     /// - Throws: ImportError
     fileprivate func importGroups() throws {
-//        let data = try fetchData(for: methodGroups)
-//        let importManager = ImportManager<Group>()
+        //        let data = try fetchData(for: methodGroups)
+        //        let importManager = ImportManager<Group>()
         //        try importManager.importFrom(data)
         // Success
         let count = try Group.all().count
@@ -101,8 +96,8 @@ extension ImportCommand {
     ///
     /// - Throws: ImportError
     fileprivate func importTeachers() throws {
-//        let data = try fetchData(for: methodTeachers)
-//        let importManager = ImportManager<Teacher>()
+        //        let data = try fetchData(for: methodTeachers)
+        //        let importManager = ImportManager<Teacher>()
         //        try importManager.importFrom(data)
         // Success
         let count = try Teacher.all().count
