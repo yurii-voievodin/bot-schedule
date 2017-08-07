@@ -17,7 +17,7 @@ final class Record: Model {
     
     let auditoriumID: Identifier?
     let groupID: Identifier?
-    let teacherID: Identifier?
+//    let teacherID: Identifier?
     
     var date: String
     var pairName: String
@@ -82,7 +82,8 @@ final class Record: Model {
         // Relationships
         auditoriumID = try row.get("auditorium_id")
         groupID = try row.get("group_id")
-        teacherID = try row.get("teacher_id")
+        
+//        teacherID = try row.get("teacher_id")
     }
     
     /// Serializes the Record to the database
@@ -97,7 +98,8 @@ final class Record: Model {
         // Relationships
         try row.set("auditorium_id", auditoriumID)
         try row.set("group_id", groupID)
-        try row.set("teacher_id", teacherID)
+        
+//        try row.set("teacher_id", teacherID)
         
         return row
     }
@@ -118,7 +120,8 @@ extension Record: NodeRepresentable {
         // Relationships
         try node.set("auditorium_id", auditoriumID)
         try node.set("group_id", groupID)
-        try node.set("teacher_id", teacherID)
+        
+//        try node.set("teacher_id", teacherID)
         
         return node
     }
@@ -136,9 +139,9 @@ extension Record {
         return parent(id: groupID)
     }
     
-    var teacher: Parent<Record, Teacher> {
-        return parent(id: teacherID)
-    }
+//    var teacher: Parent<Record, Teacher> {
+//        return parent(id: teacherID)
+//    }
 }
 
 // MARK: - Preparation
@@ -149,7 +152,9 @@ extension Record: Preparation {
             builder.id()
             builder.parent(Auditorium.self, optional: true)
             builder.parent(Group.self, optional: true)
-            builder.parent(Teacher.self, optional: true)
+            
+//            builder.parent(Teacher.self, optional: true)
+            
             builder.string("date")
             builder.string("name", optional: true)
             builder.string("type", optional: true)
@@ -193,12 +198,12 @@ extension Record {
             } catch {
             }
             // Teacher
-            do {
-                if let teacher = try record.teacher.get() {
-                    schedule += newLine + "👔 " + teacher.name
-                }
-            } catch {
-            }
+//            do {
+//                if let teacher = try record.teacher.get() {
+//                    schedule += newLine + "👔 " + teacher.name
+//                }
+//            } catch {
+//            }
             // Group
             do {
                 if let group = try record.group.get() {

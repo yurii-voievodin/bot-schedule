@@ -15,8 +15,8 @@
             "sessions",
              "auth"
         ],
-        "client": [
-        
-        ]
-    }
+        "client": []
+    },
+    "//": "Choose which commands this application can run",
+    "commands": ["import"]
 }

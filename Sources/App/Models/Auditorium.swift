@@ -28,10 +28,10 @@ extension Auditorium: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self, closure: { object in
             object.id()
-            object.int(TypableFields.serverID.name)
-            object.string(TypableFields.name.name)
-            object.string(TypableFields.updatedAt.name)
-            object.string(TypableFields.lowercaseName.name)
+            object.int(Field.serverID.name)
+            object.string(Field.name.name)
+            object.string(Field.updatedAt.name)
+            object.string(Field.lowercaseName.name)
         })
     }
     
@@ -47,7 +47,7 @@ extension Auditorium {
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
         var response = ""
-        let auditoriums = try Auditorium.makeQuery().filter(TypableFields.lowercaseName.name, .contains, name.lowercased()).all()
+        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for auditorium in auditoriums {
             response += auditorium.name + " - " + ObjectType.auditorium.prefix + "\(auditorium.serverID)" + newLine
         }
@@ -61,7 +61,7 @@ extension Auditorium {
         guard let id = Int(idString) else { return "" }
         
         // Find records for auditorium
-        guard let auditorium = try Auditorium.makeQuery().filter(TypableFields.serverID.name, id).first() else { return "" }
+        guard let auditorium = try Auditorium.makeQuery().filter(Field.serverID.name, id).first() else { return "" }
         let currentHour = Date().dateWithHour
         if auditorium.updatedAt != currentHour {
             // Try to delete old records

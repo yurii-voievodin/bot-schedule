@@ -28,10 +28,10 @@ extension Group: Preparation {
     static func prepare(_ database: Database) throws {
         try database.create(self, closure: { object in
             object.id()
-            object.int(TypableFields.serverID.name)
-            object.string(TypableFields.name.name)
-            object.string(TypableFields.updatedAt.name)
-            object.string(TypableFields.lowercaseName.name)
+            object.int(Field.serverID.name)
+            object.string(Field.name.name)
+            object.string(Field.updatedAt.name)
+            object.string(Field.lowercaseName.name)
         })
     }
     
@@ -47,7 +47,7 @@ extension Group {
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
         var response = ""
-        let groups = try Group.makeQuery().filter(TypableFields.lowercaseName.name, .contains, name.lowercased()).all()
+        let groups = try Group.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for group in groups {
             response += group.name + " - " + ObjectType.group.prefix + "\(group.serverID)" + newLine
         }
@@ -61,7 +61,7 @@ extension Group {
         guard let id = Int(idString) else { return "" }
         
         // Find records for groups
-        guard let group = try Group.makeQuery().filter(TypableFields.serverID.name, id).first() else { return "" }
+        guard let group = try Group.makeQuery().filter(Field.serverID.name, id).first() else { return "" }
         let currentHour = Date().dateWithHour
         if group.updatedAt != currentHour {
             // Try to delete old records

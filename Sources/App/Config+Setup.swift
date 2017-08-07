@@ -48,7 +48,7 @@ extension Config {
     }
     
     private func setupCommands() throws {
-        addConfigurable(command: ImportCommand.init, name: "import-command")
+        addConfigurable(command: ImportCommand.init, name: "import")
     }
     
     /// Bot errors

@@ -72,9 +72,9 @@ extension ImportCommand {
     ///
     /// - Throws: ImportError
     fileprivate func importAuditoriums() throws {
-        //        let data = try fetchData(for: methodAuditoriums)
-        //        let importManager = ImportManager<Auditorium>()
-        //        try importManager.importFrom(data)
+        let json = try fetchData(for: methodAuditoriums)
+        let importManager = ImportManager<Auditorium>()
+        try importManager.importFrom(json)
         // Success
         let count = try Auditorium.all().count
         print("\(count) auditoriums imported")
@@ -104,11 +104,10 @@ extension ImportCommand {
         print("\(count) teachers imported")
     }
     
-    fileprivate func fetchData(for method: String) throws -> [String: Any] {
-        //        let response = try drop.client.get(baseURL + method)
-        //        guard let json = response.json else { throw ImportError.missingData }
-        //        guard let array = json.object?.allItems else { throw ImportError.missingData }
-        //        return array
-        return [:]
+    fileprivate func fetchData(for method: String) throws -> [String: JSON] {
+        let response = try client.get(baseURL + method)
+        guard let json = response.json else { throw ImportError.missingData }
+        guard let array = json.object else { throw ImportError.missingData }
+        return array
     }
 }
