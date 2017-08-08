@@ -84,13 +84,13 @@ extension HistoryRecord {
         }
     }
     
-//    var teacher: Parent<HistoryRecord, Teacher>? {
-//        if let id = teacherID {
-//            return parent(id: id)
-//        } else {
-//            return nil
-//        }
-//    }
+    var teacher: Parent<HistoryRecord, Teacher>? {
+        if let id = teacherID {
+            return parent(id: id)
+        } else {
+            return nil
+        }
+    }
 }
 
 // MARK: - Preparation
@@ -132,9 +132,9 @@ extension HistoryRecord {
                     history += newLine + "👥 " + group.name + " - " + ObjectType.group.prefix + "\(group.serverID)"
                 }
                 // Teacher
-//                if let teacher = try record.teacher?.get() {
-//                    history += newLine + "👔 " + teacher.name + " - " + ObjectType.teacher.prefix + "\(teacher.serverID)"
-//                }
+                if let teacher = try record.teacher?.get() {
+                    history += newLine + "👔 " + teacher.name + " - " + ObjectType.teacher.prefix + "\(teacher.serverID)"
+                }
             }
         } catch {
             print(error)

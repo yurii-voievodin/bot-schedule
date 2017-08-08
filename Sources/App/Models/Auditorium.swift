@@ -44,6 +44,7 @@ extension Auditorium: Preparation {
 
 extension Auditorium {
     
+    /// Find by name
     static func find(by name: String) throws -> String {
         guard name.characters.count > 2 else { return "" }
         var response = ""
@@ -55,6 +56,7 @@ extension Auditorium {
         return twoLines + "🚪 Аудиторії:" + twoLines + response
     }
     
+    /// Schedule for Auditorium
     static func show(for message: String, chat: [String : Any]?) throws -> String {
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))

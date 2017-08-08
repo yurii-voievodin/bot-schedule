@@ -84,9 +84,9 @@ extension ImportCommand {
     ///
     /// - Throws: ImportError
     fileprivate func importGroups() throws {
-        //        let data = try fetchData(for: methodGroups)
-        //        let importManager = ImportManager<Group>()
-        //        try importManager.importFrom(data)
+        let json = try fetchData(for: methodGroups)
+        let importManager = ImportManager<Group>()
+        try importManager.importFrom(json)
         // Success
         let count = try Group.all().count
         print("\(count) groups imported")
@@ -96,9 +96,9 @@ extension ImportCommand {
     ///
     /// - Throws: ImportError
     fileprivate func importTeachers() throws {
-        //        let data = try fetchData(for: methodTeachers)
-        //        let importManager = ImportManager<Teacher>()
-        //        try importManager.importFrom(data)
+        let json = try fetchData(for: methodTeachers)
+        let importManager = ImportManager<Teacher>()
+        try importManager.importFrom(json)
         // Success
         let count = try Teacher.all().count
         print("\(count) teachers imported")
