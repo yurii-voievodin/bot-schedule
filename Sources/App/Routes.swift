@@ -1,18 +1,28 @@
 import Vapor
 
 final class Routes: RouteCollection {
+    
+    // MARK: - Properties
+    
+    let client: ClientFactoryProtocol
     let view: ViewRenderer
-    init(_ view: ViewRenderer) {
+    
+    // MARK: - Initialization
+    
+    init(_ view: ViewRenderer, client: ClientFactoryProtocol) {
         self.view = view
+        self.client = client
     }
+    
+    // MARK: - Setup
     
     func build(_ builder: RouteBuilder) throws {
         
         // Setting up the POST request with the secret key.
         // With a secret path to be sure that nobody else knows that URL.
         // https://core.telegram.org/bots/api#setwebhook
-//        let commandsController = CommandsController(secret: secret)
-//        builder.post(secret, handler: commandsController.index)
+        let commandsController = CommandsController(client: client)
+        builder.post(ResponseManager.shared.secret, handler: commandsController.index)
         
 //        // Auth
 //        let authController = AuthController()

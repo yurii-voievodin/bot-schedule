@@ -9,12 +9,12 @@ extension Config {
         Node.fuzzy = [Row.self, JSON.self, Node.self]
         
         /// Read the secret key from Config/secrets/app.json.
-        //        guard let secret = config["app", "secret"]?.string else {
-        //            // Throw missing secret key error.
-        //            throw BotError.missingSecretKey
-        //        }
-        //        // Response manager
-        //        ResponseManager.shared.secret = secret
+        guard let secret = self["app", "secret"]?.string else {
+            // Throw missing secret key error.
+            throw BotError.missingSecretKey
+        }
+        // Response manager
+        ResponseManager.shared.secret = secret
         
         try setupProviders()
         try setupPreparations()

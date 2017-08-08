@@ -15,12 +15,12 @@ final class CommandsController {
     
     // MARK: - Properties
     
-    let secret: String
+    let client: ClientFactoryProtocol
     
     // MARK: - Initialization
     
-    init(secret: String) {
-        self.secret = secret
+    init(client: ClientFactoryProtocol) {
+        self.client = client
     }
     
     // MARK: - Methods
@@ -42,9 +42,9 @@ final class CommandsController {
                 BotUser.registerRequest(for: chat)
                 // Response
                 if command == .history {
-                    try ResponseManager.shared.sendResponse(chatID, text: HistoryRecord.history(for: chatID))
+                    try self.sendResponse(chatID, text: HistoryRecord.history(for: chatID))
                 } else {
-                    try ResponseManager.shared.sendResponse(chatID, text: command.response)
+                    try self.sendResponse(chatID, text: command.response)
                 }
             }
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
@@ -54,7 +54,7 @@ final class CommandsController {
                 if !result.isEmpty {
                     responseText = result
                 }
-                try ResponseManager.shared.sendResponse(chatID, text: responseText)
+                try self.sendResponse(chatID, text: responseText)
             }
         } else if message.hasPrefix(ObjectType.group.prefix) {
             // Group
@@ -63,7 +63,7 @@ final class CommandsController {
                 if !result.isEmpty {
                     responseText = result
                 }
-                try ResponseManager.shared.sendResponse(chatID, text: responseText)
+                try self.sendResponse(chatID, text: responseText)
             }
         } else if message.hasPrefix(ObjectType.teacher.prefix) {
             // Teacher
@@ -72,7 +72,7 @@ final class CommandsController {
                 if !result.isEmpty {
                     responseText = result
                 }
-                try ResponseManager.shared.sendResponse(chatID, text: responseText)
+                try self.sendResponse(chatID, text: responseText)
             }
         } else {
             // Search
@@ -87,10 +87,17 @@ final class CommandsController {
                 // Register user request
                 BotUser.registerRequest(for: chat)
                 // Response
-                try ResponseManager.shared.sendResponse(chatID, text: responseText)
+                try self.sendResponse(chatID, text: responseText)
             }
         }
         // Response with "typing"
         return try JSON(node: ["method": "sendChatAction", "chat_id": chatID, "action": "typing"])
+    }
+    
+    fileprivate func sendResponse(_ chatID: Int, text: String) throws {
+        let json = try JSON(node: ["method": "sendMessage", "chat_id": chatID, "text": text])
+        let uri = "https://api.telegram.org/bot\(ResponseManager.shared.secret)/sendMessage"
+        
+        _ = try client.post(uri, query: [:], ["Content-Type": "application/x-www-form-urlencoded"], json.makeBody(), through: [])
     }
 }
