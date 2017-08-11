@@ -56,7 +56,7 @@ extension Teacher {
         return twoLines + "👔 Викладачі:" + twoLines + response
     }
     
-    static func show(for message: String, chat: [String : Any]?) throws -> String {
+    static func show(for message: String, chat: [String : Any]?, client: ClientFactoryProtocol) throws -> String {
         // Get ID of teacher from message (/teacher_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 9))
         guard let id = Int(idString) else { return "" }
@@ -69,7 +69,7 @@ extension Teacher {
             try teacher.records.delete()
             
             // Try to import schedule
-            try ScheduleImportManager.importSchedule(for: .teacher, id: teacher.serverID)
+            try ScheduleImportManager.importSchedule(for: .teacher, id: teacher.serverID, client: client)
             
             // Update date in object
             teacher.updatedAt = currentHour

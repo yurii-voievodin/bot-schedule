@@ -55,7 +55,7 @@ extension Group {
         return twoLines + "👥 Групи:" + twoLines + response
     }
     
-    static func show(for message: String, chat: [String : Any]?) throws -> String {
+    static func show(for message: String, chat: [String : Any]?, client: ClientFactoryProtocol) throws -> String {
         // Get ID of group from message (/group_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 7))
         guard let id = Int(idString) else { return "" }
@@ -68,7 +68,7 @@ extension Group {
             try group.records.delete()
             
             // Try to import schedule
-            try ScheduleImportManager.importSchedule(for: .group, id: group.serverID)
+            try ScheduleImportManager.importSchedule(for: .group, id: group.serverID, client: client)
             
             // Update date in object
             group.updatedAt = currentHour

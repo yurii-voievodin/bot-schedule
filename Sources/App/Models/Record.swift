@@ -13,6 +13,10 @@ import FluentProvider
 final class Record: Model {
     let storage = Storage()
     
+    enum ImportError: Error {
+        case missingValue
+    }
+    
     // MARK: Properties
     
     let auditoriumID: Identifier?
@@ -28,45 +32,42 @@ final class Record: Model {
     
     // MARK: - Initialization
     
-    //    init?(_ record: [String: Any]) {
-    //        guard let date = record["DATE_REG"] as? String else { return nil }
-    //        self.date = date
-    //
-    //        guard let time = record["TIME_PAIR"] as? String else { return nil }
-    //        self.time = time
-    //
-    //        guard let pairName = record["NAME_PAIR"] as? String else { return nil }
-    //        self.pairName = pairName
-    //
-    //        name = record["ABBR_DISC"] as? String
-    //        type = record["NAME_STUD"] as? String
-    //
-    //        // Auditorium
-    //        if let kodAud = record["KOD_AUD"] as? String {
-    //            do {
-    //                let auditorium = try Auditorium.makeQuery().filter(TypableFields.serverID.name, kodAud).first()
-    //                auditoriumID = auditorium?.id
-    //            } catch  {
-    //            }
-    //        }
-    //        // Teacher
-    //        if let kodFio = record["KOD_FIO"] as? String {
-    ////            teacherID = Node(stringLiteral: kodFio)
-    //            do {
-    //                let teacher = try Teacher.makeQuery().filter(TypableFields.serverID.name, kodFio).first()
-    //                teacherID = teacher?.id
-    //            } catch  {
-    //            }
-    //        }
-    //        // Group
-    //        if let nameGroup = record["NAME_GROUP"] as? String {
-    //            do {
-    //                let group = try Group.makeQuery().filter("name", nameGroup).first()
-    //                groupID = group?.id
-    //            } catch  {
-    //            }
-    //        }
-    //    }
+    static func row(from record: [String: Any]) throws -> Record {
+        var row = Row()
+        
+        guard let date = record["DATE_REG"] as? String else { throw ImportError.missingValue }
+        try row.set("date", date)
+        
+        guard let time = record["TIME_PAIR"] as? String else { throw ImportError.missingValue }
+        try row.set("time", time)
+        
+        guard let pairName = record["NAME_PAIR"] as? String else { throw ImportError.missingValue }
+        try row.set("pair_name", pairName)
+        
+        let name = record["ABBR_DISC"] as? String
+        let type = record["NAME_STUD"] as? String
+        try row.set("name", name)
+        try row.set("type", type)
+        
+        // Auditorium
+        if let kodAud = record["KOD_AUD"] as? String {
+            let auditorium = try Auditorium.makeQuery().filter(ListObject.Field.serverID.name, kodAud).first()
+            try row.set("auditorium_id", auditorium?.id)
+        }
+        // Teacher
+        if let kodFio = record["KOD_FIO"] as? String {
+            let teacher = try Teacher.makeQuery().filter(ListObject.Field.serverID.name, kodFio).first()
+            try row.set("teacher_id", teacher?.id)
+            
+        }
+        // Group
+        if let nameGroup = record["NAME_GROUP"] as? String {
+            let group = try Group.makeQuery().filter("name", nameGroup).first()
+            try row.set("group_id", group?.id)
+        }
+        let newRecord = try Record(row: row)
+        return newRecord
+    }
     
     // MARK: Fluent Serialization
     

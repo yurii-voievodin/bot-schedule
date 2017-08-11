@@ -50,7 +50,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
             // Auditorium
             Jobs.oneoff {
-                let result = try Auditorium.show(for: message, chat: chat)
+                let result = try Auditorium.show(for: message, chat: chat, client: self.client)
                 if !result.isEmpty {
                     responseText = result
                 }
@@ -59,7 +59,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.group.prefix) {
             // Group
             Jobs.oneoff {
-                let result = try Group.show(for: message, chat: chat)
+                let result = try Group.show(for: message, chat: chat, client: self.client)
                 if !result.isEmpty {
                     responseText = result
                 }
@@ -68,7 +68,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.teacher.prefix) {
             // Teacher
             Jobs.oneoff {
-                let result = try Teacher.show(for: message, chat: chat)
+                let result = try Teacher.show(for: message, chat: chat, client: self.client)
                 if !result.isEmpty {
                     responseText = result
                 }
