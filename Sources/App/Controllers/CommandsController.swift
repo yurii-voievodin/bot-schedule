@@ -101,9 +101,10 @@ final class CommandsController {
     }
     
     fileprivate func sendResponse(_ chatID: Int, text: String) throws {
-        let json = try JSON(node: ["method": "sendMessage", "chat_id": chatID, "text": text])
         let uri = "https://api.telegram.org/bot\(secret)/sendMessage"
-        
-        _ = try client.post(uri, query: [:], ["Content-Type": "application/x-www-form-urlencoded"], json.makeBody(), through: [])
+        let request = Request(method: .post, uri: uri)
+        request.formURLEncoded = try Node(node: ["method": "sendMessage", "chat_id": chatID, "text": text])
+        request.headers = ["Content-Type": "application/x-www-form-urlencoded"]
+        let _ = try client.respond(to: request)
     }
 }
