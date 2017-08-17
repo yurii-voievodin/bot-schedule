@@ -44,7 +44,7 @@ final class HistoryRecord: Entity {
         auditoriumID = try row.get("auditorium_id")
         groupID = try row.get("group_id")
         teacherID = try row.get("teacher_id")
-        userID = try row.get("user_id")
+        userID = try row.get("bot_user_id")
     }
     
     /// Serializes the HistoryRecord to the database
@@ -54,7 +54,7 @@ final class HistoryRecord: Entity {
         try row.set("auditorium_id", auditoriumID)
         try row.set("group_id", groupID)
         try row.set("teacher_id", teacherID)
-        try row.set("user_id", userID)
+        try row.set("bot_user_id", userID)
         
         return row
     }
