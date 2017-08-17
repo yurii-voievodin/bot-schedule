@@ -45,7 +45,7 @@ extension Group: Preparation {
 extension Group {
     
     static func find(by name: String) throws -> String {
-        guard name.characters.count > 2 else { return "" }
+        guard name.characters.count > 3 else { return "" }
         var response = ""
         let groups = try Group.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for group in groups {

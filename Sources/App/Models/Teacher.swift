@@ -46,7 +46,7 @@ extension Teacher {
     
     static func find(by name: String) throws -> String {
         var response = ""
-        guard name.characters.count > 2 else { return response }
+        guard name.characters.count > 3 else { return response }
         
         let teachers = try Teacher.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for teacher in teachers {

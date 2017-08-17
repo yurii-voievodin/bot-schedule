@@ -46,7 +46,7 @@ extension Auditorium {
     
     /// Find by name
     static func find(by name: String) throws -> String {
-        guard name.characters.count > 2 else { return "" }
+        guard name.characters.count > 3 else { return "" }
         var response = ""
         let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for auditorium in auditoriums {

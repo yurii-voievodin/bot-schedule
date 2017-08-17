@@ -80,7 +80,7 @@ final class CommandsController {
             // Search
             Jobs.oneoff {
                 if message.characters.count <= 3 {
-                    responseText = "Мінімальна кількість символів для пошуку рівна 3"
+                    responseText = "Мінімальна кількість символів для пошуку рівна 4"
                 } else {
                     var searchResults = ""
                     searchResults += try Auditorium.find(by: message)
