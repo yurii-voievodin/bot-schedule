@@ -16,11 +16,13 @@ final class CommandsController {
     // MARK: - Properties
     
     let client: ClientFactoryProtocol
+    let secret: String
     
     // MARK: - Initialization
     
-    init(client: ClientFactoryProtocol) {
+    init(client: ClientFactoryProtocol, secret: String) {
         self.client = client
+        self.secret = secret
     }
     
     // MARK: - Methods
@@ -96,7 +98,7 @@ final class CommandsController {
     
     fileprivate func sendResponse(_ chatID: Int, text: String) throws {
         let json = try JSON(node: ["method": "sendMessage", "chat_id": chatID, "text": text])
-        let uri = "https://api.telegram.org/bot\(ResponseManager.shared.secret)/sendMessage"
+        let uri = "https://api.telegram.org/bot\(secret)/sendMessage"
         
         _ = try client.post(uri, query: [:], ["Content-Type": "application/x-www-form-urlencoded"], json.makeBody(), through: [])
     }

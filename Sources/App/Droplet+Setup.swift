@@ -4,7 +4,7 @@ extension Droplet {
     public func setup() throws {
         let client = try config.resolveClient()
         
-        let routes = Routes(view, client: client)
+        let routes = Routes(client, drop: self, view: view)
         try collection(routes)
     }
 }

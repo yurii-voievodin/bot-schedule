@@ -8,14 +8,6 @@ extension Config {
         // (add your own types here)
         Node.fuzzy = [Row.self, JSON.self, Node.self]
         
-        /// Read the secret key from Config/secrets/app.json.
-        guard let secret = self["app", "secret"]?.string else {
-            // Throw missing secret key error.
-            throw BotError.missingSecretKey
-        }
-        // Response manager
-        ResponseManager.shared.secret = secret
-        
         try setupProviders()
         try setupPreparations()
         try setupMiddlewares()
@@ -49,11 +41,5 @@ extension Config {
     
     private func setupCommands() throws {
         addConfigurable(command: ImportCommand.init, name: "import")
-    }
-    
-    /// Bot errors
-    enum BotError: Swift.Error {
-        /// Missing secret key in Config/secrets/app.json.
-        case missingSecretKey
     }
 }
