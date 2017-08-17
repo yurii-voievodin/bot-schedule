@@ -65,7 +65,9 @@ extension Auditorium {
         // Find records for auditorium
         guard let auditorium = try Auditorium.makeQuery().filter(Field.serverID.name, id).first() else { return "" }
         let currentHour = Date().dateWithHour
+        
         if auditorium.updatedAt != currentHour {
+            
             // Try to delete old records
             try auditorium.records.delete()
             

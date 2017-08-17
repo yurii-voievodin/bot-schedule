@@ -54,10 +54,8 @@ struct ScheduleImportManager {
         let scheduleResponse = try makeRequestOfSchedule(for: type, id: id, client: client)
         guard let responseArray = scheduleResponse.json?.array else { throw ImportError.failedGetArray }
         for item in responseArray {
-            if let object = item.object {
-                let record = try Record.row(from: object)
-                try record.save()
-            }
+            let record = try Record.row(from: item)
+            try record.save()
         }
     }
 }

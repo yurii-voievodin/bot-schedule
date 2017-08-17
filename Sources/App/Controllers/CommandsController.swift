@@ -79,12 +79,16 @@ final class CommandsController {
         } else {
             // Search
             Jobs.oneoff {
-                var searchResults = ""
-                searchResults += try Auditorium.find(by: message)
-                searchResults += try Group.find(by: message)
-                searchResults += try Teacher.find(by: message)
-                if !searchResults.isEmpty {
-                    responseText = searchResults
+                if message.characters.count <= 2 {
+                    responseText = "Мінімальна кількість символів для пошуку рівна 3"
+                } else {
+                    var searchResults = ""
+                    searchResults += try Auditorium.find(by: message)
+                    searchResults += try Group.find(by: message)
+                    searchResults += try Teacher.find(by: message)
+                    if !searchResults.isEmpty {
+                        responseText = searchResults
+                    }
                 }
                 // Register user request
                 BotUser.registerRequest(for: chat)
