@@ -7,89 +7,70 @@
 //
 
 import Vapor
-import Fluent
-import Foundation
+import FluentProvider
 
-final class Teacher: Typable {
+final class Teacher: ListObject {
+    
+}
 
-    // MARK: Properties
+// MARK: - Relationships
 
-    var id: Node?
-    var exists: Bool = false
-
-    var serverID: Int
-    var name: String
-    var updatedAt: String
-    var lowercaseName: String
-
-    // MARK: Initialization
-
-    init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
-        serverID = try node.extract(TypableFields.serverID.name)
-        name = try node.extract(TypableFields.name.name)
-        updatedAt = try node.extract(TypableFields.updatedAt.name)
-        lowercaseName = try node.extract(TypableFields.lowercaseName.name)
+extension Teacher {
+    var records: Children<Teacher, Record> {
+        return children()
     }
+}
 
-    init?(array: [String : Any]) {
-        guard let serverID = array[TypableFields.serverID.name] as? Int else { return nil }
-        self.serverID = serverID
+// MARK: - Preparation
 
-        guard let name = array[TypableFields.name.name] as? String else { return nil }
-        self.name = name
-
-        guard let updatedAt = array[TypableFields.updatedAt.name] as? String else { return nil }
-        self.updatedAt = updatedAt
-
-        guard let lowercaseName = array[TypableFields.lowercaseName.name] as? String else { return nil }
-        self.lowercaseName = lowercaseName
+extension Teacher: Preparation {
+    
+    static func prepare(_ database: Database) throws {
+        try database.create(self, closure: { object in
+            object.id()
+            object.int(Field.serverID.name)
+            object.string(Field.name.name)
+            object.string(Field.updatedAt.name)
+            object.string(Field.lowercaseName.name)
+        })
     }
-
-    // MARK: - Node
-
-    func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
-            "id": id,
-            TypableFields.serverID.name: serverID,
-            TypableFields.name.name: name,
-            TypableFields.updatedAt.name: updatedAt,
-            TypableFields.lowercaseName.name: lowercaseName
-            ]
-        )
+    
+    static func revert(_ database: Database) throws {
+        try database.delete(self)
     }
 }
 
 // MARK: - Helpers
 
 extension Teacher {
-
+    
     static func find(by name: String) throws -> String {
-        guard name.characters.count > 2 else { return "" }
         var response = ""
-        let teachers = try Teacher.query().filter(TypableFields.lowercaseName.name, contains: name.lowercased()).all()
+        guard name.characters.count > 2 else { return response }
+        
+        let teachers = try Teacher.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for teacher in teachers {
             response += teacher.name + " - /teacher_\(teacher.serverID)" + newLine
         }
-        guard response.characters.count > 0 else { return "" }
+        guard !response.isEmpty else { return "" }
         return twoLines + "👔 Викладачі:" + twoLines + response
     }
-
-    static func show(for message: String, chat: [String : Polymorphic]?) throws -> String {
+    
+    static func show(for message: String, chat: [String : Any]?, client: ClientFactoryProtocol) throws -> String {
         // Get ID of teacher from message (/teacher_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 9))
         guard let id = Int(idString) else { return "" }
-
+        
         // Find records for teachers
-        guard var teacher = try Teacher.query().filter(TypableFields.serverID.name, id).first() else { return "" }
+        guard let teacher = try Teacher.makeQuery().filter(Field.serverID.name, id).first() else { return "" }
         let currentHour = Date().dateWithHour
         if teacher.updatedAt != currentHour {
             // Try to delete old records
-            try teacher.records().delete()
-
+            try teacher.records.delete()
+            
             // Try to import schedule
-            try ScheduleImportManager.importSchedule(for: .teacher, id: teacher.serverID)
-
+            try ScheduleImportManager.importSchedule(for: .teacher, id: teacher.serverID, client: client)
+            
             // Update date in object
             teacher.updatedAt = currentHour
             try teacher.save()
@@ -100,41 +81,14 @@ extension Teacher {
             BotUser.registerRequest(for: chat, objectID: id, type: .teacher)
         }
         
-        let records = try teacher.records()
+        let records = try teacher.records
             .sort("date", .ascending)
             .sort("pair_name", .ascending)
             .all()
-
+        
         // Formatting a response
         var response = Record.prepareResponse(for: records)
         response += twoLines +  "👔 Викладач - " + teacher.name
         return response
-    }
-}
-
-// MARK: - Relationships
-
-extension Teacher {
-    func records() throws -> Children<Record> {
-        return children()
-    }
-}
-
-// MARK: - Preparation
-
-extension Teacher: Preparation {
-
-    static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { object in
-            object.id()
-            object.int(TypableFields.serverID.name)
-            object.string(TypableFields.name.name)
-            object.string(TypableFields.updatedAt.name)
-            object.string(TypableFields.lowercaseName.name)
-        })
-    }
-
-    static func revert(_ database: Database) throws {
-        try database.delete(entity)
     }
 }

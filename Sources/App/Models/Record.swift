@@ -8,114 +8,137 @@
 
 import Vapor
 import HTTP
-import Fluent
-import Foundation
+import FluentProvider
 
 final class Record: Model {
-
+    let storage = Storage()
+    
+    enum ImportError: Error {
+        case missingValue
+    }
+    
     // MARK: Properties
-
-    var id: Node?
-    var exists: Bool = false
-
-    var auditoriumID: Node?
-    var groupID: Node?
-    var teacherID: Node?
-
+    
+    let auditoriumID: Identifier?
+    let groupID: Identifier?
+    let teacherID: Identifier?
+    
     var date: String
     var pairName: String
-
+    
     var name: String?
     var type: String?
     var time: String
-
+    
     // MARK: - Initialization
-
-    init(node: Node, in context: Context) throws {
-        id = try node.extract("id")
-
-        // Properties
-        date = try node.extract("date")
-        name = try node.extract("name")
-        type = try node.extract("type")
-        time = try node.extract("time")
-        pairName = try node.extract("pair_name")
-
-        // Relationships
-        auditoriumID = try node.extract("auditorium_id")
-        groupID = try node.extract("group_id")
-        teacherID = try node.extract("teacher_id")
-    }
-
-    func makeNode(context: Context) throws -> Node {
-        return try Node(node: [
-            "id": id,
-            "date": date,
-            "name": name,
-            "type": type,
-            "auditorium_id": auditoriumID,
-            "group_id": groupID,
-            "teacher_id": teacherID,
-            "time": time,
-            "pair_name": pairName
-            ])
-    }
-
-    init?(_ record: [String: Polymorphic]) {
-        guard let date = record["DATE_REG"]?.string else { return nil }
-        self.date = date
-
-        guard let time = record["TIME_PAIR"]?.string else { return nil }
-        self.time = time
-
-        guard let pairName = record["NAME_PAIR"]?.string else { return nil }
-        self.pairName = pairName
-
-        name = record["ABBR_DISC"]?.string
-        type = record["NAME_STUD"]?.string
-
+    
+    static func row(from record: [String: Any]) throws -> Record {
+        var row = Row()
+        
+        guard let date = record["DATE_REG"] as? String else { throw ImportError.missingValue }
+        try row.set("date", date)
+        
+        guard let time = record["TIME_PAIR"] as? String else { throw ImportError.missingValue }
+        try row.set("time", time)
+        
+        guard let pairName = record["NAME_PAIR"] as? String else { throw ImportError.missingValue }
+        try row.set("pair_name", pairName)
+        
+        let name = record["ABBR_DISC"] as? String
+        let type = record["NAME_STUD"] as? String
+        try row.set("name", name)
+        try row.set("type", type)
+        
         // Auditorium
-        if let kodAud = record["KOD_AUD"]?.string {
-            do {
-                let auditorium = try Auditorium.query().filter(TypableFields.serverID.name, kodAud).first()
-                auditoriumID = auditorium?.id
-            } catch  {
-            }
+        if let kodAud = record["KOD_AUD"] as? String {
+            let auditorium = try Auditorium.makeQuery().filter(ListObject.Field.serverID.name, kodAud).first()
+            try row.set("auditorium_id", auditorium?.id)
         }
         // Teacher
-        if let kodFio = record["KOD_FIO"]?.string {
-            teacherID = Node(stringLiteral: kodFio)
-            do {
-                let teacher = try Teacher.query().filter(TypableFields.serverID.name, kodFio).first()
-                teacherID = teacher?.id
-            } catch  {
-            }
+        if let kodFio = record["KOD_FIO"] as? String {
+            let teacher = try Teacher.makeQuery().filter(ListObject.Field.serverID.name, kodFio).first()
+            try row.set("teacher_id", teacher?.id)
+            
         }
         // Group
-        if let nameGroup = record["NAME_GROUP"]?.string {
-            do {
-                let group = try Group.query().filter("name", nameGroup).first()
-                groupID = group?.id
-            } catch  {
-            }
+        if let nameGroup = record["NAME_GROUP"] as? String {
+            let group = try Group.makeQuery().filter("name", nameGroup).first()
+            try row.set("group_id", group?.id)
         }
+        let newRecord = try Record(row: row)
+        return newRecord
+    }
+    
+    // MARK: Fluent Serialization
+    
+    /// Initializes the Record from the
+    /// database row
+    init(row: Row) throws {
+        date = try row.get("date")
+        name = try row.get("name")
+        type = try row.get("type")
+        time = try row.get("time")
+        pairName = try row.get("pair_name")
+        
+        // Relationships
+        auditoriumID = try row.get("auditorium_id")
+        groupID = try row.get("group_id")
+        teacherID = try row.get("teacher_id")
+    }
+    
+    /// Serializes the Record to the database
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set("date", date)
+        try row.set("name", name)
+        try row.set("type", type)
+        try row.set("time", time)
+        try row.set("pair_name", pairName)
+        
+        // Relationships
+        try row.set("auditorium_id", auditoriumID)
+        try row.set("group_id", groupID)
+        try row.set("teacher_id", teacherID)
+        
+        return row
+    }
+}
+
+// MARK: - NodeRepresentable
+
+extension Record: NodeRepresentable {
+    
+    func makeNode(in context: Context?) throws -> Node {
+        var node = Node(context)
+        try node.set("date", date)
+        try node.set("name", name)
+        try node.set("type", type)
+        try node.set("time", time)
+        try node.set("pair_name", pairName)
+        
+        // Relationships
+        try node.set("auditorium_id", auditoriumID)
+        try node.set("group_id", groupID)
+        try node.set("teacher_id", teacherID)
+        
+        return node
     }
 }
 
 // MARK: - Relationships
 
 extension Record {
-
-    func auditorium() throws -> Parent<Auditorium> {
-        return try parent(auditoriumID)
+    
+    var auditorium: Parent<Record, Auditorium> {
+        return parent(id: auditoriumID)
     }
-
-    func group() throws -> Parent<Group> {
-        return try parent(groupID)
+    
+    var group: Parent<Record, Group> {
+        return parent(id: groupID)
     }
-
-    func teacher() throws -> Parent<Teacher> {
-        return try parent(teacherID)
+    
+    var teacher: Parent<Record, Teacher> {
+        return parent(id: teacherID)
     }
 }
 
@@ -123,33 +146,34 @@ extension Record {
 
 extension Record: Preparation {
     static func prepare(_ database: Database) throws {
-        try database.create(entity, closure: { record in
-            record.id()
-            record.parent(Auditorium.self, optional: true)
-            record.parent(Group.self, optional: true)
-            record.parent(Teacher.self, optional: true)
-            record.string("date")
-            record.string("name", optional: true)
-            record.string("type", optional: true)
-            record.string("time")
-            record.string("pair_name")
+        try database.create(self, closure: { builder in
+            builder.id()
+            builder.parent(Auditorium.self, optional: true)
+            builder.parent(Group.self, optional: true)
+            builder.parent(Teacher.self, optional: true)
+            
+            builder.string("date")
+            builder.string("name", optional: true)
+            builder.string("type", optional: true)
+            builder.string("time")
+            builder.string("pair_name")
         })
     }
-
+    
     static func revert(_ database: Database) throws {
-        try database.delete(entity)
+        try database.delete(self)
     }
 }
 
 // MARK: - Helpers
 
 extension Record {
-
+    
     static func prepareResponse(for records: [Record]) -> String {
         var schedule = ""
         var dateString = ""
         var scheduleArray: [String] = []
-
+        
         for record in records {
             // Time
             if record.time.characters.count > 0 {
@@ -165,21 +189,21 @@ extension Record {
             }
             // Auditorium
             do {
-                if let auditorium = try record.auditorium().get() {
+                if let auditorium = try record.auditorium.get() {
                     schedule += newLine + "🚪 " + auditorium.name
                 }
             } catch {
             }
             // Teacher
             do {
-                if let teacher = try record.teacher().get() {
+                if let teacher = try record.teacher.get() {
                     schedule += newLine + "👔 " + teacher.name
                 }
             } catch {
             }
             // Group
             do {
-                if let group = try record.group().get() {
+                if let group = try record.group.get() {
                     schedule += newLine + "👥 " + group.name
                 }
             } catch {
@@ -196,7 +220,7 @@ extension Record {
                 schedule = ""
             }
         }
-
+        
         // Generate reversed response
         var response = ""
         for item in scheduleArray.reversed() {

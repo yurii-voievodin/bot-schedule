@@ -7,22 +7,21 @@
 //
 
 import Vapor
-import Fluent
-import Foundation
+import FluentProvider
 
-class ImportManager<Type: Typable> {
+class ImportManager<Type: ListObject> {
     
-    func importFrom(_ array: [(String, Polymorphic)]) throws {
-        for item in array {
+    func importFrom(_ json: [String: JSON]) throws {
+        for item in json {
             
             // Get ID and name
-            guard let id = item.0.int else { continue }
-            guard let name = item.1.string else { continue }
+            guard let id = Int(item.key) else { continue }
+            guard let name = item.value.string else { continue }
             
             // Validation
             guard name.characters.count > 0 && id != 0 else { continue }
             
-            if var existingObject = try Type.query().filter(TypableFields.serverID.name, id).first() {
+            if let existingObject = try Type.makeQuery().filter(ListObject.Field.serverID.name, id).first() {
                 // Find existing
                 existingObject.name = name
                 existingObject.updatedAt = ""
@@ -30,53 +29,16 @@ class ImportManager<Type: Typable> {
                 try existingObject.save()
             } else {
                 // Or create a new one
-                let array: [String : Any] = [
-                    TypableFields.serverID.name: id,
-                    TypableFields.name.name: name,
-                    TypableFields.updatedAt.name: "",
-                    TypableFields.lowercaseName.name: name.lowercased()
-                ]
-                var newObject = Type(array: array)
-                try newObject?.save()
+                var row = Row()
+                try row.set(ListObject.Field.serverID.name, id)
+                try row.set(ListObject.Field.name.name, name)
+                try row.set(ListObject.Field.updatedAt.name, "")
+                try row.set(ListObject.Field.lowercaseName.name, name.lowercased())
+                
+                // Save
+                let newObject = try Type(row: row)
+                try newObject.save()
             }
-        }
-    }
-}
-
-// MARK: - Typable
-
-protocol Typable: Model {
-    
-    // MARK: Default properties
-    
-    var serverID: Int { get set }
-    var name: String { get set }
-    var updatedAt: String { get set }
-    var lowercaseName: String { get set }
-    
-    // MARK: - Initialization
-    
-    init?(array: [String : Any])
-}
-
-// MARK: - TypableFields
-
-enum TypableFields {
-    case serverID
-    case name
-    case updatedAt
-    case lowercaseName
-    
-    var name: String {
-        switch self {
-        case .lowercaseName:
-            return "lowercase_name"
-        case .name:
-            return "name"
-        case .serverID:
-            return "server_id"
-        case .updatedAt:
-            return "updated_at"
         }
     }
 }
