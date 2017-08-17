@@ -79,7 +79,7 @@ final class CommandsController {
         } else {
             // Search
             Jobs.oneoff {
-                if message.characters.count <= 2 {
+                if message.characters.count <= 3 {
                     responseText = "Мінімальна кількість символів для пошуку рівна 3"
                 } else {
                     var searchResults = ""
