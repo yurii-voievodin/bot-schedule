@@ -19,8 +19,8 @@ final class BotUser: Model {
     
     // MARK: - Initialization
     
-    init?(_ object: [String: Any]) {
-        guard let chatID = object["id"] as? Int else { return nil }
+    init?(_ object: [String: Node]) {
+        guard let chatID = object["id"]?.int else { return nil }
         self.chatID = chatID
         self.requests = 0
     }
@@ -72,7 +72,7 @@ extension BotUser {
 
 extension BotUser {
     
-    static func registerRequest(for chat: [String : Any], objectID: Identifier, type: ObjectType) {
+    static func registerRequest(for chat: [String : Node], objectID: Identifier, type: ObjectType) {
         guard let user = BotUser(chat) else { return }
         do {
             // Try to find user and add new if not found
@@ -90,7 +90,7 @@ extension BotUser {
         }
     }
     
-    static func registerRequest(for chat: [String : Any]?) {
+    static func registerRequest(for chat: [String : Node]?) {
         guard let chat = chat else { return }
         guard let user = BotUser(chat) else { return }
         do {

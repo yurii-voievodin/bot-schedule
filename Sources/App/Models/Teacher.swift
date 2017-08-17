@@ -56,7 +56,7 @@ extension Teacher {
         return twoLines + "👔 Викладачі:" + twoLines + response
     }
     
-    static func show(for message: String, chat: [String : Any]?, client: ClientFactoryProtocol) throws -> String {
+    static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> String {
         // Get ID of teacher from message (/teacher_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 9))
         guard let id = Int(idString) else { return "" }

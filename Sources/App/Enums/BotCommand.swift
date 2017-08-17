@@ -1,5 +1,5 @@
 //
-//  Command.swift
+//  BotCommand.swift
 //  SumDUBot
 //
 //  Created by Yura Voevodin on 03.05.17.
