@@ -41,5 +41,6 @@ extension Config {
     
     private func setupCommands() throws {
         addConfigurable(command: ImportCommand.init, name: "import")
+        addConfigurable(command: TestCommand.init, name: "test")
     }
 }

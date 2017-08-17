@@ -18,5 +18,5 @@
         "client": []
     },
     "//": "Choose which commands this application can run",
-    "commands": ["import"]
+    "commands": ["import", "test"]
 }

@@ -37,7 +37,7 @@ final class CommandsController {
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
         
-        if let command = Command(rawValue: message) {
+        if let command = BotCommand(rawValue: message) {
             // Command
             Jobs.oneoff {
                 // Register user request
