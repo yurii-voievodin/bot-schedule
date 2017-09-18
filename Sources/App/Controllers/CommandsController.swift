@@ -20,9 +20,22 @@ final class CommandsController {
     
     // MARK: - Initialization
     
-    init(client: ClientFactoryProtocol, secret: String) {
-        self.client = client
+    init(drop: Droplet) throws {
+        // Client
+        self.client = try drop.config.resolveClient()
+        
+        // Read the secret key from Config/secrets/app.json.
+        guard let secret = drop.config["app", "secret"]?.string else {
+            throw BotError.missingSecretKey
+        }
         self.secret = secret
+        
+        // Add routes
+        
+        // Setting up the POST request with the secret key.
+        // With a secret path to be sure that nobody else knows that URL.
+        // https://core.telegram.org/bots/api#setwebhook
+        drop.post(secret, handler: index)
     }
     
     // MARK: - Methods
@@ -106,5 +119,16 @@ final class CommandsController {
         request.formURLEncoded = try Node(node: ["method": "sendMessage", "chat_id": chatID, "text": text])
         request.headers = ["Content-Type": "application/x-www-form-urlencoded"]
         let _ = try client.respond(to: request)
+    }
+}
+
+// MARK: - BotError
+
+extension CommandsController {
+    
+    /// Bot errors
+    enum BotError: Swift.Error {
+        /// Missing secret key in Config/secrets/app.json.
+        case missingSecretKey
     }
 }
