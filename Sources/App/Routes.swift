@@ -6,5 +6,8 @@ extension Droplet {
         
         // Telegram
         _ = try CommandsController(drop: self)
+        
+        // Facebook Messenger
+        _ = try MessengerController(drop: self)
     }
 }
