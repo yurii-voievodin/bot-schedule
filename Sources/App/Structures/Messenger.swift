@@ -37,4 +37,19 @@ struct Messenger {
             ]
         ]
     }
+    
+    static func buttons(_ buttons: [Button], title: String) throws -> Node {
+        /// Create the Node.
+        return try [
+            "attachment": [
+                "type": "template",
+                "payload":
+                    [
+                        "template_type": "button",
+                        "text": title.makeNode(in: nil),
+                        "elements": buttons.makeNode(in: nil)
+                ]
+            ]
+        ]
+    }
 }

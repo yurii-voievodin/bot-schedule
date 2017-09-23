@@ -56,6 +56,17 @@ extension Auditorium {
         return twoLines + "🚪 Аудиторії:" + twoLines + response
     }
     
+    static func find(by name: String) throws -> [Button] {
+        guard name.characters.count > 3 else { return [] }
+        var buttons: [Button] = []
+        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+        for auditorium in auditoriums {
+            let auditoriumButton = try Button(type: .postback, title: auditorium.name, payload: String(auditorium.serverID))
+            buttons.append(auditoriumButton)
+        }
+        return buttons
+    }
+    
     /// Schedule for Auditorium
     static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> String {
         // Get ID of auditorium from message (/auditorium_{id})

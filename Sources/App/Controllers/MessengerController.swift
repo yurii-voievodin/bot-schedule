@@ -114,20 +114,16 @@ final class MessengerController {
                     /// The user greeted the bot.
                 } else {
                     // Search
-                    var responseText = ""
                     if text.characters.count <= 3 {
-                        responseText = "Мінімальна кількість символів для пошуку рівна 4"
+                        let responseText = "Мінімальна кількість символів для пошуку рівна 4"
+                        response = Messenger.message(responseText)
                     } else {
-                        var searchResults = ""
+                        var searchResults: [Button] = []
+                        
                         searchResults += try Auditorium.find(by: text)
-                        searchResults += try Group.find(by: text)
-                        searchResults += try Teacher.find(by: text)
-                        if !searchResults.isEmpty {
-                            responseText = searchResults
-                        }
+                        
+                        response = try Messenger.buttons(searchResults, title: "Аудиторії")
                     }
-                    /// Set the response message text.
-                    response = Messenger.message(responseText)
                 }
                 
                 /// Creating the response JSON data bytes.
