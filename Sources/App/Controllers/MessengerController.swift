@@ -101,8 +101,19 @@ final class MessengerController {
                 if !postback.isEmpty {
                     /// Get payload from postback.
                     let payload: String = postback["payload"]?.string ?? "No payload provided by developer."
+                    
+                    var responseText = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
+
+                    // Auditorium
+                    if payload.hasPrefix(ObjectType.auditorium.prefix) {
+                        let result = try Auditorium.show(for: payload, client: self.client)
+                        if !result.isEmpty {
+                            responseText = result
+                        }
+                    }
                     /// Set the response message text.
-                    response = Messenger.message(payload)
+                    response = Messenger.message(responseText)
+                    
                     /// Check if the message object is empty.
                 } else if message.isEmpty {
                     /// Set the response message text.

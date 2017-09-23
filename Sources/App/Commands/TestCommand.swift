@@ -84,7 +84,7 @@ final class TestCommand: Command, ConfigInitializable {
         
         let result: String
         if request.hasPrefix(ObjectType.auditorium.prefix) {
-            result = try Auditorium.show(for: request, chat: [:], client: client)
+            result = try Auditorium.show(for: request, client: client)
             
         } else if request.hasPrefix(ObjectType.group.prefix) {
             result = try Group.show(for: request, chat: [:], client: client)

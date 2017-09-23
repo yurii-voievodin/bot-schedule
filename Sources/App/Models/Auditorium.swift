@@ -61,14 +61,15 @@ extension Auditorium {
         var buttons: [Button] = []
         let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for auditorium in auditoriums {
-            let auditoriumButton = try Button(type: .postback, title: auditorium.name, payload: String(auditorium.serverID))
+            let payload = ObjectType.auditorium.prefix + "\(auditorium.serverID)"
+            let auditoriumButton = try Button(type: .postback, title: auditorium.name, payload: payload)
             buttons.append(auditoriumButton)
         }
         return buttons
     }
     
     /// Schedule for Auditorium
-    static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> String {
+    static func show(for message: String, client: ClientFactoryProtocol, chat: [String : Node]? = nil) throws -> String {
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
         guard let id = Int(idString) else { return "" }
