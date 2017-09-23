@@ -113,8 +113,21 @@ final class MessengerController {
                     response = Messenger.message("I'm sorry but your message is empty 😢")
                     /// The user greeted the bot.
                 } else {
+                    // Search
+                    var responseText = ""
+                    if text.characters.count <= 3 {
+                        responseText = "Мінімальна кількість символів для пошуку рівна 4"
+                    } else {
+                        var searchResults = ""
+                        searchResults += try Auditorium.find(by: text)
+                        searchResults += try Group.find(by: text)
+                        searchResults += try Teacher.find(by: text)
+                        if !searchResults.isEmpty {
+                            responseText = searchResults
+                        }
+                    }
                     /// Set the response message text.
-                    response = Messenger.message(text)
+                    response = Messenger.message(responseText)
                 }
                 
                 /// Creating the response JSON data bytes.
