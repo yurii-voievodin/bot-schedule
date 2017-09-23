@@ -47,7 +47,7 @@ struct Messenger {
                     [
                         "template_type": "button",
                         "text": title.makeNode(in: nil),
-                        "elements": buttons.makeNode(in: nil)
+                        "buttons": buttons.makeNode(in: nil)
                 ]
             ]
         ]
