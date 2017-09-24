@@ -103,19 +103,20 @@ final class MessengerController {
                 if !postback.isEmpty {
                     /// Get payload from postback.
                     let payload: String = postback["payload"]?.string ?? "No payload provided by developer."
-                    
-                    var responseText = emptyResponseText
 
                     // Auditorium
                     if payload.hasPrefix(ObjectType.auditorium.prefix) {
-                        let result = try Auditorium.show(for: payload, client: self.client)
-                        if !result.isEmpty {
-                            responseText = result
+                        
+                        let result = try Auditorium.showForMessenger(for: payload, client: self.client)
+                        /// Set the response message text.
+                        if result.isEmpty {
+                            try self.sendResponse(response: Messenger.message(emptyResponseText), senderID: senderID)
+                        } else {
+                            for item in result {
+                                try self.sendResponse(response: Messenger.message(item), senderID: senderID)
+                            }
                         }
                     }
-                    /// Set the response message text.
-                    response = Messenger.message(responseText)
-                    
                     /// Check if the message object is empty.
                 } else if message.isEmpty {
                     /// Set the response message text.
@@ -148,16 +149,7 @@ final class MessengerController {
                         }
                     }
                 }
-                
-                /// Creating the response JSON data bytes.
-                /// At Step 6 of Facebook Messenger Quick Start guide, using Node.js demo, they told you to send back the "recipient.id", but the correct one is "sender.id".
-                /// https://developers.facebook.com/docs/messenger-platform/guides/quick-start#send_text_message
-                var responseData: JSON = JSON()
-                try responseData.set("recipient", ["id": senderID])
-                try responseData.set("message", response)
-                
-                /// Calling the Facebook API to send the response.
-                let _: Response = try self.client.post("https://graph.facebook.com/v2.9/me/messages", query: ["access_token": token], ["Content-Type": "application/json"], Body.data(responseData.makeBytes()))
+                try self.sendResponse(response: response, senderID: senderID)
             }
         }
         
@@ -165,5 +157,17 @@ final class MessengerController {
         /// https://developers.facebook.com/docs/messenger-platform/webhook-reference#response
         /// The header is added just to mute a Vapor warning.
         return Response(status: .ok, headers: ["Content-Type": "application/json"])
+    }
+    
+    fileprivate func sendResponse(response: Node, senderID: String) throws {
+        /// Creating the response JSON data bytes.
+        /// At Step 6 of Facebook Messenger Quick Start guide, using Node.js demo, they told you to send back the "recipient.id", but the correct one is "sender.id".
+        /// https://developers.facebook.com/docs/messenger-platform/guides/quick-start#send_text_message
+        var responseData: JSON = JSON()
+        try responseData.set("recipient", ["id": senderID])
+        try responseData.set("message", response)
+        
+        /// Calling the Facebook API to send the response.
+        let _: Response = try self.client.post("https://graph.facebook.com/v2.9/me/messages", query: ["access_token": token], ["Content-Type": "application/json"], Body.data(responseData.makeBytes()))
     }
 }

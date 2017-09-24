@@ -69,7 +69,42 @@ extension Auditorium {
     }
     
     /// Schedule for Auditorium
-    static func show(for message: String, client: ClientFactoryProtocol, chat: [String : Node]? = nil) throws -> String {
+    static func showForMessenger(for message: String, client: ClientFactoryProtocol, chat: [String : Node]? = nil) throws -> [String] {
+        // Get ID of auditorium from message (/auditorium_{id})
+        let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
+        guard let id = Int(idString) else { return [] }
+        
+        // Find records for auditorium
+        guard let auditorium = try Auditorium.makeQuery().filter(Field.serverID.name, id).first() else { return [] }
+        let currentHour = Date().dateWithHour
+        
+        if auditorium.updatedAt != currentHour {
+            
+            // Try to delete old records
+            try auditorium.records.delete()
+            
+            // Try to import schedule
+            try ScheduleImportManager.importSchedule(for: .auditorium, id: auditorium.serverID, client: client)
+            
+            // Update date in object
+            auditorium.updatedAt = currentHour
+            try auditorium.save()
+        }
+        
+        // Register request for user
+        if let chat = chat, let id = auditorium.id {
+            BotUser.registerRequest(for: chat, objectID: id, type: .auditorium)
+        }
+        
+        let records = try auditorium.records
+            .sort("date", .ascending)
+            .sort("pair_name", .ascending)
+            .all()
+        
+        return Record.prepareMessengerResponse(for: records)
+    }
+    
+    static func showForTelegram(for message: String, client: ClientFactoryProtocol, chat: [String : Node]? = nil) throws -> String {
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
         guard let id = Int(idString) else { return "" }
@@ -102,7 +137,7 @@ extension Auditorium {
             .all()
         
         // Formatting a response
-        var response = Record.prepareResponse(for: records)
+        var response = Record.prepareTelegramResponse(for: records)
         response += twoLines +  "🚪 Аудиторія - " + auditorium.name
         return response
     }

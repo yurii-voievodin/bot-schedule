@@ -15,10 +15,8 @@ struct Messenger {
     /// - Parameter message: Message text to be sent.
     /// - Returns: Returns the created Node ready to be sent.
     static func message(_ message: String) -> Node {
-        /// Create the Node.
-        return [
-            "text": message.makeNode(in: nil)
-        ]
+        let message: Node = ["text": message.makeNode(in: nil)]
+        return message
     }
     
     /// Creates a structured Messenger message.

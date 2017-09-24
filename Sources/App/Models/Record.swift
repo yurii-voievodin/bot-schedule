@@ -155,7 +155,7 @@ extension Record: Preparation {
 
 extension Record {
     
-    static func prepareResponse(for records: [Record]) -> String {
+    static func prepareMessengerResponse(for records: [Record]) -> [String] {
         var schedule = ""
         var dateString = ""
         var scheduleArray: [String] = []
@@ -210,7 +210,65 @@ extension Record {
                 schedule = ""
             }
         }
+        // Generate reversed response
+        return scheduleArray.reversed()
+    }
+    
+    static func prepareTelegramResponse(for records: [Record]) -> String {
+        var schedule = ""
+        var dateString = ""
+        var scheduleArray: [String] = []
         
+        for record in records {
+            // Time
+            if !record.time.isEmpty {
+                schedule += twoLines + "🕐 " + record.time
+            }
+            // Type
+            if let type = record.type, !type.isEmpty {
+                schedule += newLine + type
+            }
+            // Name
+            if let name = record.name, !name.isEmpty {
+                schedule += newLine + name
+            }
+            // Reason
+            if let reason = record.reason, !reason.isEmpty {
+                schedule += newLine + reason
+            }
+            // Auditorium
+            do {
+                if let auditorium = try record.auditorium.get() {
+                    schedule += newLine + "🚪 " + auditorium.name
+                }
+            } catch {
+            }
+            // Teacher
+            do {
+                if let teacher = try record.teacher.get() {
+                    schedule += newLine + "👔 " + teacher.name
+                }
+            } catch {
+            }
+            // Group
+            do {
+                if let group = try record.group.get() {
+                    schedule += newLine + "👥 " + group.name
+                }
+            } catch {
+            }
+            // Date
+            if record.date != dateString {
+                dateString = record.date
+                if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
+                    schedule += twoLines + recordDate + " ⬆️"
+                }
+            }
+            if !schedule.isEmpty {
+                scheduleArray.append(schedule)
+                schedule = ""
+            }
+        }
         // Generate reversed response
         var response = ""
         for item in scheduleArray.reversed() {

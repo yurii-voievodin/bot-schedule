@@ -87,7 +87,7 @@ extension Teacher {
             .all()
         
         // Formatting a response
-        var response = Record.prepareResponse(for: records)
+        var response = Record.prepareTelegramResponse(for: records)
         response += twoLines +  "👔 Викладач - " + teacher.name
         return response
     }

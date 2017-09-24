@@ -65,7 +65,7 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
             // Auditorium
             Jobs.oneoff {
-                let result = try Auditorium.show(for: message, client: self.client, chat: chat)
+                let result = try Auditorium.showForTelegram(for: message, client: self.client, chat: chat)
                 if !result.isEmpty {
                     responseText = result
                 }

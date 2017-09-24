@@ -86,7 +86,7 @@ extension Group {
             .all()
         
         // Formatting a response
-        var response = Record.prepareResponse(for: records)
+        var response = Record.prepareTelegramResponse(for: records)
         response += twoLines +  "👥 Група - " + group.name
         return response
     }
