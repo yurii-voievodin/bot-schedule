@@ -108,7 +108,6 @@ final class MessengerController {
                     if payload.hasPrefix(ObjectType.auditorium.prefix) {
                         
                         let result = try Auditorium.showForMessenger(for: payload, client: self.client)
-                        /// Set the response message text.
                         if result.isEmpty {
                             try self.sendResponse(response: Messenger.message(emptyResponseText), senderID: senderID)
                         } else {
@@ -136,11 +135,7 @@ final class MessengerController {
                     } else {
                         var searchResults: [Button] = []
                         
-                        print(text)
-                        
                         searchResults += try Auditorium.find(by: text)
-                        
-                        print(searchResults)
                         
                         if !searchResults.isEmpty {
                             response = try Messenger.buttons(searchResults, title: "Аудиторії")
@@ -149,7 +144,6 @@ final class MessengerController {
                         }
                     }
                 }
-                try self.sendResponse(response: response, senderID: senderID)
             }
         }
         

@@ -79,21 +79,15 @@ extension Auditorium {
         let currentHour = Date().dateWithHour
         
         if auditorium.updatedAt != currentHour {
-            
-            // Try to delete old records
+            // Delete old records
             try auditorium.records.delete()
             
-            // Try to import schedule
+            // Import new schedule
             try ScheduleImportManager.importSchedule(for: .auditorium, id: auditorium.serverID, client: client)
             
-            // Update date in object
+            // Update date
             auditorium.updatedAt = currentHour
             try auditorium.save()
-        }
-        
-        // Register request for user
-        if let chat = chat, let id = auditorium.id {
-            BotUser.registerRequest(for: chat, objectID: id, type: .auditorium)
         }
         
         let records = try auditorium.records

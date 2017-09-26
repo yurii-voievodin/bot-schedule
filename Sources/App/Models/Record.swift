@@ -205,13 +205,13 @@ extension Record {
                     schedule += twoLines + recordDate + " ⬆️"
                 }
             }
+            
             if !schedule.isEmpty {
                 scheduleArray.append(schedule)
                 schedule = ""
             }
         }
-        // Generate reversed response
-        return scheduleArray.reversed()
+        return scheduleArray
     }
     
     static func prepareTelegramResponse(for records: [Record]) -> String {

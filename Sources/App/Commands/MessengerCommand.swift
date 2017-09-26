@@ -1,9 +1,8 @@
 //
-//  TestCommand.swift
-//  SumDUBot
+//  MessengerCommand.swift
+//  App
 //
-//  Created by Yura Voevodin on 17.08.17.
-//
+//  Created by Yura Voevodin on 24.09.17.
 //
 
 import Vapor
@@ -11,14 +10,12 @@ import Console
 import HTTP
 import Foundation
 
-/// Console command for test a bot
-final class TestCommand: Command, ConfigInitializable {
+final class MessengerComand: Command, ConfigInitializable {
     
     // MARK: - Enums
     
     /// Arguments for this command
     enum Argument: String {
-        case command = "command"
         case search = "search"
         case show = "show"
     }
@@ -31,12 +28,10 @@ final class TestCommand: Command, ConfigInitializable {
     
     // MARK: - Properties
     
-    let id = "test"
-    let help = ["This command test a bot"]
+    let id = "messenger"
+    let help = ["This command tests a Messenger bot"]
     var console: ConsoleProtocol
     var client: ClientFactoryProtocol
-    
-    // MARK: - Methods
     
     required init(config: Config) throws {
         console = try config.resolveConsole()
@@ -49,49 +44,28 @@ final class TestCommand: Command, ConfigInitializable {
         let lastArgument = arguments.last
         
         switch argument {
-        case .command:
-            run(command: lastArgument)
-            
         case .search:
             try search(lastArgument)
-            
         case .show:
             try show(lastArgument)
         }
     }
     
-    // MARK: - Helpers
-    
-    fileprivate func run(command: String?) {
-        guard let command = command else { return }
-        guard let botCommand = BotCommand(rawValue: command) else { return }
-        console.print(botCommand.response, newLine: true)
-    }
-    
     fileprivate func search(_ request: String?) throws {
         guard let request = request else { return }
-        var searchResults = ""
-        searchResults += try Auditorium.find(by: request)
-        searchResults += try Group.find(by: request)
-        searchResults += try Teacher.find(by: request)
         
-        print("results = ", searchResults)
+        var searchResults: [Button] = []
+        searchResults = try Auditorium.find(by: request)
+        
+        print(searchResults)
     }
     
     fileprivate func show(_ request: String?) throws {
         guard let request = request else { return }
         
-        let result: String
+        var result = ""
         if request.hasPrefix(ObjectType.auditorium.prefix) {
             result = try Auditorium.showForTelegram(for: request, client: client)
-            
-        } else if request.hasPrefix(ObjectType.group.prefix) {
-            result = try Group.show(for: request, chat: [:], client: client)
-            
-        } else if request.hasPrefix(ObjectType.teacher.prefix) {
-            result = try Teacher.show(for: request, chat: [:], client: client)
-        } else {
-            result = "Empty"
         }
         print(result)
     }
