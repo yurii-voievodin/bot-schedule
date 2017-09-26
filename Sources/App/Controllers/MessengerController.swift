@@ -114,6 +114,7 @@ final class MessengerController {
                             for item in result {
                                 try self.sendResponse(response: Messenger.message(item), senderID: senderID)
                             }
+                            return try ok()
                         }
                     }
                     /// Check if the message object is empty.
@@ -144,13 +145,10 @@ final class MessengerController {
                         }
                     }
                 }
+                try self.sendResponse(response: response, senderID: senderID)
             }
         }
-        
-        /// Sending an HTTP 200 OK response is required.
-        /// https://developers.facebook.com/docs/messenger-platform/webhook-reference#response
-        /// The header is added just to mute a Vapor warning.
-        return Response(status: .ok, headers: ["Content-Type": "application/json"])
+        return try ok()
     }
     
     fileprivate func sendResponse(response: Node, senderID: String) throws {
@@ -163,5 +161,12 @@ final class MessengerController {
         
         /// Calling the Facebook API to send the response.
         let _: Response = try self.client.post("https://graph.facebook.com/v2.9/me/messages", query: ["access_token": token], ["Content-Type": "application/json"], Body.data(responseData.makeBytes()))
+    }
+    
+    fileprivate func ok() throws -> ResponseRepresentable {
+        /// Sending an HTTP 200 OK response is required.
+        /// https://developers.facebook.com/docs/messenger-platform/webhook-reference#response
+        /// The header is added just to mute a Vapor warning.
+        return Response(status: .ok, headers: ["Content-Type": "application/json"])
     }
 }
