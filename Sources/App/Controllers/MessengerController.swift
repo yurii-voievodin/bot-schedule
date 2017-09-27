@@ -55,6 +55,17 @@ final class MessengerController {
     func getWebhook(request: Request) throws -> ResponseRepresentable {
         let object = request.query?.object
         
+        // TODO: Test code
+        let testSearchQuery = ObjectType.auditorium.prefix + "1227"
+        let test = try Auditorium.showForMessenger(for: testSearchQuery, client: self.client)
+//        for item in test {
+//            let message = Messenger.message(item)
+//            print(message)
+//            print("")
+//            print("------------------")
+//            print("")
+//        }
+        
         /// Check for "hub.mode", "hub.verify_token" & "hub.challenge" query parameters.
         guard object?["hub.mode"]?.string == "subscribe" && object?["hub.verify_token"]?.string == secret, let challenge = object?["hub.challenge"]?.string else {
             throw Abort(.badRequest, reason: "Missing Messenger verification data.")
