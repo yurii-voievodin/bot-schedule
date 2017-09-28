@@ -81,9 +81,9 @@ final class TestCommand: Command, ConfigInitializable {
     fileprivate func show(_ request: String?) throws {
         guard let request = request else { return }
         
-        let result: String
+        let result: [String]
         if request.hasPrefix(ObjectType.auditorium.prefix) {
-            result = try Auditorium.showForTelegram(for: request, client: client)
+            result = try Auditorium.show(for: request, client: client)
             
         } else if request.hasPrefix(ObjectType.group.prefix) {
             result = try Group.show(for: request, chat: [:], client: client)
@@ -91,7 +91,7 @@ final class TestCommand: Command, ConfigInitializable {
         } else if request.hasPrefix(ObjectType.teacher.prefix) {
             result = try Teacher.show(for: request, chat: [:], client: client)
         } else {
-            result = "Empty"
+            result = ["Empty"]
         }
         print(result)
     }

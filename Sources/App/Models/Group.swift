@@ -55,13 +55,13 @@ extension Group {
         return twoLines + "👥 Групи:" + twoLines + response
     }
     
-    static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> String {
+    static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of group from message (/group_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 7))
-        guard let id = Int(idString) else { return "" }
+        guard let id = Int(idString) else { return [] }
         
         // Find records for groups
-        guard let group = try Group.makeQuery().filter(Field.serverID.name, id).first() else { return "" }
+        guard let group = try Group.makeQuery().filter(Field.serverID.name, id).first() else { return [] }
         let currentHour = Date().dateWithHour
         if group.updatedAt != currentHour {
             // Try to delete old records
@@ -85,9 +85,6 @@ extension Group {
             .sort("pair_name", .ascending)
             .all()
         
-        // Formatting a response
-        var response = Record.prepareTelegramResponse(for: records)
-        response += twoLines +  "👥 Група - " + group.name
-        return response
+        return Record.prepareResponse(for: records)
     }
 }

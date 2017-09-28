@@ -63,9 +63,9 @@ final class MessengerComand: Command, ConfigInitializable {
     fileprivate func show(_ request: String?) throws {
         guard let request = request else { return }
         
-        var result = ""
+        var result: [String] = []
         if request.hasPrefix(ObjectType.auditorium.prefix) {
-            result = try Auditorium.showForTelegram(for: request, client: client)
+            result = try Auditorium.show(for: request, client: client)
         }
         print(result)
     }

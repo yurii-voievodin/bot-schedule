@@ -155,7 +155,7 @@ extension Record: Preparation {
 
 extension Record {
     
-    static func prepareMessengerResponse(for records: [Record]) -> [String] {
+    static func prepareResponse(for records: [Record]) -> [String] {
         var schedule = ""
         var dateString = records.first?.date ?? ""
         var scheduleArray: [String] = []
@@ -175,6 +175,7 @@ extension Record {
         var updatedRecords = records
         updatedRecords.append(fakeRecord)
         
+        // Sorting records by days
         for record in updatedRecords {
             
             if record.date != dateString {
@@ -182,139 +183,66 @@ extension Record {
                 groupedByDates.append(rows)
                 rows = []
             }
-            
             rows.append(record)
         }
         
         for day in groupedByDates {
-            print("")
-            print(day.first?.date ?? "no date")
-            print(":")
+            
+            // Date of the day
+            if let firstRecord = day.first {
+                if firstRecord.date != "" {
+                    if let recordDate = Date.serverDate(from: firstRecord.date)?.humanReadable {
+                        schedule +=  recordDate + twoLines
+                    }
+                }
+            }
+
             for record in day {
                 
-                print(record.name ?? "")
-                print(record.pairName)
-                print(record.time)
-                print(record.type ?? "")
-                print(".")
-            }
-            print("")
-            print("--------")
-        }
-        
-        for record in records {
-            
-            // Date
-            if record.date != dateString {
-                dateString = record.date
-                if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
-                    schedule +=  recordDate + twoLines
+                // Pair
+                if !record.pairName.isEmpty {
+                    schedule += twoLines + record.pairName
+                }
+                
+                // Time
+                if !record.time.isEmpty {
+                    schedule += newLine + "🕐 " + record.time
+                }
+                // Type
+                if let type = record.type, !type.isEmpty {
+                    schedule += newLine + type
+                }
+                // Name
+                if let name = record.name, !name.isEmpty {
+                    schedule += newLine + name
+                }
+                // Reason
+                if let reason = record.reason, !reason.isEmpty {
+                    schedule += newLine + reason
+                }
+                
+                do {
+                    // Auditorium
+                    if let auditorium = try record.auditorium.get() {
+                        schedule += newLine + "🚪 " + auditorium.name
+                    }
+                    // Teacher
+                    if let teacher = try record.teacher.get() {
+                        schedule += newLine + "👔 " + teacher.name
+                    }
+                    // Group
+                    if let group = try record.group.get() {
+                        schedule += newLine + "👥 " + group.name
+                    }
+                } catch {
                 }
             }
             
-            // Time
-            if !record.time.isEmpty {
-                schedule += twoLines + "🕐 " + record.time
-            }
-            // Type
-            if let type = record.type, !type.isEmpty {
-                schedule += newLine + type
-            }
-            // Name
-            if let name = record.name, !name.isEmpty {
-                schedule += newLine + name
-            }
-            // Reason
-            if let reason = record.reason, !reason.isEmpty {
-                schedule += newLine + reason
-            }
-            
-            do {
-                // Auditorium
-                if let auditorium = try record.auditorium.get() {
-                    schedule += newLine + "🚪 " + auditorium.name
-                }
-                // Teacher
-                if let teacher = try record.teacher.get() {
-                    schedule += newLine + "👔 " + teacher.name
-                }
-                // Group
-                if let group = try record.group.get() {
-                    schedule += newLine + "👥 " + group.name
-                }
-            } catch {
-            }
-            
-            if record.date != dateString {
-                if !schedule.isEmpty {
-                    scheduleArray.append(schedule)
-                    schedule = ""
-                }
-            }
-        }
-        return scheduleArray
-    }
-    
-    static func prepareTelegramResponse(for records: [Record]) -> String {
-        var schedule = ""
-        var dateString = ""
-        var scheduleArray: [String] = []
-        
-        for record in records {
-            // Time
-            if !record.time.isEmpty {
-                schedule += twoLines + "🕐 " + record.time
-            }
-            // Type
-            if let type = record.type, !type.isEmpty {
-                schedule += newLine + type
-            }
-            // Name
-            if let name = record.name, !name.isEmpty {
-                schedule += newLine + name
-            }
-            // Reason
-            if let reason = record.reason, !reason.isEmpty {
-                schedule += newLine + reason
-            }
-            // Auditorium
-            do {
-                if let auditorium = try record.auditorium.get() {
-                    schedule += newLine + "🚪 " + auditorium.name
-                }
-            } catch {
-            }
-            // Teacher
-            do {
-                if let teacher = try record.teacher.get() {
-                    schedule += newLine + "👔 " + teacher.name
-                }
-            } catch {
-            }
-            // Group
-            do {
-                if let group = try record.group.get() {
-                    schedule += newLine + "👥 " + group.name
-                }
-            } catch {
-            }
-            // Date
-            if record.date != dateString {
-                dateString = record.date
-                if let recordDate = Date.serverDate(from: dateString)?.humanReadable {
-                    schedule += twoLines + recordDate + " ⬆️"
-                }
-            }
             if !schedule.isEmpty {
                 scheduleArray.append(schedule)
                 schedule = ""
             }
         }
-        // Generate reversed response
-        var response = ""
-        for item in scheduleArray.reversed() {
-            response += item
-        }
-        return response
+        return scheduleArray
     }
 }

@@ -65,29 +65,38 @@ final class CommandsController {
         } else if message.hasPrefix(ObjectType.auditorium.prefix) {
             // Auditorium
             Jobs.oneoff {
-                let result = try Auditorium.showForTelegram(for: message, client: self.client, chat: chat)
-                if !result.isEmpty {
-                    responseText = result
+                let result = try Auditorium.show(for: message, client: self.client, chat: chat)
+                if result.isEmpty {
+                    try self.sendResponse(chatID, text: responseText)
+                } else {
+                    for row in result  {
+                        try self.sendResponse(chatID, text: row)
+                    }
                 }
-                try self.sendResponse(chatID, text: responseText)
             }
         } else if message.hasPrefix(ObjectType.group.prefix) {
             // Group
             Jobs.oneoff {
                 let result = try Group.show(for: message, chat: chat, client: self.client)
-                if !result.isEmpty {
-                    responseText = result
+                if result.isEmpty {
+                    try self.sendResponse(chatID, text: responseText)
+                } else {
+                    for row in result  {
+                        try self.sendResponse(chatID, text: row)
+                    }
                 }
-                try self.sendResponse(chatID, text: responseText)
             }
         } else if message.hasPrefix(ObjectType.teacher.prefix) {
             // Teacher
             Jobs.oneoff {
                 let result = try Teacher.show(for: message, chat: chat, client: self.client)
-                if !result.isEmpty {
-                    responseText = result
+                if result.isEmpty {
+                    try self.sendResponse(chatID, text: responseText)
+                } else {
+                    for row in result  {
+                        try self.sendResponse(chatID, text: row)
+                    }
                 }
-                try self.sendResponse(chatID, text: responseText)
             }
         } else {
             // Search
