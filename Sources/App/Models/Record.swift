@@ -201,7 +201,7 @@ extension Record {
                 
                 // Pair
                 if !record.pairName.isEmpty {
-                    schedule += record.pairName + ":"
+                    schedule += newLine + record.pairName + ":"
                 }
                 
                 // Time
