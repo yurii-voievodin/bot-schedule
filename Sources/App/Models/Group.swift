@@ -55,7 +55,19 @@ extension Group {
         return twoLines + "👥 Групи:" + twoLines + response
     }
     
-    static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> [String] {
+    static func find(by name: String) throws -> [Button] {
+        guard name.characters.count > 3 else { return [] }
+        var buttons: [Button] = []
+        let groups = try Group.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+        for group in groups {
+            let payload = ObjectType.group.prefix + "\(group.serverID)"
+            let auditoriumButton = try Button(type: .postback, title: group.name, payload: payload)
+            buttons.append(auditoriumButton)
+        }
+        return buttons
+    }
+    
+    static func show(for message: String, chat: [String : Node]? = nil, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of group from message (/group_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 7))
         guard let id = Int(idString) else { return [] }

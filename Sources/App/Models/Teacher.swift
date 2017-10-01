@@ -56,7 +56,19 @@ extension Teacher {
         return twoLines + "👔 Викладачі:" + twoLines + response
     }
     
-    static func show(for message: String, chat: [String : Node]?, client: ClientFactoryProtocol) throws -> [String] {
+    static func find(by name: String) throws -> [Button] {
+        guard name.characters.count > 3 else { return [] }
+        var buttons: [Button] = []
+        let teachers = try Teacher.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+        for teacher in teachers {
+            let payload = ObjectType.teacher.prefix + "\(teacher.serverID)"
+            let auditoriumButton = try Button(type: .postback, title: teacher.name, payload: payload)
+            buttons.append(auditoriumButton)
+        }
+        return buttons
+    }
+    
+    static func show(for message: String, chat: [String : Node]? = nil, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of teacher from message (/teacher_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 9))
         guard let id = Int(idString) else { return [] }
