@@ -9,9 +9,72 @@
 import Vapor
 import FluentProvider
 
-final class Group: ListObject {
-
+final class Group: Model, ListObject {
+    let storage = Storage()
+    
+    // MARK: Properties
+    
+    var serverID: Int
+    var name: String
+    var updatedAt: String
+    var lowercaseName: String
+    
+    // MARK: - Initialization
+    
+    init(serverID: Int, name: String, updatedAt: String, lowercaseName: String) {
+        self.serverID = serverID
+        self.name = name
+        self.updatedAt = updatedAt
+        self.lowercaseName = lowercaseName
+    }
+    
+    // MARK: Fluent Serialization
+    
+    /// Initializes the ListObject from the
+    /// database row
+    required init(row: Row) throws {
+        serverID = try row.get(Field.serverID.name)
+        name = try row.get(Field.name.name)
+        updatedAt = try row.get(Field.updatedAt.name)
+        lowercaseName = try row.get(Field.lowercaseName.name)
+    }
+    
+    /// Serializes the ListObject to the database
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(Field.serverID.name, serverID)
+        try row.set(Field.name.name, name)
+        try row.set(Field.updatedAt.name, updatedAt)
+        try row.set(Field.lowercaseName.name, lowercaseName)
+        return row
+    }
 }
+
+// MARK: JSON
+// How the model converts from / to JSON.
+extension Group: JSONConvertible {
+    
+    convenience init(json: JSON) throws {
+        try self.init(
+            serverID: json.get(Field.serverID.name),
+            name: json.get(Field.name.name),
+            updatedAt: json.get(Field.updatedAt.name),
+            lowercaseName: json.get(Field.lowercaseName.name)
+        )
+    }
+    
+    func makeJSON() throws -> JSON {
+        var json = JSON()
+        try json.set("id", id)
+        try json.set(Field.name.name, name)
+        return json
+    }
+}
+
+// MARK: HTTP
+// This allows Group models to be returned
+// directly in route closures
+extension Group: ResponseRepresentable { }
 
 // MARK: - Relationships
 

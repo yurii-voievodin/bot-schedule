@@ -10,7 +10,35 @@ import Vapor
 import FluentProvider
 
 final class Auditorium: ListObject {
+    let storage = Storage()
     
+    // MARK: Properties
+    
+    var serverID: Int
+    var name: String
+    var updatedAt: String
+    var lowercaseName: String
+    
+    // MARK: Fluent Serialization
+    
+    /// Initializes the ListObject from the
+    /// database row
+    required init(row: Row) throws {
+        serverID = try row.get(Field.serverID.name)
+        name = try row.get(Field.name.name)
+        updatedAt = try row.get(Field.updatedAt.name)
+        lowercaseName = try row.get(Field.lowercaseName.name)
+    }
+    
+    /// Serializes the ListObject to the database
+    func makeRow() throws -> Row {
+        var row = Row()
+        try row.set(Field.serverID.name, serverID)
+        try row.set(Field.name.name, name)
+        try row.set(Field.updatedAt.name, updatedAt)
+        try row.set(Field.lowercaseName.name, lowercaseName)
+        return row
+    }
 }
 
 // MARK: - Relationships

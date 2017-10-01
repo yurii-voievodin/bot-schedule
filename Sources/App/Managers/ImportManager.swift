@@ -21,7 +21,7 @@ class ImportManager<Type: ListObject> {
             // Validation
             guard name.characters.count > 0 && id != 0 else { continue }
             
-            if let existingObject = try Type.makeQuery().filter(ListObject.Field.serverID.name, id).first() {
+            if let existingObject = try Type.makeQuery().filter(Field.serverID.name, id).first() {
                 // Find existing
                 existingObject.name = name
                 existingObject.updatedAt = ""
@@ -30,10 +30,10 @@ class ImportManager<Type: ListObject> {
             } else {
                 // Or create a new one
                 var row = Row()
-                try row.set(ListObject.Field.serverID.name, id)
-                try row.set(ListObject.Field.name.name, name)
-                try row.set(ListObject.Field.updatedAt.name, "")
-                try row.set(ListObject.Field.lowercaseName.name, name.lowercased())
+                try row.set(Field.serverID.name, id)
+                try row.set(Field.name.name, name)
+                try row.set(Field.updatedAt.name, "")
+                try row.set(Field.lowercaseName.name, name.lowercased())
                 
                 // Save
                 let newObject = try Type(row: row)

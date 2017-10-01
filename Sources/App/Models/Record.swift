@@ -55,12 +55,12 @@ final class Record: Model {
         
         // Auditorium
         if let kodAud = record["KOD_AUD"]?.string {
-            let auditorium = try Auditorium.makeQuery().filter(ListObject.Field.serverID.name, kodAud).first()
+            let auditorium = try Auditorium.makeQuery().filter(Field.serverID.name, kodAud).first()
             try row.set("auditorium_id", auditorium?.id)
         }
         // Teacher
         if let kodFio = record["KOD_FIO"]?.string {
-            let teacher = try Teacher.makeQuery().filter(ListObject.Field.serverID.name, kodFio).first()
+            let teacher = try Teacher.makeQuery().filter(Field.serverID.name, kodFio).first()
             try row.set("teacher_id", teacher?.id)
             
         }
