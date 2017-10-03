@@ -192,7 +192,7 @@ extension Record {
             if let firstRecord = day.first {
                 if firstRecord.date != "" {
                     if let recordDate = Date.serverDate(from: firstRecord.date)?.humanReadable {
-                        schedule +=  recordDate + newLine
+                        schedule +=  newLine + "🗓  " + recordDate + newLine
                     }
                 }
             }
@@ -201,7 +201,7 @@ extension Record {
                 
                 // Pair
                 if !record.pairName.isEmpty {
-                    schedule += twoLines + record.pairName + ":"
+                    schedule += newLine + record.pairName + ":"
                 }
                 
                 // Time
