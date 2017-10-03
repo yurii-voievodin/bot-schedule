@@ -142,7 +142,7 @@ final class MessengerController {
                     /// Check if the message text is empty
                 } else if text.isEmpty {
                     /// Set the response message text.
-                    let message = Messenger.message("I'm sorry but your message is empty 😢")
+                    let message = Messenger.message("Вас вітає бот розкладу СумДУ! 🙋‍♂️")
                     try self.sendResponse(response: message, senderID: senderID)
                 } else {
                     // Search
