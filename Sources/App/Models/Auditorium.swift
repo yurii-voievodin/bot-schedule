@@ -84,6 +84,18 @@ extension Auditorium {
         return twoLines + "🚪 Аудиторії:" + twoLines + response
     }
     
+    static func find(by name: String) throws -> [InlineKeyboardButton] {
+        guard name.characters.count > 3 else { return [] }
+        var response: [InlineKeyboardButton] = []
+        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+        let prefix = ObjectType.auditorium.prefix
+        for auditorium in auditoriums {
+            let button = InlineKeyboardButton(text: auditorium.name, callbackData: prefix + "\(auditorium.serverID)")
+            response.append(button)
+        }
+        return response
+    }
+    
     static func find(by name: String) throws -> [Button] {
         guard name.characters.count > 3 else { return [] }
         var buttons: [Button] = []

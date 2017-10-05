@@ -61,12 +61,21 @@ final class CommandsController {
                     let firstTestButton = InlineKeyboardButton(text: "Test 1", callbackData: "test_1")
                     let secondTestButton = InlineKeyboardButton(text: "Test 1", callbackData: "test_1")
                     let testKeyboard = InlineKeyboard(buttonsArray: [[firstTestButton, secondTestButton]])
+                    let test = try testKeyboard.makeNode(in: nil)
                     
                     let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
+                    
+                    var responseData: JSON = JSON()
+                    try responseData.set("method", "sendMessage")
+                    try responseData.set("chat_id", chatID)
+                    try responseData.set("text", "test!")
+                    try responseData.set("reply_markup", test)
+                    
                     let request = Request(method: .post, uri: uri)
-                    request.formURLEncoded = try Node(node: ["method": "sendMessage", "chat_id": Node(chatID), "reply_markup": testKeyboard.makeNode(in: nil)])
-                    request.headers = ["Content-Type": "application/x-www-form-urlencoded"]
-                    let _ = try self.client.respond(to: request)
+                    request.json = responseData.makeJSON()
+                    request.headers = ["Content-Type": "application/json"]
+                    
+                    let response = try self.client.respond(to: request)
                     
                 } else if command == .history {
                     try self.sendResponse(chatID, text: HistoryRecord.history(for: chatID))
@@ -116,6 +125,28 @@ final class CommandsController {
                 if message.characters.count <= 3 {
                     responseText = "Мінімальна кількість символів для пошуку рівна 4"
                 } else {
+                    // Auditoriums
+                    var auditoriumButtons: [InlineKeyboardButton] = []
+                    auditoriumButtons = try Auditorium.find(by: message)
+                    if !auditoriumButtons.isEmpty {
+                        let auditoriumsKeyboard = InlineKeyboard(buttonsArray: [auditoriumButtons])
+                        let keyboard = try auditoriumsKeyboard.makeNode(in: nil)
+                        
+                        let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
+                        var responseData: JSON = JSON()
+                        try responseData.set("method", "sendMessage")
+                        try responseData.set("chat_id", chatID)
+                        try responseData.set("text", "🚪 Аудиторії")
+                        try responseData.set("reply_markup", keyboard)
+                        
+                        let request = Request(method: .post, uri: uri)
+                        request.json = responseData.makeJSON()
+                        request.headers = ["Content-Type": "application/json"]
+                        let _ = try self.client.respond(to: request)
+                    }
+                    
+                    // TODO: Send as 3 message with buttons
+                    
                     var searchResults = ""
                     searchResults += try Auditorium.find(by: message)
                     searchResults += try Group.find(by: message)
