@@ -15,6 +15,7 @@ enum BotCommand: String {
     case search = "/search"
     case start = "/start"
     case statistics = "/statistics"
+    case test = "/test"
     
     var response: String {
         switch self {
@@ -37,6 +38,9 @@ enum BotCommand: String {
             return "Кількість запитів:" + newLine
                 + " - за сьогодні: " + Session.statisticsForToday() + newLine
                 + " - у цьому місяці: " + Session.statisticsForMonth()
+            
+        case .test:
+            return ""
         }
     }
 }

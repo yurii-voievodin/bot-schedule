@@ -56,7 +56,19 @@ final class CommandsController {
                 // Register user request
                 BotUser.registerRequest(for: chat)
                 // Response
-                if command == .history {
+                if command == .test {
+                    
+                    let firstTestButton = InlineKeyboardButton(text: "Test 1", callbackData: "test_1")
+                    let secondTestButton = InlineKeyboardButton(text: "Test 1", callbackData: "test_1")
+                    let testKeyboard = InlineKeyboard(buttonsArray: [[firstTestButton, secondTestButton]])
+                    
+                    let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
+                    let request = Request(method: .post, uri: uri)
+                    request.formURLEncoded = try Node(node: ["method": "sendMessage", "chat_id": Node(chatID), "reply_markup": testKeyboard.makeNode(in: nil)])
+                    request.headers = ["Content-Type": "application/x-www-form-urlencoded"]
+                    let _ = try self.client.respond(to: request)
+                    
+                } else if command == .history {
                     try self.sendResponse(chatID, text: HistoryRecord.history(for: chatID))
                 } else {
                     try self.sendResponse(chatID, text: command.response)
