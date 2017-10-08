@@ -95,22 +95,19 @@ final class CommandsController {
                     // Auditoriums
                     let auditoriumButtons: [InlineKeyboardButton] = try Auditorium.find(by: message)
                     if !auditoriumButtons.isEmpty {
-                        let auditoriumsKeyboard = InlineKeyboard(buttonsArray: [auditoriumButtons])
-                        try self.sendResponse(chatID, text: "🚪 Аудиторії", keyboard: auditoriumsKeyboard)
+                        try self.sendResponse(chatID, text: "🚪 Аудиторії", buttons: auditoriumButtons)
                     }
                     
                     // Groups
                     let groupButtons: [InlineKeyboardButton] = try Group.find(by: message)
                     if !groupButtons.isEmpty {
-                        let groupsKeyboard = InlineKeyboard(buttonsArray: [groupButtons])
-                        try self.sendResponse(chatID, text: "👥 Групи", keyboard: groupsKeyboard)
+                        try self.sendResponse(chatID, text: "👥 Групи", buttons: groupButtons)
                     }
                     
                     // Teachers
                     let teacherButtons: [InlineKeyboardButton] = try Teacher.find(by: message)
                     if !teacherButtons.isEmpty {
-                        let teachersKeyboard = InlineKeyboard(buttonsArray: [teacherButtons])
-                        try self.sendResponse(chatID, text: "👔 Викладачі", keyboard: teachersKeyboard)
+                        try self.sendResponse(chatID, text: "👔 Викладачі", buttons: teacherButtons)
                     }
                     
                     // Register user request
@@ -146,16 +143,25 @@ final class CommandsController {
         let _ = try client.respond(to: request)
     }
     
-    fileprivate func sendResponse(_ chatID: Int, text: String, keyboard: InlineKeyboard) throws {
+    fileprivate func sendResponse(_ chatID: Int, text: String, buttons: [InlineKeyboardButton]) throws {
         let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
+        
+        // Make keyboard
+        var buttonsArray: [[InlineKeyboardButton]] = []
+        for button in buttons {
+            buttonsArray.append([button])
+        }
+        let keyboard = InlineKeyboard(buttonsArray: buttonsArray)
         let keyboardNode = try keyboard.makeNode(in: nil)
         
+        // JSON
         var responseData = JSON()
         try responseData.set("method", "sendMessage")
         try responseData.set("chat_id", chatID)
         try responseData.set("text", text)
         try responseData.set("reply_markup", keyboardNode)
         
+        // Request
         let request = Request(method: .post, uri: uri)
         request.json = responseData.makeJSON()
         request.headers = ["Content-Type": "application/json"]
