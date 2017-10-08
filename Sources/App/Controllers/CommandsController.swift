@@ -50,6 +50,11 @@ final class CommandsController {
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
         
+        if let query = request.json?["callback_query"] {
+            let callbackQuery = try CallbackQuery(json: query)
+            try answerCallbackQuery(id: callbackQuery.id)
+        }
+        
         if let data = request.data["callback_query", "data"]?.string {
             // Register user request
             BotUser.registerRequest(for: chat)
@@ -133,6 +138,15 @@ final class CommandsController {
                 try self.sendResponse(chatID, text: row)
             }
         }
+    }
+    
+    fileprivate func answerCallbackQuery(id: String) throws {
+        let uri = "https://api.telegram.org/bot\(secret)/answerCallbackQuery"
+        let request = Request(method: .post, uri: uri)
+        request.formURLEncoded = try Node(node: ["method": "answerCallbackQuery", "callback_query_id": id])
+        request.headers = ["Content-Type": "application/x-www-form-urlencoded"]
+        let response = try client.respond(to: request)
+        print(response.json ?? "Empty response")
     }
     
     fileprivate func sendResponse(_ chatID: Int, text: String) throws {
