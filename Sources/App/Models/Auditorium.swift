@@ -73,17 +73,6 @@ extension Auditorium: Preparation {
 extension Auditorium {
     
     /// Find by name
-    static func find(by name: String) throws -> String {
-        guard name.characters.count > 3 else { return "" }
-        var response = ""
-        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
-        for auditorium in auditoriums {
-            response += auditorium.name + " - " + ObjectType.auditorium.prefix + "\(auditorium.serverID)" + newLine
-        }
-        guard response.characters.count > 0 else { return "" }
-        return twoLines + "🚪 Аудиторії:" + twoLines + response
-    }
-    
     static func find(by name: String) throws -> [InlineKeyboardButton] {
         guard name.characters.count > 3 else { return [] }
         var response: [InlineKeyboardButton] = []

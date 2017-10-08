@@ -107,15 +107,16 @@ extension Group: Preparation {
 
 extension Group {
     
-    static func find(by name: String) throws -> String {
-        guard name.characters.count > 3 else { return "" }
-        var response = ""
+    static func find(by name: String) throws -> [InlineKeyboardButton] {
+        guard name.characters.count > 3 else { return [] }
+        var response: [InlineKeyboardButton] = []
         let groups = try Group.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+        let prefix = ObjectType.group.prefix
         for group in groups {
-            response += group.name + " - " + ObjectType.group.prefix + "\(group.serverID)" + newLine
+            let button = InlineKeyboardButton(text: group.name, callbackData: prefix + "\(group.serverID)")
+            response.append(button)
         }
-        guard response.characters.count > 0 else { return "" }
-        return twoLines + "👥 Групи:" + twoLines + response
+        return response
     }
     
     static func find(by name: String) throws -> [Button] {

@@ -50,73 +50,40 @@ final class CommandsController {
         let message = (request.data["message", "text"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         var responseText = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
         
-        if let command = BotCommand(rawValue: message) {
+        if let data = request.data["callback_query", "data"]?.string {
+            // Register user request
+            BotUser.registerRequest(for: chat)
+            
+            // Callback from button
+            if data.hasPrefix(ObjectType.auditorium.prefix) {
+                // Auditorium
+                Jobs.oneoff {
+                    let result = try Auditorium.show(for: data, client: self.client, chat: chat)
+                    try self.sendResult(result, chatID: chatID)
+                }
+            } else if data.hasPrefix(ObjectType.group.prefix) {
+                // Group
+                Jobs.oneoff {
+                    let result = try Group.show(for: data, chat: chat, client: self.client)
+                    try self.sendResult(result, chatID: chatID)
+                }
+            } else if data.hasPrefix(ObjectType.teacher.prefix) {
+                // Teacher
+                Jobs.oneoff {
+                    let result = try Teacher.show(for: data, chat: chat, client: self.client)
+                    try self.sendResult(result, chatID: chatID)
+                }
+            }
+        } else if let command = BotCommand(rawValue: message) {
             // Command
             Jobs.oneoff {
                 // Register user request
                 BotUser.registerRequest(for: chat)
                 // Response
-                if command == .test {
-                    
-                    let firstTestButton = InlineKeyboardButton(text: "Test 1", callbackData: "test_1")
-                    let secondTestButton = InlineKeyboardButton(text: "Test 1", callbackData: "test_1")
-                    let testKeyboard = InlineKeyboard(buttonsArray: [[firstTestButton, secondTestButton]])
-                    let test = try testKeyboard.makeNode(in: nil)
-                    
-                    let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
-                    
-                    var responseData: JSON = JSON()
-                    try responseData.set("method", "sendMessage")
-                    try responseData.set("chat_id", chatID)
-                    try responseData.set("text", "test!")
-                    try responseData.set("reply_markup", test)
-                    
-                    let request = Request(method: .post, uri: uri)
-                    request.json = responseData.makeJSON()
-                    request.headers = ["Content-Type": "application/json"]
-                    
-                    let response = try self.client.respond(to: request)
-                    
-                } else if command == .history {
+                if command == .history {
                     try self.sendResponse(chatID, text: HistoryRecord.history(for: chatID))
                 } else {
                     try self.sendResponse(chatID, text: command.response)
-                }
-            }
-        } else if message.hasPrefix(ObjectType.auditorium.prefix) {
-            // Auditorium
-            Jobs.oneoff {
-                let result = try Auditorium.show(for: message, client: self.client, chat: chat)
-                if result.isEmpty {
-                    try self.sendResponse(chatID, text: responseText)
-                } else {
-                    for row in result  {
-                        try self.sendResponse(chatID, text: row)
-                    }
-                }
-            }
-        } else if message.hasPrefix(ObjectType.group.prefix) {
-            // Group
-            Jobs.oneoff {
-                let result = try Group.show(for: message, chat: chat, client: self.client)
-                if result.isEmpty {
-                    try self.sendResponse(chatID, text: responseText)
-                } else {
-                    for row in result  {
-                        try self.sendResponse(chatID, text: row)
-                    }
-                }
-            }
-        } else if message.hasPrefix(ObjectType.teacher.prefix) {
-            // Teacher
-            Jobs.oneoff {
-                let result = try Teacher.show(for: message, chat: chat, client: self.client)
-                if result.isEmpty {
-                    try self.sendResponse(chatID, text: responseText)
-                } else {
-                    for row in result  {
-                        try self.sendResponse(chatID, text: row)
-                    }
                 }
             }
         } else {
@@ -126,43 +93,49 @@ final class CommandsController {
                     responseText = "Мінімальна кількість символів для пошуку рівна 4"
                 } else {
                     // Auditoriums
-                    var auditoriumButtons: [InlineKeyboardButton] = []
-                    auditoriumButtons = try Auditorium.find(by: message)
+                    let auditoriumButtons: [InlineKeyboardButton] = try Auditorium.find(by: message)
                     if !auditoriumButtons.isEmpty {
                         let auditoriumsKeyboard = InlineKeyboard(buttonsArray: [auditoriumButtons])
-                        let keyboard = try auditoriumsKeyboard.makeNode(in: nil)
-                        
-                        let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
-                        var responseData: JSON = JSON()
-                        try responseData.set("method", "sendMessage")
-                        try responseData.set("chat_id", chatID)
-                        try responseData.set("text", "🚪 Аудиторії")
-                        try responseData.set("reply_markup", keyboard)
-                        
-                        let request = Request(method: .post, uri: uri)
-                        request.json = responseData.makeJSON()
-                        request.headers = ["Content-Type": "application/json"]
-                        let _ = try self.client.respond(to: request)
+                        try self.sendResponse(chatID, text: "🚪 Аудиторії", keyboard: auditoriumsKeyboard)
                     }
                     
-                    // TODO: Send as 3 message with buttons
+                    // Groups
+                    let groupButtons: [InlineKeyboardButton] = try Group.find(by: message)
+                    if !groupButtons.isEmpty {
+                        let groupsKeyboard = InlineKeyboard(buttonsArray: [groupButtons])
+                        try self.sendResponse(chatID, text: "👥 Групи", keyboard: groupsKeyboard)
+                    }
                     
-                    var searchResults = ""
-                    searchResults += try Auditorium.find(by: message)
-                    searchResults += try Group.find(by: message)
-                    searchResults += try Teacher.find(by: message)
-                    if !searchResults.isEmpty {
-                        responseText = searchResults
+                    // Teachers
+                    let teacherButtons: [InlineKeyboardButton] = try Teacher.find(by: message)
+                    if !teacherButtons.isEmpty {
+                        let teachersKeyboard = InlineKeyboard(buttonsArray: [teacherButtons])
+                        try self.sendResponse(chatID, text: "👔 Викладачі", keyboard: teachersKeyboard)
+                    }
+                    
+                    // Register user request
+                    BotUser.registerRequest(for: chat)
+                    
+                    // Empty response
+                    if auditoriumButtons.isEmpty && groupButtons.isEmpty && teacherButtons.isEmpty {
+                        try self.sendResponse(chatID, text: responseText)
                     }
                 }
-                // Register user request
-                BotUser.registerRequest(for: chat)
-                // Response
-                try self.sendResponse(chatID, text: responseText)
             }
         }
         // Response with "typing"
         return try JSON(node: ["method": "sendChatAction", "chat_id": chatID, "action": "typing"])
+    }
+    
+    fileprivate func sendResult(_ result: [String], chatID: Int) throws {
+        let emptyResponse = "🙁 За вашим запитом нічого не знайдено, спробуйте інший"
+        if result.isEmpty {
+            try self.sendResponse(chatID, text: emptyResponse)
+        } else {
+            for row in result  {
+                try self.sendResponse(chatID, text: row)
+            }
+        }
     }
     
     fileprivate func sendResponse(_ chatID: Int, text: String) throws {
@@ -171,6 +144,22 @@ final class CommandsController {
         request.formURLEncoded = try Node(node: ["method": "sendMessage", "chat_id": chatID, "text": text])
         request.headers = ["Content-Type": "application/x-www-form-urlencoded"]
         let _ = try client.respond(to: request)
+    }
+    
+    fileprivate func sendResponse(_ chatID: Int, text: String, keyboard: InlineKeyboard) throws {
+        let uri = "https://api.telegram.org/bot\(self.secret)/sendMessage"
+        let keyboardNode = try keyboard.makeNode(in: nil)
+        
+        var responseData = JSON()
+        try responseData.set("method", "sendMessage")
+        try responseData.set("chat_id", chatID)
+        try responseData.set("text", text)
+        try responseData.set("reply_markup", keyboardNode)
+        
+        let request = Request(method: .post, uri: uri)
+        request.json = responseData.makeJSON()
+        request.headers = ["Content-Type": "application/json"]
+        let _ = try self.client.respond(to: request)
     }
 }
 

@@ -72,16 +72,16 @@ extension Teacher: Preparation {
 
 extension Teacher {
     
-    static func find(by name: String) throws -> String {
-        var response = ""
-        guard name.characters.count > 3 else { return response }
-        
+    static func find(by name: String) throws -> [InlineKeyboardButton] {
+        guard name.characters.count > 3 else { return [] }
+        var response: [InlineKeyboardButton] = []
         let teachers = try Teacher.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+        let prefix = ObjectType.teacher.prefix
         for teacher in teachers {
-            response += teacher.name + " - /teacher_\(teacher.serverID)" + newLine
+            let button = InlineKeyboardButton(text: teacher.name, callbackData: prefix + "\(teacher.serverID)")
+            response.append(button)
         }
-        guard !response.isEmpty else { return "" }
-        return twoLines + "👔 Викладачі:" + twoLines + response
+        return response
     }
     
     static func find(by name: String) throws -> [Button] {

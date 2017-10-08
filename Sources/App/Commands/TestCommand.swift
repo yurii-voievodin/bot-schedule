@@ -70,12 +70,14 @@ final class TestCommand: Command, ConfigInitializable {
     
     fileprivate func search(_ request: String?) throws {
         guard let request = request else { return }
-        var searchResults = ""
-        searchResults += try Auditorium.find(by: request)
-        searchResults += try Group.find(by: request)
-        searchResults += try Teacher.find(by: request)
         
-        print("results = ", searchResults)
+        let auditoriumButtons: [InlineKeyboardButton] = try Auditorium.find(by: request)
+        let groupButtons: [InlineKeyboardButton] = try Group.find(by: request)
+        let teacherButtons: [InlineKeyboardButton] = try Teacher.find(by: request)
+        
+        print(auditoriumButtons)
+        print(groupButtons)
+        print(teacherButtons)
     }
     
     fileprivate func show(_ request: String?) throws {
