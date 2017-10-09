@@ -88,10 +88,10 @@ final class TestCommand: Command, ConfigInitializable {
             result = try Auditorium.show(for: request, client: client)
             
         } else if request.hasPrefix(ObjectType.group.prefix) {
-            result = try Group.show(for: request, chat: [:], client: client)
+            result = try Group.show(for: request, chatID: nil, client: client)
             
         } else if request.hasPrefix(ObjectType.teacher.prefix) {
-            result = try Teacher.show(for: request, chat: [:], client: client)
+            result = try Teacher.show(for: request, chatID: nil, client: client)
         } else {
             result = ["Empty"]
         }

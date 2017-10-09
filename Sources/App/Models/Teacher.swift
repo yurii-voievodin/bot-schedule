@@ -72,7 +72,8 @@ extension Teacher: Preparation {
 
 extension Teacher {
     
-    static func find(by name: String) throws -> [InlineKeyboardButton] {
+    static func find(by name: String?) throws -> [InlineKeyboardButton] {
+        guard let name = name else { return [] }
         guard name.characters.count > 3 else { return [] }
         var response: [InlineKeyboardButton] = []
         let teachers = try Teacher.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
@@ -96,7 +97,7 @@ extension Teacher {
         return buttons
     }
     
-    static func show(for message: String, chat: [String : Node]? = nil, client: ClientFactoryProtocol) throws -> [String] {
+    static func show(for message: String, chatID: Int? = nil, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of teacher from message (/teacher_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 9))
         guard let id = Int(idString) else { return [] }
@@ -117,8 +118,8 @@ extension Teacher {
         }
         
         // Register request for user
-        if let chat = chat, let id = teacher.id {
-            BotUser.registerRequest(for: chat, objectID: id, type: .teacher)
+        if let chatID = chatID, let id = teacher.id {
+            BotUser.registerRequest(chatID: chatID, objectID: id, type: .teacher)
         }
         
         let records = try teacher.records

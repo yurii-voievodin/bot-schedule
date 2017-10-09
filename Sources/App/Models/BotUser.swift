@@ -19,8 +19,7 @@ final class BotUser: Model {
     
     // MARK: - Initialization
     
-    init?(_ object: [String: Node]) {
-        guard let chatID = object["id"]?.int else { return nil }
+    init(chatID: Int) {
         self.chatID = chatID
         self.requests = 0
     }
@@ -72,8 +71,8 @@ extension BotUser {
 
 extension BotUser {
     
-    static func registerRequest(for chat: [String : Node], objectID: Identifier, type: ObjectType) {
-        guard let user = BotUser(chat) else { return }
+    static func registerRequest(chatID: Int, objectID: Identifier, type: ObjectType) {
+        let user = BotUser(chatID: chatID)
         do {
             // Try to find user and add new if not found
             if let existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {
@@ -90,9 +89,9 @@ extension BotUser {
         }
     }
     
-    static func registerRequest(for chat: [String : Node]?) {
-        guard let chat = chat else { return }
-        guard let user = BotUser(chat) else { return }
+    static func registerRequest(chatID: Int?) {
+        guard let id = chatID else { return }
+        let user = BotUser(chatID: id)
         do {
             // Try to find user and add new if not found
             if let existingUser = try BotUser.makeQuery().filter("chat_id", .equals, user.chatID).first() {

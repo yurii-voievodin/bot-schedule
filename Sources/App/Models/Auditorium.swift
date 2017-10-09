@@ -73,7 +73,8 @@ extension Auditorium: Preparation {
 extension Auditorium {
     
     /// Find by name
-    static func find(by name: String) throws -> [InlineKeyboardButton] {
+    static func find(by name: String?) throws -> [InlineKeyboardButton] {
+        guard let name = name else { return [] }
         guard name.characters.count > 3 else { return [] }
         var response: [InlineKeyboardButton] = []
         let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
@@ -98,7 +99,7 @@ extension Auditorium {
     }
     
     /// Schedule for Auditorium
-    static func show(for message: String, client: ClientFactoryProtocol, chat: [String : Node]? = nil) throws -> [String] {
+    static func show(for message: String, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
         guard let id = Int(idString) else { return [] }

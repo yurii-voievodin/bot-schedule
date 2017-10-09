@@ -107,7 +107,8 @@ extension Group: Preparation {
 
 extension Group {
     
-    static func find(by name: String) throws -> [InlineKeyboardButton] {
+    static func find(by name: String?) throws -> [InlineKeyboardButton] {
+        guard let name = name else { return [] }
         guard name.characters.count > 3 else { return [] }
         var response: [InlineKeyboardButton] = []
         let groups = try Group.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
@@ -131,7 +132,7 @@ extension Group {
         return buttons
     }
     
-    static func show(for message: String, chat: [String : Node]? = nil, client: ClientFactoryProtocol) throws -> [String] {
+    static func show(for message: String, chatID: Int? = nil, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of group from message (/group_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 7))
         guard let id = Int(idString) else { return [] }
@@ -152,8 +153,8 @@ extension Group {
         }
         
         // Register request for user
-        if let chat = chat, let id = group.id {
-            BotUser.registerRequest(for: chat, objectID: id, type: .group)
+        if let chatID = chatID, let id = group.id {
+            BotUser.registerRequest(chatID: chatID, objectID: id, type: .group)
         }
         
         let records = try group.records
