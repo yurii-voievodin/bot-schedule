@@ -40,7 +40,7 @@ extension Message {
         
         init(json: JSON) throws {
             try self.init(
-                id: json.get("i")
+                id: json.get("id")
             )
         }
     }
