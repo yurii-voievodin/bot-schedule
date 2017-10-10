@@ -37,7 +37,7 @@ final class CommandsController {
         
         // Message from Telegram API
         let message = try? Message(json: request.json?["message"] ?? [:])
-        let chatID = message?.chat.id ?? 0
+        var chatID = message?.chat.id ?? 0
         
         // Register user request
         BotUser.registerRequest(chatID: chatID)
@@ -47,7 +47,9 @@ final class CommandsController {
             let callbackQuery = try CallbackQuery(json: query)
             try responseManager.answerCallbackQuery(id: callbackQuery.id)
             
-            if let chatID = callbackQuery.message?.chat.id, let data = callbackQuery.data {
+            if let id = callbackQuery.message?.chat.id, let data = callbackQuery.data {
+                // Update chat id
+                chatID = id
                 // Callback from button
                 if data.hasPrefix(ObjectType.auditorium.prefix) {
                     // Auditorium
