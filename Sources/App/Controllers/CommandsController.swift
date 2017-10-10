@@ -39,9 +39,6 @@ final class CommandsController {
         let message = try? Message(json: request.json?["message"] ?? [:])
         var chatID = message?.chat.id ?? 0
         
-        // Register user request
-        BotUser.registerRequest(chatID: chatID)
-        
         if let query = request.json?["callback_query"] {
             // Callback query
             let callbackQuery = try CallbackQuery(json: query)
@@ -50,11 +47,12 @@ final class CommandsController {
             if let id = callbackQuery.message?.chat.id, let data = callbackQuery.data {
                 // Update chat id
                 chatID = id
+                
                 // Callback from button
                 if data.hasPrefix(ObjectType.auditorium.prefix) {
                     // Auditorium
                     Jobs.oneoff {
-                        let result = try Auditorium.show(for: data, client: self.client)
+                        let result = try Auditorium.show(for: data, chatID: chatID, client: self.client)
                         try self.sendResult(result, chatID: chatID)
                     }
                 } else if data.hasPrefix(ObjectType.group.prefix) {
@@ -113,6 +111,9 @@ final class CommandsController {
                 }
             }
         }
+        // Register user request
+        BotUser.registerRequest(chatID: chatID)
+        
         // Response with "typing"
         return try JSON(node: ["method": "sendChatAction", "chat_id": chatID, "action": "typing"])
     }

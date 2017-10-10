@@ -99,7 +99,7 @@ extension Auditorium {
     }
     
     /// Schedule for Auditorium
-    static func show(for message: String, client: ClientFactoryProtocol) throws -> [String] {
+    static func show(for message: String, chatID: Int? = nil, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of auditorium from message (/auditorium_{id})
         let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
         guard let id = Int(idString) else { return [] }
@@ -118,6 +118,11 @@ extension Auditorium {
             // Update date
             auditorium.updatedAt = currentHour
             try auditorium.save()
+        }
+        
+        // Register request for user
+        if let chatID = chatID, let id = auditorium.id {
+            BotUser.registerRequest(chatID: chatID, objectID: id, type: .auditorium)
         }
         
         let records = try auditorium.records
