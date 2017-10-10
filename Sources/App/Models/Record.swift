@@ -185,8 +185,10 @@ extension Record {
             }
             rows.append(record)
         }
+        // Limit to two days
+        let groupedRecords: [[Record]] = Array(groupedByDates[0..<2])
         
-        for day in groupedByDates {
+        for day in groupedRecords {
             
             // Date of the day
             if let firstRecord = day.first {
