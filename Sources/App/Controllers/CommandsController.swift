@@ -74,13 +74,16 @@ final class CommandsController {
         } else if let command = BotCommand(rawValue: message?.text ?? "") {
             // Command
             Jobs.oneoff {
-                let message: String
                 if command == .history {
-                    message = HistoryRecord.history(for: chatID)
+                    let buttons: [InlineKeyboardButton] = HistoryRecord.history(for: chatID)
+                    if buttons.isEmpty {
+                        try self.responseManager.sendMessage("Історія порожня", chatID: chatID)
+                    } else {
+                        try self.responseManager.sendMessage("Історія запитів", chatID: chatID, buttons: buttons)
+                    }
                 } else {
-                    message = command.response
+                    try self.responseManager.sendMessage(command.response, chatID: chatID)
                 }
-                try self.responseManager.sendMessage(message, chatID: chatID)
             }
         } else {
             // Search

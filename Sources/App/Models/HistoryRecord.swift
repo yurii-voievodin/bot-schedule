@@ -116,33 +116,37 @@ extension HistoryRecord: Preparation {
 
 extension HistoryRecord {
     
-    static func history(for chatID: Int) -> String {
-        let emptyHistory = "Історія порожня"
-        var history = ""
+    static func history(for chatID: Int) -> [InlineKeyboardButton] {
+        var response: [InlineKeyboardButton] = []
         do {
             let user = try BotUser.makeQuery().filter("chat_id", chatID).first()
-            guard let records = try user?.historyRecords.all() else { return emptyHistory }
+            guard let records = try user?.historyRecords.all() else { return [] }
             for record in records {
                 // Auditorium
                 if let auditorium = try record.auditorium?.get() {
-                    history += newLine + "🚪 " + auditorium.name + " - " + ObjectType.auditorium.prefix + "\(auditorium.serverID)"
+                    let text = "🚪 " + auditorium.name
+                    let callback = ObjectType.auditorium.prefix + "\(auditorium.serverID)"
+                    let button = InlineKeyboardButton(text: text, callbackData: callback)
+                    response.append(button)
                 }
                 // Group
                 if let group = try record.group?.get() {
-                    history += newLine + "👥 " + group.name + " - " + ObjectType.group.prefix + "\(group.serverID)"
+                    let text = "👥 " + group.name
+                    let callback = ObjectType.group.prefix + "\(group.serverID)"
+                    let button = InlineKeyboardButton(text: text, callbackData: callback)
+                    response.append(button)
                 }
                 // Teacher
                 if let teacher = try record.teacher?.get() {
-                    history += newLine + "👔 " + teacher.name + " - " + ObjectType.teacher.prefix + "\(teacher.serverID)"
+                    let text = "👔 " + teacher.name
+                    let callback = ObjectType.teacher.prefix + "\(teacher.serverID)"
+                    let button = InlineKeyboardButton(text: text, callbackData: callback)
+                    response.append(button)
                 }
             }
         } catch {
             print(error)
         }
-        if history.isEmpty {
-            return emptyHistory
-        } else {
-            return "Історія запитів" + newLine + history
-        }
+        return response
     }
 }
