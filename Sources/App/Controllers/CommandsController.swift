@@ -47,29 +47,28 @@ final class CommandsController {
             let callbackQuery = try CallbackQuery(json: query)
             try responseManager.answerCallbackQuery(id: callbackQuery.id)
             
-            // TODO: Edit message end send schedule
-            
-            // Callback from button
-            //            if data.hasPrefix(ObjectType.auditorium.prefix) {
-            //                // Auditorium
-            //                Jobs.oneoff {
-            //                    let result = try Auditorium.show(for: data, client: self.client)
-            //                    try self.sendResult(result, chatID: chatID)
-            //                }
-            //            } else if data.hasPrefix(ObjectType.group.prefix) {
-            //                // Group
-            //                Jobs.oneoff {
-            //                    let result = try Group.show(for: data, chat: chat, client: self.client)
-            //                    try self.sendResult(result, chatID: chatID)
-            //                }
-            //            } else if data.hasPrefix(ObjectType.teacher.prefix) {
-            //                // Teacher
-            //                Jobs.oneoff {
-            //                    let result = try Teacher.show(for: data, chat: chat, client: self.client)
-            //                    try self.sendResult(result, chatID: chatID)
-            //                }
-            //            }
-            
+            if let chatID = callbackQuery.message?.chat.id, let data = callbackQuery.data {
+                // Callback from button
+                if data.hasPrefix(ObjectType.auditorium.prefix) {
+                    // Auditorium
+                    Jobs.oneoff {
+                        let result = try Auditorium.show(for: data, client: self.client)
+                        try self.sendResult(result, chatID: chatID)
+                    }
+                } else if data.hasPrefix(ObjectType.group.prefix) {
+                    // Group
+                    Jobs.oneoff {
+                        let result = try Group.show(for: data, chatID: chatID, client: self.client)
+                        try self.sendResult(result, chatID: chatID)
+                    }
+                } else if data.hasPrefix(ObjectType.teacher.prefix) {
+                    // Teacher
+                    Jobs.oneoff {
+                        let result = try Teacher.show(for: data, chatID: chatID, client: self.client)
+                        try self.sendResult(result, chatID: chatID)
+                    }
+                }
+            }
         } else if let command = BotCommand(rawValue: message?.text ?? "") {
             // Command
             Jobs.oneoff {
@@ -83,7 +82,7 @@ final class CommandsController {
             }
         } else {
             // Search
-            guard let text = message?.text, text.characters.count >= 3 else {
+            guard let text = message?.text, text.characters.count >= 4 else {
                 let errorText = "Мінімальна кількість символів для пошуку рівна 4"
                 return try JSON(node: ["method": "sendMessage", "chat_id": chatID, "text": errorText])
             }
