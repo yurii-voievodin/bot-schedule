@@ -9,6 +9,7 @@
 import Vapor
 import HTTP
 import FluentProvider
+import Foundation
 
 final class Record: Model {
     let storage = Storage()
@@ -23,7 +24,8 @@ final class Record: Model {
     let groupID: Identifier?
     let teacherID: Identifier?
     
-    var date: String
+    var date: Date
+    var dateString: String
     var pairName: String
     
     var name: String?
@@ -37,7 +39,10 @@ final class Record: Model {
         guard let record = json else { throw ImportError.missingValue }
         var row = Row()
         
-        guard let date = record["DATE_REG"]?.string else { throw ImportError.missingValue }
+        guard let dateString = record["DATE_REG"]?.string else { throw ImportError.missingValue }
+        try row.set("dateString", dateString)
+        
+        guard let date = Date.serverDate(from: dateString) else { throw ImportError.missingValue }
         try row.set("date", date)
         
         guard let time = record["TIME_PAIR"]?.string else { throw ImportError.missingValue }
@@ -79,6 +84,7 @@ final class Record: Model {
     /// database row
     init(row: Row) throws {
         date = try row.get("date")
+        dateString = try row.get("dateString")
         name = try row.get("name")
         reason = try row.get("reason")
         type = try row.get("type")
@@ -95,6 +101,7 @@ final class Record: Model {
     func makeRow() throws -> Row {
         var row = Row()
         try row.set("date", date)
+        try row.set("dateString", dateString)
         try row.set("name", name)
         try row.set("reason", reason)
         try row.set("type", type)
@@ -137,7 +144,8 @@ extension Record: Preparation {
             builder.parent(Group.self, optional: true)
             builder.parent(Teacher.self, optional: true)
             
-            builder.string("date")
+            builder.custom("date", type: "Date")
+            builder.string("dateString")
             builder.string("name", optional: true)
             builder.string("reason", optional: true)
             builder.string("type", optional: true)
@@ -157,29 +165,17 @@ extension Record {
     
     static func prepareResponse(for records: [Record]) -> [String] {
         var schedule = ""
-        var dateString = records.first?.date ?? ""
+        var dateString = records.first?.dateString ?? ""
         var scheduleArray: [String] = []
         
         var groupedByDates: [[Record]] = []
         var rows: [Record] = []
         
-        // Fake record
-        let fakeRecordJSON: JSON = [
-            "DATE_REG": "",
-            "NAME_PAIR": "",
-            "TIME_PAIR": ""
-        ]
-        guard let fakeRecord = try? Record.row(from: fakeRecordJSON) else { return [] }
-        
-        // Add fake record
-        var updatedRecords = records
-        updatedRecords.append(fakeRecord)
-        
         // Sorting records by days
-        for record in updatedRecords {
-            
-            if record.date != dateString {
-                dateString = record.date
+        let lastIndex = records.count - 1
+        for (index, record) in records.enumerated() {
+            if record.dateString != dateString || index == lastIndex {
+                dateString = record.dateString
                 groupedByDates.append(rows)
                 rows = []
             }
@@ -192,13 +188,11 @@ extension Record {
             
             // Date of the day
             if let firstRecord = day.first {
-                if firstRecord.date != "" {
-                    if let recordDate = Date.serverDate(from: firstRecord.date)?.humanReadable {
-                        schedule +=  twoLines + "🗓  " + recordDate + newLine
-                    }
+                if let recordDate = Date.serverDate(from: firstRecord.dateString)?.humanReadable {
+                    schedule +=  twoLines + "🗓  " + recordDate + newLine
                 }
             }
-
+            
             for record in day {
                 
                 // Pair
