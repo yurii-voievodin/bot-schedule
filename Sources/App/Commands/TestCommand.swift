@@ -82,19 +82,20 @@ final class TestCommand: Command, ConfigInitializable {
     
     fileprivate func show(_ request: String?) throws {
         guard let request = request else { return }
-        
-        let result: [String]
-        if request.hasPrefix(ObjectType.auditorium.prefix) {
-            result = try Auditorium.show(for: request, client: client)
-            
-        } else if request.hasPrefix(ObjectType.group.prefix) {
-            result = try Group.show(for: request, chatID: nil, client: client)
-            
-        } else if request.hasPrefix(ObjectType.teacher.prefix) {
-            result = try Teacher.show(for: request, chatID: nil, client: client)
-        } else {
-            result = ["Empty"]
+        do {
+            let result: [String]
+            if request.hasPrefix(ObjectType.auditorium.prefix) {
+                result = try Auditorium.show(for: request, chatID: nil, client: client)
+            } else if request.hasPrefix(ObjectType.group.prefix) {
+                result = try Group.show(for: request, chatID: nil, client: client)
+            } else if request.hasPrefix(ObjectType.teacher.prefix) {
+                result = try Teacher.show(for: request, chatID: nil, client: client)
+            } else {
+                result = ["Empty"]
+            }
+            print(result)
+        } catch {
+            print(error)
         }
-        print(result)
     }
 }

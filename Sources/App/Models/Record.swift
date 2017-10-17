@@ -14,10 +14,6 @@ import Foundation
 final class Record: Model {
     let storage = Storage()
     
-    enum ImportError: Error {
-        case missingValue
-    }
-    
     // MARK: Properties
     
     let auditoriumID: Identifier?
@@ -36,19 +32,20 @@ final class Record: Model {
     // MARK: - Initialization
     
     static func row(from json: JSON?) throws -> Record {
-        guard let record = json else { throw ImportError.missingValue }
+        let importError = ImportError.failedToImportRecord
+        guard let record = json else { throw importError }
         var row = Row()
         
-        guard let dateString = record["DATE_REG"]?.string else { throw ImportError.missingValue }
+        guard let dateString = record["DATE_REG"]?.string else { throw importError }
         try row.set("dateString", dateString)
         
-        guard let date = Date.serverDate(from: dateString) else { throw ImportError.missingValue }
+        guard let date = Date.serverDate(from: dateString) else { throw importError }
         try row.set("date", date)
         
-        guard let time = record["TIME_PAIR"]?.string else { throw ImportError.missingValue }
+        guard let time = record["TIME_PAIR"]?.string else { throw importError }
         try row.set("time", time)
         
-        guard let pairName = record["NAME_PAIR"]?.string else { throw ImportError.missingValue }
+        guard let pairName = record["NAME_PAIR"]?.string else { throw importError }
         try row.set("pair_name", pairName)
         
         let name = record["ABBR_DISC"]?.string
@@ -163,7 +160,7 @@ extension Record: Preparation {
 
 extension Record {
     
-    static func prepareResponse(for records: [Record]) -> [String] {
+    static func prepareResponse(for records: [Record]) throws -> [String] {
         var schedule = ""
         var dateString = records.first?.dateString ?? ""
         var scheduleArray: [String] = []
@@ -172,7 +169,9 @@ extension Record {
         var rows: [Record] = []
         
         // Sorting records by days
-        let lastIndex = records.count - 1
+        let countOfRecords = records.count
+        let lastIndex = (countOfRecords > 0) ? (countOfRecords - 1) : 0
+        
         for (index, record) in records.enumerated() {
             if record.dateString != dateString || index == lastIndex {
                 dateString = record.dateString
@@ -181,9 +180,16 @@ extension Record {
             }
             rows.append(record)
         }
-        // Limit to two days
-        let groupedRecords: [[Record]] = Array(groupedByDates[0..<2])
         
+        // Limit to two days
+        let groupedRecords: [[Record]]
+        if groupedByDates.count > 2 {
+            groupedRecords = Array(groupedByDates[0..<2])
+        } else {
+            groupedRecords = groupedByDates
+        }
+        
+        // Prepare response
         for day in groupedRecords {
             
             // Date of the day

@@ -51,10 +51,12 @@ final class CommandsController {
                 // Callback from button
                 if data.hasPrefix(ObjectType.auditorium.prefix) {
                     // Auditorium
-                    Jobs.oneoff {
+                    Jobs.oneoff(action: {
                         let result = try Auditorium.show(for: data, chatID: chatID, client: self.client)
                         try self.sendResult(result, chatID: chatID)
-                    }
+                    }, onError: { error in
+                        print(error)
+                    })
                 } else if data.hasPrefix(ObjectType.group.prefix) {
                     // Group
                     Jobs.oneoff {

@@ -162,6 +162,6 @@ extension Group {
             .sort("pair_name", .ascending)
             .all()
         
-        return Record.prepareResponse(for: records)
+        return try Record.prepareResponse(for: records)
     }
 }
