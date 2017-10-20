@@ -7,7 +7,7 @@ extension Droplet {
         try resource("groups", GroupController.self)
         
         // Telegram
-        _ = try CommandsController(drop: self)
+        _ = try TelegramController(drop: self)
         
         // Facebook Messenger
         _ = try MessengerController(drop: self)

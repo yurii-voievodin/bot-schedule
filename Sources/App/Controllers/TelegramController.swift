@@ -1,5 +1,5 @@
 //
-//  CommandsController.swift
+//  TelegramController.swift
 //  SumDUBot
 //
 //  Created by Yura Voevodin on 04.03.17.
@@ -11,12 +11,14 @@ import HTTP
 import Vapor
 import Foundation
 
-final class CommandsController {
+final class TelegramController {
     
     // MARK: - Properties
     
     let client: ClientFactoryProtocol
     var responseManager: ResponseManager!
+    
+    let errorMessage = "Сталася невідома помилка! Напиші, будь ласка, розробнику - @voevodin_yura"
     
     // MARK: - Initialization
     
@@ -56,24 +58,31 @@ final class CommandsController {
                         try self.sendResult(result, chatID: chatID)
                     }, onError: { error in
                         print(error)
+                        try? self.responseManager.sendMessage(self.errorMessage, chatID: chatID)
                     })
                 } else if data.hasPrefix(ObjectType.group.prefix) {
                     // Group
-                    Jobs.oneoff {
+                    Jobs.oneoff(action: {
                         let result = try Group.show(for: data, chatID: chatID, client: self.client)
                         try self.sendResult(result, chatID: chatID)
-                    }
+                    }, onError: { error in
+                        print(error)
+                        try? self.responseManager.sendMessage(self.errorMessage, chatID: chatID)
+                    })
                 } else if data.hasPrefix(ObjectType.teacher.prefix) {
                     // Teacher
-                    Jobs.oneoff {
+                    Jobs.oneoff(action: {
                         let result = try Teacher.show(for: data, chatID: chatID, client: self.client)
                         try self.sendResult(result, chatID: chatID)
-                    }
+                    }, onError: { error in
+                        print(error)
+                        try? self.responseManager.sendMessage(self.errorMessage, chatID: chatID)
+                    })
                 }
             }
         } else if let command = BotCommand(rawValue: message?.text ?? "") {
             // Command
-            Jobs.oneoff {
+            Jobs.oneoff(action: {
                 if command == .history {
                     let buttons: [InlineKeyboardButton] = HistoryRecord.history(for: chatID)
                     if buttons.isEmpty {
@@ -84,14 +93,17 @@ final class CommandsController {
                 } else {
                     try self.responseManager.sendMessage(command.response, chatID: chatID)
                 }
-            }
+            }, onError: { error in
+                print(error)
+                try? self.responseManager.sendMessage(self.errorMessage, chatID: chatID)
+            })
         } else {
             // Search
             guard let text = message?.text, text.characters.count >= 4 else {
                 let errorText = "Мінімальна кількість символів для пошуку рівна 4"
                 return try JSON(node: ["method": "sendMessage", "chat_id": chatID, "text": errorText])
             }
-            Jobs.oneoff {
+            Jobs.oneoff(action: {
                 // Auditoriums
                 let auditoriumButtons: [InlineKeyboardButton] = try Auditorium.find(by: message?.text)
                 if !auditoriumButtons.isEmpty {
@@ -111,7 +123,10 @@ final class CommandsController {
                 if auditoriumButtons.isEmpty && groupButtons.isEmpty && teacherButtons.isEmpty {
                     try self.sendResult([], chatID: chatID)
                 }
-            }
+            }, onError: { error in
+                print(error)
+                try? self.responseManager.sendMessage(self.errorMessage, chatID: chatID)
+            })
         }
         // Register user request
         BotUser.registerRequest(chatID: chatID)
