@@ -88,4 +88,25 @@ struct Button: NodeRepresentable {
         /// Create the Node.
         return Node(node: node)
     }
+    
+    static func groupForResponse(_ buttons: [Button]) -> [[Button]] {
+        var array = buttons
+        var smallArray: [Button] = []
+        var countOfPrecessedItems = 0
+        var result: [[Button]] = []
+        
+        for (index, item) in array.enumerated() {
+            smallArray.append(item)
+            if index % 3 == 2 {
+                result.append(smallArray)
+                smallArray = []
+                countOfPrecessedItems += 3
+            }
+        }
+        if array.count > countOfPrecessedItems {
+            array.removeSubrange(0..<countOfPrecessedItems)
+            result.append(array)
+        }
+        return result
+    }
 }
