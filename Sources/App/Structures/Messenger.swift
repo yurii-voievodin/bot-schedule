@@ -36,7 +36,7 @@ struct Messenger {
         ]
     }
     
-    static func buttons(_ buttons: [Button], title: String? = nil) throws -> Node {
+    static func buttons(_ buttons: [Button], title: String) throws -> Node {
         /// Create the Node.
         return try [
             "attachment": [

@@ -158,7 +158,7 @@ final class MessengerController {
                         if !auditoriums.isEmpty {
                             let groupedButtons = Button.groupForResponse(auditoriums)
                             for buttons in groupedButtons {
-                                let message = try Messenger.buttons(buttons)
+                                let message = try Messenger.buttons(buttons, title: "Аудиторії")
                                 try self.sendResponse(response: message, senderID: senderID)
                             }
                         }
@@ -169,7 +169,7 @@ final class MessengerController {
                         if !groups.isEmpty {
                             let groupedButtons = Button.groupForResponse(groups)
                             for buttons in groupedButtons {
-                                let message = try Messenger.buttons(buttons)
+                                let message = try Messenger.buttons(buttons, title: "Групи")
                                 try self.sendResponse(response: message, senderID: senderID)
                             }
                         }
@@ -179,7 +179,7 @@ final class MessengerController {
                         if !teachers.isEmpty {
                             let groupedButtons = Button.groupForResponse(teachers)
                             for buttons in groupedButtons {
-                                let message = try Messenger.buttons(buttons)
+                                let message = try Messenger.buttons(buttons, title: "Викладачі")
                                 try self.sendResponse(response: message, senderID: senderID)
                             }
                         }
