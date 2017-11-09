@@ -19,7 +19,7 @@ class ImportManager<Type: ListObject> {
             guard let name = item.value.string else { continue }
             
             // Validation
-            guard name.characters.count > 0 && id != 0 else { continue }
+            guard name.count > 0 && id != 0 else { continue }
             
             if let existingObject = try Type.makeQuery().filter(Field.serverID.name, id).first() {
                 // Find existing

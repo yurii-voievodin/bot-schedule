@@ -148,7 +148,7 @@ final class MessengerController {
                     try self.sendResponse(response: message, senderID: senderID)
                 } else {
                     // Search
-                    if text.characters.count <= 3 {
+                    if text.count <= 3 {
                         let message = Messenger.message("Мінімальна кількість символів для пошуку рівна 4")
                         try self.sendResponse(response: message, senderID: senderID)
                     } else {

@@ -99,7 +99,7 @@ final class TelegramController {
             })
         } else {
             // Search
-            guard let text = message?.text, text.characters.count >= 4 else {
+            guard let text = message?.text, text.count >= 4 else {
                 let errorText = "Мінімальна кількість символів для пошуку рівна 4"
                 return try JSON(node: ["method": "sendMessage", "chat_id": chatID, "text": errorText])
             }

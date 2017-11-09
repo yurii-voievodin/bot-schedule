@@ -6,7 +6,8 @@
 //
 //
 
-import Foundation
+import Vapor
+import FluentProvider
 
 enum BotCommand: String {
     
@@ -37,7 +38,8 @@ enum BotCommand: String {
         case .statistics:
             return "Кількість запитів:" + newLine
                 + " - за сьогодні: " + Session.statisticsForToday() + newLine
-                + " - у цьому місяці: " + Session.statisticsForMonth()
+                + " - у цьому місяці: " + Session.statisticsForMonth() + newLine
+                + "Кількість користувачів: " + BotUser.countOfUsers()
             
         case .test:
             return ""

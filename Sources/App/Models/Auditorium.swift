@@ -75,7 +75,7 @@ extension Auditorium {
     /// Find by name
     static func find(by name: String?) throws -> [InlineKeyboardButton] {
         guard let name = name else { return [] }
-        guard name.characters.count > 3 else { return [] }
+        guard name.count > 3 else { return [] }
         var response: [InlineKeyboardButton] = []
         let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         let prefix = ObjectType.auditorium.prefix
@@ -87,7 +87,7 @@ extension Auditorium {
     }
     
     static func find(by name: String) throws -> [Button] {
-        guard name.characters.count > 3 else { return [] }
+        guard name.count > 3 else { return [] }
         var buttons: [Button] = []
         let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
         for auditorium in auditoriums {
@@ -101,7 +101,7 @@ extension Auditorium {
     /// Schedule for Auditorium
     static func show(for message: String, chatID: Int? = nil, client: ClientFactoryProtocol) throws -> [String] {
         // Get ID of auditorium from message (/auditorium_{id})
-        let idString = message.substring(from: message.index(message.startIndex, offsetBy: 12))
+        let idString = message[message.index(message.startIndex, offsetBy: 12)...]
         guard let id = Int(idString) else { return [] }
         
         // Find records for auditorium

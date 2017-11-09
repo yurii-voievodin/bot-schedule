@@ -168,3 +168,17 @@ extension BotUser {
         }
     }
 }
+
+// MARK: - Count
+
+extension BotUser {
+    
+    static func countOfUsers() -> String {
+        let count = try? BotUser.count()
+        if let count = count {
+            return "\(count)"
+        } else {
+            return "0"
+        }
+    }
+}
