@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "SumDUBot",
+    name: "BotSchedule",
     products: [
         .library(name: "App", targets: ["App"]),
         .executable(name: "Run", targets: ["Run"])
