@@ -14,7 +14,10 @@ final class GroupController: ResourceRepresentable {
     /// When users call 'GET' on '/groups'
     /// it should return an index of all available groups
     func index(_ req: Request) throws -> ResponseRepresentable {
-        return try Group.all().makeJSON()
+        let groups = try Group.all().makeJSON()
+        var json = JSON()
+        try json.set("groups", groups)
+        return json
     }
     
     /// When making a controller, it is pretty flexible in that it
