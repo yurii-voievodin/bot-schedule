@@ -8,15 +8,30 @@
 import Vapor
 import HTTP
 
+/// Here we have a controller that helps facilitate
+/// RESTful interactions with our Groups table
 final class GroupController: ResourceRepresentable {
     typealias Model = Group
     
     /// When users call 'GET' on '/groups'
     /// it should return an index of all available groups
     func index(_ req: Request) throws -> ResponseRepresentable {
-        let groups = try Group.all().makeJSON()
+        let records = try Model.all().makeJSON()
         var json = JSON()
-        try json.set("groups", groups)
+        try json.set("groups", records)
+        return json
+    }
+    
+    /// When the consumer calls 'GET' on a specific resource, ie:
+    /// '/groups/1' we should show that specific group
+    func show(_ req: Request, group: Model) throws -> ResponseRepresentable {
+        
+        // TODO: Send request to schedule.sumdu.edu.ua
+        
+        let records = try group.records.all()
+        var json = JSON()
+        try json.set("group", group)
+        try json.set("group.records", records)
         return json
     }
     
@@ -26,7 +41,8 @@ final class GroupController: ResourceRepresentable {
     /// implementation
     func makeResource() -> Resource<Model> {
         return Resource(
-            index: index
+            index: index,
+            show: show
         )
     }
 }

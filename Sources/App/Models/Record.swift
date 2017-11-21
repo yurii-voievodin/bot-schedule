@@ -31,6 +31,21 @@ final class Record: Model {
     
     // MARK: - Initialization
     
+    init(date: Date, dateString: String, pairName: String, time: String) {
+        auditoriumID = nil
+        groupID = nil
+        teacherID = nil
+        
+        self.date = date
+        self.dateString = dateString
+        self.pairName = pairName
+        
+        name = nil
+        reason = nil
+        type = nil
+        self.time = time
+    }
+    
     static func row(from json: JSON?) throws -> Record {
         let importError = ImportError.failedToImportRecord
         guard let record = json else { throw importError }
@@ -130,6 +145,60 @@ extension Record {
         return parent(id: teacherID)
     }
 }
+
+// MARK: JSON
+// How the model converts from / to JSON.
+extension Record: JSONConvertible {
+    
+    convenience init(json: JSON) throws {
+        let dateString: String = try json.get("date")
+        guard let date = Date.serverDate(from: dateString) else { throw ImportError.failedToImportRecord }
+        
+        try self.init(
+            date: date,
+            dateString: json.get("dateString"),
+            pairName: json.get("pairName"),
+            time: json.get("time"))
+    }
+    
+    func makeJSON() throws -> JSON {
+        var json = JSON()
+        
+        // Auditorium
+        if let auditorium = try auditorium.get() {
+            try json.set("auditorium", auditorium)
+        }
+        // Teacher
+        if let teacher = try teacher.get() {
+            try json.set("teacher", teacher)
+        }
+        // Group
+        if let group = try group.get() {
+            try json.set("group", group)
+        }
+        
+        try json.set("date_string", dateString)
+        try json.set("pair_name", pairName)
+        
+        if let name = name {
+            try json.set("name", name)
+        }
+        if let reason = reason {
+            try json.set("reason", reason)
+        }
+        if let type = type {
+            try json.set("type", type)
+        }
+        try json.set("time", time)
+        
+        return json
+    }
+}
+
+// MARK: HTTP
+// This allows Record models to be returned
+// directly in route closures
+extension Record: ResponseRepresentable { }
 
 // MARK: - Preparation
 

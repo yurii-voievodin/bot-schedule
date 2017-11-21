@@ -19,6 +19,15 @@ final class Auditorium: ListObject {
     var updatedAt: String
     var lowercaseName: String
     
+    // MARK: - Initialization
+    
+    init(serverID: Int, name: String, updatedAt: String, lowercaseName: String) {
+        self.serverID = serverID
+        self.name = name
+        self.updatedAt = updatedAt
+        self.lowercaseName = lowercaseName
+    }
+    
     // MARK: Fluent Serialization
     
     /// Initializes the ListObject from the
@@ -48,6 +57,32 @@ extension Auditorium {
         return children()
     }
 }
+
+// MARK: JSON
+// How the model converts from / to JSON.
+extension Auditorium: JSONConvertible {
+    
+    convenience init(json: JSON) throws {
+        try self.init(
+            serverID: json.get(Field.serverID.name),
+            name: json.get(Field.name.name),
+            updatedAt: json.get(Field.updatedAt.name),
+            lowercaseName: json.get(Field.lowercaseName.name)
+        )
+    }
+    
+    func makeJSON() throws -> JSON {
+        var json = JSON()
+        try json.set("id", id)
+        try json.set(Field.name.name, name)
+        return json
+    }
+}
+
+// MARK: HTTP
+// This allows Auditorium models to be returned
+// directly in route closures
+extension Auditorium: ResponseRepresentable { }
 
 // MARK: - Preparation
 
