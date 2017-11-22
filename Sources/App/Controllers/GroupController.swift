@@ -13,6 +13,18 @@ import HTTP
 final class GroupController: ResourceRepresentable {
     typealias Model = Group
     
+    // MARK: - Properties
+    
+    let client: ClientFactoryProtocol
+    
+    // MARK: - Initialization
+    
+    init(drop: Droplet) throws {
+        client = try drop.config.resolveClient()
+    }
+    
+    // MARK: - Methods
+    
     /// When users call 'GET' on '/groups'
     /// it should return an index of all available groups
     func index(_ req: Request) throws -> ResponseRepresentable {
@@ -26,9 +38,26 @@ final class GroupController: ResourceRepresentable {
     /// '/groups/1' we should show that specific group
     func show(_ req: Request, group: Model) throws -> ResponseRepresentable {
         
-        // TODO: Send request to schedule.sumdu.edu.ua
+        // Check of need to update Grop
+        let currentHour = Date().dateWithHour
+        if group.updatedAt != currentHour {
+            // Try to delete old records
+            try group.records.delete()
+            
+            // Try to import schedule
+            try ScheduleImportManager.importSchedule(for: .group, id: group.serverID, client: client)
+            
+            // Update date in object
+            group.updatedAt = currentHour
+            try group.save()
+        }
         
-        let records = try group.records.all()
+        // Fetch sorted records for Group.
+        let records = try group.records
+            .sort("date", .ascending)
+            .sort("pair_name", .ascending)
+            .all()
+        
         var json = JSON()
         try json.set("group", group)
         try json.set("group.records", records)
@@ -46,9 +75,3 @@ final class GroupController: ResourceRepresentable {
         )
     }
 }
-
-/// Since GroupController doesn't require anything to
-/// be initialized we can conform it to EmptyInitializable.
-///
-/// This will allow it to be passed by type.
-extension GroupController: EmptyInitializable { }

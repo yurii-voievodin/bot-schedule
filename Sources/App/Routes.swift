@@ -4,7 +4,8 @@ extension Droplet {
     
     func setupRoutes() throws {
         
-        try resource("groups", GroupController.self)
+        let groups = try GroupController(drop: self)
+        resource("groups", groups)
         
         // Telegram
         _ = try TelegramController(drop: self)
