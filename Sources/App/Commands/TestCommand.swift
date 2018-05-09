@@ -6,66 +6,40 @@
 //
 //
 
+import FluentPostgreSQL
 import Vapor
-import Console
-import HTTP
-import Foundation
 
 /// Console command for test a bot
-final class TestCommand: Command, ConfigInitializable {
+final class TestCommand: Command {
     
-    // MARK: - Enums
-    
-    /// Arguments for this command
-    enum Argument: String {
-        case command = "command"
-        case search = "search"
-        case show = "show"
+    /// See `Command`
+    var arguments: [CommandArgument] {
+        return [.argument(name: "type")]
     }
     
-    /// Test errors
-    enum TestError: Swift.Error {
-        case missingArguments
-        case unknownArgument
+    /// See `Command`.
+    public var options: [CommandOption] {
+        return []
     }
     
-    // MARK: - Properties
-    
-    let id = "test"
-    let help = ["This command test a bot"]
-    var console: ConsoleProtocol
-    var client: ClientFactoryProtocol
-    
-    // MARK: - Methods
-    
-    required init(config: Config) throws {
-        console = try config.resolveConsole()
-        client = try config.resolveClient()
+    /// See `Command`
+    var help: [String] {
+        return ["This command test a bot"]
     }
     
-    public func run(arguments: [String]) throws {
-        guard let firstArgument = arguments.first else { throw TestError.missingArguments }
-        guard let argument = Argument(rawValue: firstArgument) else { throw TestError.unknownArgument }
-        let lastArgument = arguments.last
-        
-        switch argument {
-        case .command:
-            run(command: lastArgument)
-            
-        case .search:
-            try search(lastArgument)
-            
-        case .show:
-            try show(lastArgument)
-        }
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        // TODO: Finish this command
     }
-    
-    // MARK: - Helpers
+}
+
+// MARK: - Methods
+
+extension TestCommand {
     
     fileprivate func run(command: String?) {
-        guard let command = command else { return }
-        guard let botCommand = BotCommand(rawValue: command) else { return }
-        console.print(botCommand.response, newLine: true)
+//        guard let command = command else { return }
+//        guard let botCommand = BotCommand(rawValue: command) else { return }
+//        console.print(botCommand.response, newLine: true)
     }
     
     fileprivate func search(_ request: String?) throws {
@@ -81,21 +55,21 @@ final class TestCommand: Command, ConfigInitializable {
     }
     
     fileprivate func show(_ request: String?) throws {
-        guard let request = request else { return }
-        do {
-            let result: [String]
-            if request.hasPrefix(ObjectType.auditorium.prefix) {
-                result = try Auditorium.show(for: request, chatID: nil, client: client)
-            } else if request.hasPrefix(ObjectType.group.prefix) {
-                result = try Group.show(for: request, chatID: nil, client: client)
-            } else if request.hasPrefix(ObjectType.teacher.prefix) {
-                result = try Teacher.show(for: request, chatID: nil, client: client)
-            } else {
-                result = ["Empty"]
-            }
-            print(result)
-        } catch {
-            print(error)
-        }
+//        guard let request = request else { return }
+//        do {
+//            let result: [String]
+//            if request.hasPrefix(ObjectType.auditorium.prefix) {
+//                result = try Auditorium.show(for: request, chatID: nil, client: client)
+//            } else if request.hasPrefix(ObjectType.group.prefix) {
+//                result = try Group.show(for: request, chatID: nil, client: client)
+//            } else if request.hasPrefix(ObjectType.teacher.prefix) {
+//                result = try Teacher.show(for: request, chatID: nil, client: client)
+//            } else {
+//                result = ["Empty"]
+//            }
+//            print(result)
+//        } catch {
+//            print(error)
+//        }
     }
 }

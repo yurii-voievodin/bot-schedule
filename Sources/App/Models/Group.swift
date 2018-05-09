@@ -7,7 +7,7 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
 final class Group: Model, ListObject {
     let storage = Storage()
@@ -27,79 +27,13 @@ final class Group: Model, ListObject {
         self.updatedAt = updatedAt
         self.lowercaseName = lowercaseName
     }
-    
-    // MARK: Fluent Serialization
-    
-    /// Initializes the ListObject from the
-    /// database row
-    required init(row: Row) throws {
-        serverID = try row.get(Field.serverID.name)
-        name = try row.get(Field.name.name)
-        updatedAt = try row.get(Field.updatedAt.name)
-        lowercaseName = try row.get(Field.lowercaseName.name)
-    }
-    
-    /// Serializes the ListObject to the database
-    func makeRow() throws -> Row {
-        var row = Row()
-        try row.set(Field.serverID.name, serverID)
-        try row.set(Field.name.name, name)
-        try row.set(Field.updatedAt.name, updatedAt)
-        try row.set(Field.lowercaseName.name, lowercaseName)
-        return row
-    }
 }
-
-// MARK: JSON
-// How the model converts from / to JSON.
-extension Group: JSONConvertible {
-    
-    convenience init(json: JSON) throws {
-        try self.init(
-            serverID: json.get(Field.serverID.name),
-            name: json.get(Field.name.name),
-            updatedAt: json.get(Field.updatedAt.name),
-            lowercaseName: json.get(Field.lowercaseName.name)
-        )
-    }
-    
-    func makeJSON() throws -> JSON {
-        var json = JSON()
-        try json.set("id", id)
-        try json.set(Field.name.name, name)
-        return json
-    }
-}
-
-// MARK: HTTP
-// This allows Group models to be returned
-// directly in route closures
-extension Group: ResponseRepresentable { }
 
 // MARK: - Relationships
 
 extension Group {
     var records: Children<Group, Record> {
         return children()
-    }
-}
-
-// MARK: - Preparation
-
-extension Group: Preparation {
-    
-    static func prepare(_ database: Database) throws {
-        try database.create(self, closure: { object in
-            object.id()
-            object.int(Field.serverID.name)
-            object.string(Field.name.name)
-            object.string(Field.updatedAt.name)
-            object.string(Field.lowercaseName.name)
-        })
-    }
-    
-    static func revert(_ database: Database) throws {
-        try database.delete(self)
     }
 }
 

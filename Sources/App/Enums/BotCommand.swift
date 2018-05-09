@@ -7,7 +7,6 @@
 //
 
 import Vapor
-import FluentProvider
 
 enum BotCommand: String {
     

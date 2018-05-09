@@ -6,61 +6,41 @@
 //
 //
 
+import FluentPostgreSQL
 import Vapor
-import Console
-import HTTP
-import Foundation
 
 /// Console command for import auditoriums, groups and teachers from SumDU API
-final class ImportCommand: Command, ConfigInitializable {
+final class ImportCommand: Command {
     
-    // MARK: - Enums
-    
-    /// Arguments for this command
-    enum Argument: String {
-        case auditoriums = "auditoriums"
-        case groups = "groups"
-        case teachers = "teachers"
+    /// See `Command`
+    var arguments: [CommandArgument] {
+        return [.argument(name: "type")]
     }
     
-    /// Import errors
-    enum ImportError: Swift.Error {
-        case missingArguments
-        case missingData
-        case unknownArgument
+    /// See `Command`.
+    public var options: [CommandOption] {
+        return []
     }
     
-    // MARK: - Properties
-    
-    let id = "import"
-    let help = ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua"]
-    var console: ConsoleProtocol
-    var client: ClientFactoryProtocol
-    
-    fileprivate let baseURL = "http://schedule.sumdu.edu.ua/index/json"
-    fileprivate let methodAuditoriums = "?method=getAuditoriums"
-    fileprivate let methodGroups = "?method=getGroups"
-    fileprivate let methodTeachers = "?method=getTeachers"
-    
-    // MARK: - Methods
-    
-    required init(config: Config) throws {
-        console = try config.resolveConsole()
-        client = try config.resolveClient()
+    /// See `Command`
+    var help: [String] {
+        return ["This command imports data about groups, auditoriums, teachers from http://schedule.sumdu.edu.ua"]
     }
     
-    public func run(arguments: [String]) throws {
-        guard let firstArgument = arguments.first else { throw ImportError.missingArguments }
-        guard let argument = Argument(rawValue: firstArgument) else { throw ImportError.unknownArgument }
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        let type = try context.argument("type")
         
-        switch argument {
-        case .auditoriums:
+        switch type {
+        case "auditoriums":
             try importAuditoriums()
-        case .groups:
+        case "groups":
             try importGroups()
-        case .teachers:
+        case "teachers":
             try importTeachers()
+        default:
+            break
         }
+        return .done(on: context.container)
     }
 }
 
@@ -71,43 +51,48 @@ extension ImportCommand {
     /// Import auditoriums from SumDU API
     ///
     /// - Throws: ImportError
-    fileprivate func importAuditoriums() throws {
-        let json = try fetchData(for: methodAuditoriums)
-        let importManager = ImportManager<Auditorium>()
-        try importManager.importFrom(json)
-        // Success
-        let count = try Auditorium.all().count
-        print("\(count) auditoriums imported")
+    private func importAuditoriums() throws {
+//        let methodAuditoriums = "?method=getAuditoriums"
+//        let json = try fetchData(for: methodAuditoriums)
+//        let importManager = ImportManager<Auditorium>()
+//        try importManager.importFrom(json)
+//        // Success
+//
+//        let count = try Auditorium.all().count
+//        print("\(count) auditoriums imported")
     }
     
     /// Import groups from SumDU API
     ///
     /// - Throws: ImportError
-    fileprivate func importGroups() throws {
-        let json = try fetchData(for: methodGroups)
-        let importManager = ImportManager<Group>()
-        try importManager.importFrom(json)
-        // Success
-        let count = try Group.all().count
-        print("\(count) groups imported")
+    private func importGroups() throws {
+//        let methodGroups = "?method=getGroups"
+//        let json = try fetchData(for: methodGroups)
+//        let importManager = ImportManager<Group>()
+//        try importManager.importFrom(json)
+//        // Success
+//        let count = try Group.all().count
+//        print("\(count) groups imported")
     }
     
     /// Import teachers from SumDU API
     ///
     /// - Throws: ImportError
-    fileprivate func importTeachers() throws {
-        let json = try fetchData(for: methodTeachers)
-        let importManager = ImportManager<Teacher>()
-        try importManager.importFrom(json)
-        // Success
-        let count = try Teacher.all().count
-        print("\(count) teachers imported")
+    private func importTeachers() throws {
+//        let methodTeachers = "?method=getTeachers"
+//        let json = try fetchData(for: methodTeachers)
+//        let importManager = ImportManager<Teacher>()
+//        try importManager.importFrom(json)
+//        // Success
+//        let count = try Teacher.all().count
+//        print("\(count) teachers imported")
     }
     
-    fileprivate func fetchData(for method: String) throws -> [String: JSON] {
-        let response = try client.get(baseURL + method)
-        guard let json = response.json else { throw ImportError.missingData }
-        guard let array = json.object else { throw ImportError.missingData }
-        return array
-    }
+//    private func fetchData(for method: String) throws -> [String: JSON] {
+//        let baseURL = "http://schedule.sumdu.edu.ua/index/json"
+//        let response = try client.get(baseURL + method)
+//        guard let json = response.json else { throw ImportError.missingData }
+//        guard let array = json.object else { throw ImportError.missingData }
+//        return array
+//    }
 }

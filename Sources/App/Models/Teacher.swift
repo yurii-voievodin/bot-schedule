@@ -7,7 +7,7 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
 final class Teacher: ListObject {
     let storage = Storage()
@@ -55,51 +55,6 @@ final class Teacher: ListObject {
 extension Teacher {
     var records: Children<Teacher, Record> {
         return children()
-    }
-}
-
-// MARK: JSON
-// How the model converts from / to JSON.
-extension Teacher: JSONConvertible {
-    
-    convenience init(json: JSON) throws {
-        try self.init(
-            serverID: json.get(Field.serverID.name),
-            name: json.get(Field.name.name),
-            updatedAt: json.get(Field.updatedAt.name),
-            lowercaseName: json.get(Field.lowercaseName.name)
-        )
-    }
-    
-    func makeJSON() throws -> JSON {
-        var json = JSON()
-        try json.set("id", id)
-        try json.set(Field.name.name, name)
-        return json
-    }
-}
-
-// MARK: HTTP
-// This allows Teacher models to be returned
-// directly in route closures
-extension Teacher: ResponseRepresentable { }
-
-// MARK: - Preparation
-
-extension Teacher: Preparation {
-    
-    static func prepare(_ database: Database) throws {
-        try database.create(self, closure: { object in
-            object.id()
-            object.int(Field.serverID.name)
-            object.string(Field.name.name)
-            object.string(Field.updatedAt.name)
-            object.string(Field.lowercaseName.name)
-        })
-    }
-    
-    static func revert(_ database: Database) throws {
-        try database.delete(self)
     }
 }
 

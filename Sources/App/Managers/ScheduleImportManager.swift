@@ -9,7 +9,7 @@
 import Vapor
 import HTTP
 import Foundation
-import FluentProvider
+import FluentPostgreSQL
 
 struct ScheduleImportManager {
     

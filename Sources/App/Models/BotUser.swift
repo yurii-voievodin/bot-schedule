@@ -7,7 +7,7 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
 final class BotUser: Model {
     let storage = Storage()

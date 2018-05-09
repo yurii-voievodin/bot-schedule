@@ -6,67 +6,58 @@
 //
 
 import Vapor
-import Console
-import HTTP
-import Foundation
 
-final class MessengerComand: Command, ConfigInitializable {
+final class MessengerComand: Command {
     
-    // MARK: - Enums
-    
-    /// Arguments for this command
-    enum Argument: String {
-        case search = "search"
-        case show = "show"
+    /// See `Command`
+    var arguments: [CommandArgument] {
+        return [.argument(name: "type")]
     }
     
-    /// Test errors
-    enum TestError: Swift.Error {
-        case missingArguments
-        case unknownArgument
+    /// See `Command`.
+    public var options: [CommandOption] {
+        return []
     }
     
-    // MARK: - Properties
-    
-    let id = "messenger"
-    let help = ["This command tests a Messenger bot"]
-    var console: ConsoleProtocol
-    var client: ClientFactoryProtocol
-    
-    required init(config: Config) throws {
-        console = try config.resolveConsole()
-        client = try config.resolveClient()
+    /// See `Command`
+    var help: [String] {
+        return ["This command tests a Messenger bot"]
     }
     
-    public func run(arguments: [String]) throws {
-        guard let firstArgument = arguments.first else { throw TestError.missingArguments }
-        guard let argument = Argument(rawValue: firstArgument) else { throw TestError.unknownArgument }
-        let lastArgument = arguments.last
+    func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        let type = try context.argument("type")
         
-        switch argument {
-        case .search:
-            try search(lastArgument)
-        case .show:
-            try show(lastArgument)
-        }
+        // TODO: Finish this command
+        
+        context.console.print(type, newLine: true)
+        
+        return .done(on: context.container)
     }
     
-    fileprivate func search(_ request: String?) throws {
-        guard let request = request else { return }
-        
-        var searchResults: [Button] = []
-        searchResults = try Auditorium.find(by: request)
-        
-        print(searchResults)
+    /// Create a new `BootCommand`.
+    public init() { }
+}
+
+// MARK: - Methods
+
+extension MessengerComand {
+    
+    private func search(_ request: String?) throws {
+//        guard let request = request else { return }
+//
+//        var searchResults: [Button] = []
+//        searchResults = try Auditorium.find(by: request)
+//
+//        print(searchResults)
     }
     
-    fileprivate func show(_ request: String?) throws {
-        guard let request = request else { return }
-        
-        var result: [String] = []
-        if request.hasPrefix(ObjectType.auditorium.prefix) {
-            result = try Auditorium.show(for: request, client: client)
-        }
-        print(result)
+    private func show(_ request: String?) throws {
+//        guard let request = request else { return }
+//
+//        var result: [String] = []
+//        if request.hasPrefix(ObjectType.auditorium.prefix) {
+//            result = try Auditorium.show(for: request, client: client)
+//        }
+//        print(result)
     }
 }

@@ -7,9 +7,9 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
-protocol ListObject: Entity {
+protocol ListObject: PostgreSQLModel {
     
     // MARK: Properties
     

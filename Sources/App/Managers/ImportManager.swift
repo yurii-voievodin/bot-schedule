@@ -7,7 +7,7 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
 class ImportManager<Type: ListObject> {
     

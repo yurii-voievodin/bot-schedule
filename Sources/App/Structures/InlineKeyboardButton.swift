@@ -8,16 +8,13 @@
 
 import Foundation
 
-struct InlineKeyboardButton: NodeRepresentable {
+struct InlineKeyboardButton: Codable {
     
     let text: String
     let callbackData: String
     
-    func makeNode(in context: Context?) throws -> Node {
-        let node: Node = [
-            "text": text.makeNode(in: nil),
-            "callback_data": callbackData.makeNode(in: nil)
-        ]
-        return Node(node: node)
+    enum CodingKeys: String, CodingKey {
+        case callbackData = "callback_data"
+        case text
     }
 }

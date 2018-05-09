@@ -7,7 +7,7 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
 final class Session: Model {
     let storage = Storage()

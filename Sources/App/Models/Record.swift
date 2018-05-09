@@ -8,7 +8,7 @@
 
 import Vapor
 import HTTP
-import FluentProvider
+import FluentPostgreSQL
 import Foundation
 
 final class Record: Model {

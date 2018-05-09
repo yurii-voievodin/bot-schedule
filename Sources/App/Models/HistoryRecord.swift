@@ -7,7 +7,7 @@
 //
 
 import Vapor
-import FluentProvider
+import FluentPostgreSQL
 
 final class HistoryRecord: Entity {
     let storage = Storage()
