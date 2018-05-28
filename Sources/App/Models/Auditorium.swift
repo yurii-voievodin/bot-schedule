@@ -31,74 +31,74 @@ final class Auditorium: ListObject {
 
 // MARK: - Relationships
 
-extension Auditorium {
-    var records: Children<Auditorium, Record> {
-        return children()
-    }
-}
+//extension Auditorium {
+//    var records: Children<Auditorium, Record> {
+//        return children()
+//    }
+//}
 
 // MARK: - Helpers
 
 extension Auditorium {
     
     /// Find by name
-    static func find(by name: String?) throws -> [InlineKeyboardButton] {
-        guard let name = name else { return [] }
-        guard name.count > 3 else { return [] }
-        var response: [InlineKeyboardButton] = []
-        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
-        let prefix = ObjectType.auditorium.prefix
-        for auditorium in auditoriums {
-            let button = InlineKeyboardButton(text: auditorium.name, callbackData: prefix + "\(auditorium.serverID)")
-            response.append(button)
-        }
-        return response
-    }
+//    static func find(by name: String?) throws -> [InlineKeyboardButton] {
+//        guard let name = name else { return [] }
+//        guard name.count > 3 else { return [] }
+//        var response: [InlineKeyboardButton] = []
+//        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+//        let prefix = ObjectType.auditorium.prefix
+//        for auditorium in auditoriums {
+//            let button = InlineKeyboardButton(text: auditorium.name, callbackData: prefix + "\(auditorium.serverID)")
+//            response.append(button)
+//        }
+//        return response
+//    }
     
-    static func find(by name: String) throws -> [Button] {
-        guard name.count > 3 else { return [] }
-        var buttons: [Button] = []
-        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
-        for auditorium in auditoriums {
-            let payload = ObjectType.auditorium.prefix + "\(auditorium.serverID)"
-            let auditoriumButton = try Button(type: .postback, title: auditorium.name, payload: payload)
-            buttons.append(auditoriumButton)
-        }
-        return buttons
-    }
+//    static func find(by name: String) throws -> [Button] {
+//        guard name.count > 3 else { return [] }
+//        var buttons: [Button] = []
+//        let auditoriums = try Auditorium.makeQuery().filter(Field.lowercaseName.name, .contains, name.lowercased()).all()
+//        for auditorium in auditoriums {
+//            let payload = ObjectType.auditorium.prefix + "\(auditorium.serverID)"
+//            let auditoriumButton = try Button(type: .postback, title: auditorium.name, payload: payload)
+//            buttons.append(auditoriumButton)
+//        }
+//        return buttons
+//    }
     
     /// Schedule for Auditorium
-    static func show(for message: String, chatID: Int? = nil, client: ClientFactoryProtocol) throws -> [String] {
-        // Get ID of auditorium from message (/auditorium_{id})
-        let idString = message[message.index(message.startIndex, offsetBy: 12)...]
-        guard let id = Int(idString) else { return [] }
-        
-        // Find records for auditorium
-        guard let auditorium = try Auditorium.makeQuery().filter(Field.serverID.name, id).first() else { return [] }
-        let currentHour = Date().dateWithHour
-        
-        if auditorium.updatedAt != currentHour {
-            // Delete old records
-            try auditorium.records.delete()
-            
-            // Import new schedule
-            try ScheduleImportManager.importSchedule(for: .auditorium, id: auditorium.serverID, client: client)
-            
-            // Update date
-            auditorium.updatedAt = currentHour
-            try auditorium.save()
-        }
-        
-        // Register request for user
-        if let chatID = chatID, let id = auditorium.id {
-            BotUser.registerRequest(chatID: chatID, objectID: id, type: .auditorium)
-        }
-        
-        let records = try auditorium.records
-            .sort("date", .ascending)
-            .sort("pair_name", .ascending)
-            .all()
-        
-        return try Record.prepareResponse(for: records)
-    }
+//    static func show(for message: String, chatID: Int? = nil, client: ClientFactoryProtocol) throws -> [String] {
+//        // Get ID of auditorium from message (/auditorium_{id})
+//        let idString = message[message.index(message.startIndex, offsetBy: 12)...]
+//        guard let id = Int(idString) else { return [] }
+//        
+//        // Find records for auditorium
+//        guard let auditorium = try Auditorium.makeQuery().filter(Field.serverID.name, id).first() else { return [] }
+//        let currentHour = Date().dateWithHour
+//        
+//        if auditorium.updatedAt != currentHour {
+//            // Delete old records
+//            try auditorium.records.delete()
+//            
+//            // Import new schedule
+//            try ScheduleImportManager.importSchedule(for: .auditorium, id: auditorium.serverID, client: client)
+//            
+//            // Update date
+//            auditorium.updatedAt = currentHour
+//            try auditorium.save()
+//        }
+//        
+//        // Register request for user
+//        if let chatID = chatID, let id = auditorium.id {
+//            BotUser.registerRequest(chatID: chatID, objectID: id, type: .auditorium)
+//        }
+//        
+//        let records = try auditorium.records
+//            .sort("date", .ascending)
+//            .sort("pair_name", .ascending)
+//            .all()
+//        
+//        return try Record.prepareResponse(for: records)
+//    }
 }

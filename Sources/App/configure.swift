@@ -25,10 +25,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
     
     // Configure a PostgreSQL database
-    let postgreSQL = try PostgreSQLDatabase(storage: .memory)
-    
-    /// Register the configured SQLite database to the database config.
-    var databases = DatabasesConfig()
-    databases.add(database: postgreSQL, as: .sqlite)
-    services.register(databases)
+//    let postgreSQL = try PostgreSQLDatabase(storage: .memory)
+//    
+//    /// Register the configured SQLite database to the database config.
+//    var databases = DatabasesConfig()
+//    databases.add(database: postgreSQL, as: .sqlite)
+//    services.register(databases)
 }

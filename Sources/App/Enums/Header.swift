@@ -11,12 +11,12 @@ enum Header {
     case urlencoded
     case json
     
-    var value: [HeaderKey: String] {
-        switch self {
-        case .urlencoded:
-            return [HeaderKey.contentType: "application/x-www-form-urlencoded"]
-        case .json:
-            return [HeaderKey.contentType: "application/json"]
-        }
-    }
+//    var value: [HeaderKey: String] {
+//        switch self {
+//        case .urlencoded:
+//            return [HeaderKey.contentType: "application/x-www-form-urlencoded"]
+//        case .json:
+//            return [HeaderKey.contentType: "application/json"]
+//        }
+//    }
 }

@@ -36,8 +36,8 @@ enum BotCommand: String {
                 + "/help - Допомога"
         case .statistics:
             return "Кількість запитів:" + newLine
-                + " - за сьогодні: " + Session.statisticsForToday() + newLine
-                + " - у цьому місяці: " + Session.statisticsForMonth() + newLine
+//                + " - за сьогодні: " + Session.statisticsForToday() + newLine
+//                + " - у цьому місяці: " + Session.statisticsForMonth() + newLine
                 + "Кількість користувачів: " + BotUser.countOfUsers()
             
         case .test:

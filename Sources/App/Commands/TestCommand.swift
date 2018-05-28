@@ -29,6 +29,8 @@ final class TestCommand: Command {
     
     func run(using context: CommandContext) throws -> EventLoopFuture<Void> {
         // TODO: Finish this command
+        
+        return .done(on: context.container)
     }
 }
 
@@ -42,17 +44,17 @@ extension TestCommand {
 //        console.print(botCommand.response, newLine: true)
     }
     
-    fileprivate func search(_ request: String?) throws {
-        guard let request = request else { return }
-        
-        let auditoriumButtons: [InlineKeyboardButton] = try Auditorium.find(by: request)
-        let groupButtons: [InlineKeyboardButton] = try Group.find(by: request)
-        let teacherButtons: [InlineKeyboardButton] = try Teacher.find(by: request)
-        
-        print(auditoriumButtons)
-        print(groupButtons)
-        print(teacherButtons)
-    }
+//    fileprivate func search(_ request: String?) throws {
+//        guard let request = request else { return }
+//        
+//        let auditoriumButtons: [InlineKeyboardButton] = try Auditorium.find(by: request)
+//        let groupButtons: [InlineKeyboardButton] = try Group.find(by: request)
+//        let teacherButtons: [InlineKeyboardButton] = try Teacher.find(by: request)
+//        
+//        print(auditoriumButtons)
+//        print(groupButtons)
+//        print(teacherButtons)
+//    }
     
     fileprivate func show(_ request: String?) throws {
 //        guard let request = request else { return }
