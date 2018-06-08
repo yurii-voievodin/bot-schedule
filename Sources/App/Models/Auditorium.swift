@@ -9,7 +9,7 @@
 import FluentPostgreSQL
 import Vapor
 
-final class Auditorium: ListObject {
+final class Auditorium: PostgreSQLModel {
     
     // MARK: Properties
     
@@ -21,13 +21,16 @@ final class Auditorium: ListObject {
     
     // MARK: - Initialization
     
-    init(serverID: Int, name: String, updatedAt: String, lowercaseName: String) {
+    init(id: Int? = nil, serverID: Int, name: String, updatedAt: String, lowercaseName: String) {
         self.serverID = serverID
         self.name = name
         self.updatedAt = updatedAt
         self.lowercaseName = lowercaseName
     }
 }
+
+/// Allows `Auditorium` to be used as a migration.
+extension Auditorium: Migration { }
 
 // MARK: - Relationships
 
@@ -40,6 +43,26 @@ final class Auditorium: ListObject {
 // MARK: - Helpers
 
 extension Auditorium {
+    
+    static func importFrom(_ data: Data?) {
+        guard let data = data else { return }
+        if let json = try? JSONSerialization.jsonObject(with: data, options: []) {
+            if let dictionary = json as? [String: String] {
+                print(dictionary)
+                
+                for item in dictionary {
+                    // Get ID and name
+                    guard let id = Int(item.key) else { continue }
+                    let name = item.value
+                    
+                    // Validation
+                    guard name.count > 0 && id != 0 else { continue }
+                    
+                    
+                }
+            }
+        }
+    }
     
     /// Find by name
 //    static func find(by name: String?) throws -> [InlineKeyboardButton] {

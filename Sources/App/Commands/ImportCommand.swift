@@ -10,9 +10,8 @@ import FluentPostgreSQL
 import Vapor
 
 /// Console command for import auditoriums, groups and teachers from SumDU API
-final class ImportCommand: Command {
+struct ImportCommand: Command {
     
-    /// See `Command`
     var arguments: [CommandArgument] {
         return [.argument(name: "type")]
     }
@@ -32,15 +31,16 @@ final class ImportCommand: Command {
         
         switch type {
         case "auditoriums":
-            try importAuditoriums()
+            return try importAuditoriums(using: context)
         case "groups":
-            try importGroups()
+//            try importGroups()
+            return .done(on: context.container)
         case "teachers":
-            try importTeachers()
+//            try importTeachers()
+            return .done(on: context.container)
         default:
-            break
+            return .done(on: context.container)
         }
-        return .done(on: context.container)
     }
 }
 
@@ -51,48 +51,57 @@ extension ImportCommand {
     /// Import auditoriums from SumDU API
     ///
     /// - Throws: ImportError
-    private func importAuditoriums() throws {
-//        let methodAuditoriums = "?method=getAuditoriums"
-//        let json = try fetchData(for: methodAuditoriums)
-//        let importManager = ImportManager<Auditorium>()
-//        try importManager.importFrom(json)
-//        // Success
-//
-//        let count = try Auditorium.all().count
-//        print("\(count) auditoriums imported")
+    private func importAuditoriums(using context: CommandContext) throws -> EventLoopFuture<Void> {
+        let methodAuditoriums = "?method=getAuditoriums"
+        let futureResponse = try fetchData(using: context, for: methodAuditoriums)
+        let result = futureResponse.do { (response) in
+            Auditorium.importFrom(response.http.body.data)
+        }
+        let voidResponse = result.map(to: Void.self) { _ in }
+        return voidResponse
     }
     
     /// Import groups from SumDU API
     ///
     /// - Throws: ImportError
     private func importGroups() throws {
-//        let methodGroups = "?method=getGroups"
-//        let json = try fetchData(for: methodGroups)
-//        let importManager = ImportManager<Group>()
-//        try importManager.importFrom(json)
-//        // Success
-//        let count = try Group.all().count
-//        print("\(count) groups imported")
+        //        let methodGroups = "?method=getGroups"
+        //        let json = try fetchData(for: methodGroups)
+        //        let importManager = ImportManager<Group>()
+        //        try importManager.importFrom(json)
+        //        // Success
+        //        let count = try Group.all().count
+        //        print("\(count) groups imported")
     }
     
     /// Import teachers from SumDU API
     ///
     /// - Throws: ImportError
     private func importTeachers() throws {
-//        let methodTeachers = "?method=getTeachers"
-//        let json = try fetchData(for: methodTeachers)
-//        let importManager = ImportManager<Teacher>()
-//        try importManager.importFrom(json)
-//        // Success
-//        let count = try Teacher.all().count
-//        print("\(count) teachers imported")
+        //        let methodTeachers = "?method=getTeachers"
+        //        let json = try fetchData(for: methodTeachers)
+        //        let importManager = ImportManager<Teacher>()
+        //        try importManager.importFrom(json)
+        //        // Success
+        //        let count = try Teacher.all().count
+        //        print("\(count) teachers imported")
     }
     
-//    private func fetchData(for method: String) throws -> [String: JSON] {
-//        let baseURL = "http://schedule.sumdu.edu.ua/index/json"
-//        let response = try client.get(baseURL + method)
-//        guard let json = response.json else { throw ImportError.missingData }
-//        guard let array = json.object else { throw ImportError.missingData }
-//        return array
-//    }
+    private func fetchData(using context: CommandContext, for method: String) throws -> EventLoopFuture<Response> {
+        // Preparations
+        let terminal = try context.container.make(Terminal.self)
+        let loadingBar = terminal.loadingBar(title: "Loading")
+        let session = URLSession(configuration: URLSessionConfiguration.default)
+        let client = FoundationClient(session, on: context.container)
+        _ = loadingBar.start(on: context.container)
+        // Make request
+        let baseURL = "http://schedule.sumdu.edu.ua/index/json"
+        let futureResponse = client.get(baseURL + method)
+        futureResponse.always {
+            loadingBar.succeed()
+        }
+        // Response
+        return futureResponse
+    }
 }
+
