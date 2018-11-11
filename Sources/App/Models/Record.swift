@@ -177,6 +177,7 @@ extension Record: JSONConvertible {
             try json.set("group", group)
         }
         
+        try json.set("id", id)
         try json.set("date_string", dateString)
         try json.set("pair_name", pairName)
         
