@@ -9,7 +9,7 @@
 import Vapor
 import FluentProvider
 
-final class Auditorium: ListObject {
+final class Auditorium: Model, ListObject {
     let storage = Storage()
     
     // MARK: Properties
