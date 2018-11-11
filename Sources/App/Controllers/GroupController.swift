@@ -8,8 +8,7 @@
 import Vapor
 import HTTP
 
-/// Here we have a controller that helps facilitate
-/// RESTful interactions with our Groups table
+/// RESTful interactions with Groups table
 final class GroupController: ResourceRepresentable {
     typealias Model = Group
     
