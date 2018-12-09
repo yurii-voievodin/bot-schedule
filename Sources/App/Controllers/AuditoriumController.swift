@@ -33,7 +33,40 @@ final class AuditoriumController: ResourceRepresentable {
         return json
     }
     
+    /// When the consumer calls 'GET' on a specific resource, ie:
+    /// '/auditoriums/1' we should show that specific group
+    func show(_ req: Request, auditorium: Model) throws -> ResponseRepresentable {
+        
+        // Check of need to update Grop
+        let currentHour = Date().dateWithHour
+        if auditorium.updatedAt != currentHour {
+            // Try to delete old records
+            try auditorium.records.delete()
+            
+            // Try to import schedule
+            try ScheduleImportManager.importSchedule(for: .auditorium, id: auditorium.serverID, client: client)
+            
+            // Update date in object
+            auditorium.updatedAt = currentHour
+            try auditorium.save()
+        }
+        
+        // Fetch sorted records for Auditorium.
+        let records = try auditorium.records
+            .sort("date", .ascending)
+            .sort("pair_name", .ascending)
+            .all()
+        
+        var json = JSON()
+        try json.set("auditorium", auditorium)
+        try json.set("auditorium.records", records)
+        return json
+    }
+    
     func makeResource() -> Resource<Model> {
-        return Resource(index: index)
+        return Resource(
+            index: index,
+            show: show
+        )
     }
 }
